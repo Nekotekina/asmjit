@@ -20,7 +20,7 @@
 
 namespace asmjit {
 
-//! \addtogroup asmjit_base_tree
+//! \addtogroup asmjit_base_compiler
 //! \{
 
 // ============================================================================
@@ -89,23 +89,23 @@ struct BaseContext {
   // --------------------------------------------------------------------------
 
   //! Get current state.
-  ASMJIT_INLINE BaseVarState* getState() const {
+  ASMJIT_INLINE VarState* getState() const {
     return _state;
   }
 
   //! Load current state from `target` state.
-  virtual void loadState(BaseVarState* src) = 0;
-  //! Save current state, returning new `BaseVarState` instance.
-  virtual BaseVarState* saveState() = 0;
+  virtual void loadState(VarState* src) = 0;
+  //! Save current state, returning new `VarState` instance.
+  virtual VarState* saveState() = 0;
 
   //! Change the current state to `target` state.
-  virtual void switchState(BaseVarState* src) = 0;
+  virtual void switchState(VarState* src) = 0;
 
   //! Change the current state to the intersection of two states `a` and `b`.
-  virtual void intersectStates(BaseVarState* a, BaseVarState* b) = 0;
+  virtual void intersectStates(VarState* a, VarState* b) = 0;
 
   // --------------------------------------------------------------------------
-  // [Mem]
+  // [Context]
   // --------------------------------------------------------------------------
 
   ASMJIT_INLINE Error _registerContextVar(VarData* vd) {
@@ -277,7 +277,7 @@ struct BaseContext {
   uint32_t _annotationLength;
 
   //! Current state (used by register allocator).
-  BaseVarState* _state;
+  VarState* _state;
 };
 
 //! \}

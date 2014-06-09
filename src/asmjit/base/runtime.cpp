@@ -62,8 +62,8 @@ uint32_t JitRuntime::getStackAlignment() {
   return alignment;
 }
 
-const BaseCpuInfo* JitRuntime::getCpuInfo() {
-  return BaseCpuInfo::getHost();
+const CpuInfo* JitRuntime::getCpuInfo() {
+  return CpuInfo::getHost();
 }
 
 // ============================================================================

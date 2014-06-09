@@ -236,8 +236,6 @@ AsmJit_AddSource(ASMJIT_SRC asmjit/base
   cputicks.h
   error.cpp
   error.h
-  func.cpp
-  func.h
   globals.cpp
   globals.h
   intutil.cpp
@@ -270,16 +268,11 @@ AsmJit_AddSource(ASMJIT_SRC asmjit/x86
   x86context_p.h
   x86cpuinfo.cpp
   x86cpuinfo.h
-  x86func.cpp
-  x86func.h
   x86inst.cpp
   x86inst.h
   x86operand.cpp
+  x86operand_regs.cpp
   x86operand.h
-  x86regs.cpp
-  x86regs.h
-  x86util.cpp
-  x86util.h
 )
 
 If(ASMJIT_BUILD_CONTRIB)

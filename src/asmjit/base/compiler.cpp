@@ -434,7 +434,7 @@ CommentNode* BaseCompiler::comment(const char* fmt, ...) {
 // [asmjit::BaseCompiler - Hint]
 // ============================================================================
 
-HintNode* BaseCompiler::newHint(BaseVar& var, uint32_t hint, uint32_t value) {
+HintNode* BaseCompiler::newHint(Var& var, uint32_t hint, uint32_t value) {
   if (var.getId() == kInvalidValue)
     return NULL;
   VarData* vd = getVd(var);
@@ -449,7 +449,7 @@ _NoMemory:
   return NULL;
 }
 
-HintNode* BaseCompiler::addHint(BaseVar& var, uint32_t hint, uint32_t value) {
+HintNode* BaseCompiler::addHint(Var& var, uint32_t hint, uint32_t value) {
   if (var.getId() == kInvalidValue)
     return NULL;
 
@@ -512,31 +512,31 @@ _NoMemory:
   return NULL;
 }
 
-void BaseCompiler::alloc(BaseVar& var) {
+void BaseCompiler::alloc(Var& var) {
   addHint(var, kVarHintAlloc, kInvalidValue);
 }
 
-void BaseCompiler::alloc(BaseVar& var, uint32_t regIndex) {
+void BaseCompiler::alloc(Var& var, uint32_t regIndex) {
   addHint(var, kVarHintAlloc, regIndex);
 }
 
-void BaseCompiler::alloc(BaseVar& var, const BaseReg& reg) {
+void BaseCompiler::alloc(Var& var, const Reg& reg) {
   addHint(var, kVarHintAlloc, reg.getRegIndex());
 }
 
-void BaseCompiler::save(BaseVar& var) {
+void BaseCompiler::save(Var& var) {
   addHint(var, kVarHintSave, kInvalidValue);
 }
 
-void BaseCompiler::spill(BaseVar& var) {
+void BaseCompiler::spill(Var& var) {
   addHint(var, kVarHintSpill, kInvalidValue);
 }
 
-void BaseCompiler::unuse(BaseVar& var) {
+void BaseCompiler::unuse(Var& var) {
   addHint(var, kVarHintUnuse, kInvalidValue);
 }
 
-uint32_t BaseCompiler::getPriority(BaseVar& var) const {
+uint32_t BaseCompiler::getPriority(Var& var) const {
   if (var.getId() == kInvalidValue)
     return kInvalidValue;
 
@@ -544,7 +544,7 @@ uint32_t BaseCompiler::getPriority(BaseVar& var) const {
   return vd->getPriority();
 }
 
-void BaseCompiler::setPriority(BaseVar& var, uint32_t priority) {
+void BaseCompiler::setPriority(Var& var, uint32_t priority) {
   if (var.getId() == kInvalidValue)
     return;
 
@@ -555,7 +555,7 @@ void BaseCompiler::setPriority(BaseVar& var, uint32_t priority) {
   vd->_priority = static_cast<uint8_t>(priority);
 }
 
-bool BaseCompiler::getSaveOnUnuse(BaseVar& var) const {
+bool BaseCompiler::getSaveOnUnuse(Var& var) const {
   if (var.getId() == kInvalidValue)
     return false;
 
@@ -563,7 +563,7 @@ bool BaseCompiler::getSaveOnUnuse(BaseVar& var) const {
   return static_cast<bool>(vd->_saveOnUnuse);
 }
 
-void BaseCompiler::setSaveOnUnuse(BaseVar& var, bool value) {
+void BaseCompiler::setSaveOnUnuse(Var& var, bool value) {
   if (var.getId() == kInvalidValue)
     return;
 
@@ -571,7 +571,7 @@ void BaseCompiler::setSaveOnUnuse(BaseVar& var, bool value) {
   vd->_saveOnUnuse = value;
 }
 
-void BaseCompiler::rename(BaseVar& var, const char* name) {
+void BaseCompiler::rename(Var& var, const char* name) {
   if (var.getId() == kInvalidValue)
     return;
 

@@ -62,8 +62,8 @@ int main(int argc, char* argv[]) {
   uint32_t kNumIterations = 100000;
 
   JitRuntime runtime;
-  Assembler a(&runtime);
-  Compiler c(&runtime);
+  HostAssembler a(&runtime);
+  HostCompiler c(&runtime);
 
   uint32_t r, i;
 

@@ -43,12 +43,12 @@ ASMJIT_ENUM(kCpuVendor) {
 };
 
 // ============================================================================
-// [asmjit::BaseCpuInfo]
+// [asmjit::CpuInfo]
 // ============================================================================
 
 //! Base cpu information.
-struct BaseCpuInfo {
-  ASMJIT_NO_COPY(BaseCpuInfo)
+struct CpuInfo {
+  ASMJIT_NO_COPY(CpuInfo)
 
   //! \internal
   enum {
@@ -59,7 +59,7 @@ struct BaseCpuInfo {
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ASMJIT_INLINE BaseCpuInfo(uint32_t size = sizeof(BaseCpuInfo)) : _size(size) {}
+  ASMJIT_INLINE CpuInfo(uint32_t size = sizeof(CpuInfo)) : _size(size) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -90,7 +90,7 @@ struct BaseCpuInfo {
   }
 
   //! Add a CPU `feature`.
-  ASMJIT_INLINE BaseCpuInfo& addFeature(uint32_t feature) {
+  ASMJIT_INLINE CpuInfo& addFeature(uint32_t feature) {
     ASMJIT_ASSERT(feature < sizeof(_features) * 8);
 
     _features[feature / kFeaturesPerUInt32] |= (1U << (feature % kFeaturesPerUInt32));
@@ -105,7 +105,7 @@ struct BaseCpuInfo {
   static ASMJIT_API uint32_t detectNumberOfCores();
 
   //! Get host cpu.
-  static ASMJIT_API const BaseCpuInfo* getHost();
+  static ASMJIT_API const CpuInfo* getHost();
 
   // --------------------------------------------------------------------------
   // [Members]

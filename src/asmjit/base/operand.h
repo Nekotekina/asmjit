@@ -52,7 +52,7 @@ ASMJIT_ENUM(kOperandType) {
 
 //! Operand id masks used to determine the operand type.
 ASMJIT_ENUM(kOperandId) {
-  //! Operand id refers to `BaseVar`.
+  //! Operand id refers to `Var`.
   kOperandIdVar = 0x80000000U,
   //! Operand id to real index mask.
   kOperandIdNum = 0x7FFFFFFFU
@@ -64,11 +64,8 @@ ASMJIT_ENUM(kOperandId) {
 
 //! Register class.
 ASMJIT_ENUM(kRegClass) {
-  //! Gp register class (any architecture).
-  kRegClassGp = 0,
-
-  //! Invalid register class.
-  kRegClassInvalid = 0xFF
+  //! Gp register class, compatible with all architectures.
+  kRegClassGp = 0
 };
 
 // ============================================================================
@@ -122,52 +119,6 @@ ASMJIT_ENUM(kMemType) {
   //! Supported mostly by x86, truncated to a 32-bit value when running in
   //! 64-bit mode (x64).
   kMemTypeAbsolute = 3
-};
-
-// ============================================================================
-// [asmjit::kVarType]
-// ============================================================================
-
-ASMJIT_ENUM(kVarType) {
-  //! Variable is 8-bit signed integer.
-  kVarTypeInt8 = 0,
-  //! Variable is 8-bit unsigned integer.
-  kVarTypeUInt8 = 1,
-  //! Variable is 16-bit signed integer.
-  kVarTypeInt16 = 2,
-  //! Variable is 16-bit unsigned integer.
-  kVarTypeUInt16 = 3,
-  //! Variable is 32-bit signed integer.
-  kVarTypeInt32 = 4,
-  //! Variable is 32-bit unsigned integer.
-  kVarTypeUInt32 = 5,
-  //! Variable is 64-bit signed integer.
-  kVarTypeInt64 = 6,
-  //! Variable is 64-bit unsigned integer.
-  kVarTypeUInt64 = 7,
-
-  //! Variable is target `intptr_t`, not compatible with host `intptr_t`.
-  kVarTypeIntPtr = 8,
-  //! Variable is target `uintptr_t`, not compatible with host `uintptr_t`.
-  kVarTypeUIntPtr = 9,
-
-  //! Variable is 32-bit floating point (single precision).
-  kVarTypeFp32 = 10,
-  //! Variable is 64-bit floating point (double precision).
-  kVarTypeFp64 = 11,
-
-  //! Invalid variable type.
-  kVarTypeInvalid = 0xFF,
-
-  //! \internal
-  _kVarTypeIntStart = kVarTypeInt8,
-  //! \internal
-  _kVarTypeIntEnd = kVarTypeUIntPtr,
-
-  //! \internal
-  _kVarTypeFpStart = kVarTypeFp32,
-  //! \internal
-  _kVarTypeFpEnd = kVarTypeFp64
 };
 
 // ============================================================================
@@ -263,7 +214,7 @@ struct Operand {
     //! Type of the memory operand, see `kMemType`.
     uint8_t type;
     //! X86/X64 layout:
-    //!   - segment  [3 bits], see `x86x64::kSeg`.
+    //!   - segment  [3 bits], see `kX86Seg`.
     //!   - shift    [2 bits], index register shift (0 to 3).
     uint8_t flags;
 
@@ -436,6 +387,16 @@ struct Operand {
   // [Type - Combined]
   // --------------------------------------------------------------------------
 
+  //! Get register type.
+  ASMJIT_INLINE uint32_t getRegType() const {
+    return _vreg.type;
+  }
+
+  //! Get register index.
+  ASMJIT_INLINE uint32_t getRegIndex() const {
+    return _vreg.index;
+  }
+
   //! Get whether the operand is register of `type`.
   ASMJIT_INLINE bool isRegType(uint32_t type) const {
     return (_packed[0].u32[0] & IntUtil::pack32_2x8_1x16(0xFF, 0, 0xFF00)) == IntUtil::pack32_2x8_1x16(kOperandTypeReg, 0, (type << 8));
@@ -521,7 +482,7 @@ struct OperandUtil {
     return id & 0x7FFFFFFFU;
   }
 
-  //! Get whether the id refers to `BaseVar`.
+  //! Get whether the id refers to `Var`.
   //!
   //! \note The function will never return `true` if the id is `kInvalidValue`.
   //! The trick is to compare a given id to -1 (kInvalidValue) so we check both
@@ -539,39 +500,44 @@ struct OperandUtil {
 };
 
 // ============================================================================
-// [asmjit::BaseReg]
+// [asmjit::Reg]
 // ============================================================================
 
 //! Base class for all register operands.
-struct BaseReg : public Operand {
+struct Reg : public Operand {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   //! Create a dummy base register.
-  ASMJIT_INLINE BaseReg() : Operand(NoInit) {
+  ASMJIT_INLINE Reg() : Operand(NoInit) {
     _init_packed_op_sz_w0_id(kOperandTypeReg, 0, (kInvalidReg << 8) + kInvalidReg, kInvalidValue);
-    _init_packed_d2_d3(kVarTypeInvalid, 0);
+    _init_packed_d2_d3(kInvalidVar, 0);
   }
 
   //! Create a new base register.
-  ASMJIT_INLINE BaseReg(uint32_t type, uint32_t index, uint32_t size) : Operand(NoInit) {
+  ASMJIT_INLINE Reg(uint32_t type, uint32_t index, uint32_t size) : Operand(NoInit) {
     _init_packed_op_sz_w0_id(kOperandTypeReg, size, (type << 8) + index, kInvalidValue);
-    _init_packed_d2_d3(kVarTypeInvalid, 0);
+    _init_packed_d2_d3(kInvalidVar, 0);
   }
 
   //! Create a new reference to `other`.
-  ASMJIT_INLINE BaseReg(const BaseReg& other) : Operand(other) {}
+  ASMJIT_INLINE Reg(const Reg& other) : Operand(other) {}
 
-  explicit ASMJIT_INLINE BaseReg(const _NoInit&) : Operand(NoInit) {}
+  //! Create a new reference to `other` and change the index to `index`.
+  ASMJIT_INLINE Reg(const Reg& other, uint32_t index) : Operand(other) {
+    _vreg.index = static_cast<uint8_t>(index);
+  }
+
+  explicit ASMJIT_INLINE Reg(const _NoInit&) : Operand(NoInit) {}
 
   // --------------------------------------------------------------------------
-  // [BaseReg Specific]
+  // [Reg Specific]
   // --------------------------------------------------------------------------
 
-  //! Clone `BaseReg` operand.
-  ASMJIT_INLINE BaseReg clone() const {
-    return BaseReg(*this);
+  //! Clone `Reg` operand.
+  ASMJIT_INLINE Reg clone() const {
+    return Reg(*this);
   }
 
   //! Get whether register code is equal to `type`.
@@ -721,50 +687,6 @@ struct BaseMem : public Operand {
 
   ASMJIT_INLINE bool operator!=(const BaseMem& other) const { return !(*this == other); }
 };
-
-// ============================================================================
-// [asmjit::BaseVar]
-// ============================================================================
-
-#if !defined(ASMJIT_DISABLE_COMPILER)
-//! Base class for all variables.
-struct BaseVar : public Operand {
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  ASMJIT_INLINE BaseVar() : Operand(NoInit) {
-    _init_packed_op_sz_b0_b1_id(kOperandTypeVar, 0, 0, 0, kInvalidValue);
-    _init_packed_d2_d3(kInvalidValue, kInvalidValue);
-  }
-
-  ASMJIT_INLINE BaseVar(const BaseVar& other) : Operand(other) {}
-
-  explicit ASMJIT_INLINE BaseVar(const _NoInit&) : Operand(NoInit) {}
-
-  // --------------------------------------------------------------------------
-  // [BaseVar Specific]
-  // --------------------------------------------------------------------------
-
-  //! Clone `BaseVar` operand.
-  ASMJIT_INLINE BaseVar clone() const {
-    return BaseVar(*this);
-  }
-
-  ASMJIT_INLINE uint32_t getVarType() const {
-    return _vreg.vType;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  ASMJIT_INLINE BaseVar& operator=(const BaseVar& other) { _copy(other); return *this; }
-
-  ASMJIT_INLINE bool operator==(const BaseVar& other) const { return _packed[0] == other._packed[0]; }
-  ASMJIT_INLINE bool operator!=(const BaseVar& other) const { return !operator==(other); }
-};
-#endif // !ASMJIT_DISABLE_COMPILER
 
 // ============================================================================
 // [asmjit::Imm]

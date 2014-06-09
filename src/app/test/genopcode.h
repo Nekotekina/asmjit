@@ -14,9 +14,18 @@
 namespace asmgen {
 
 // Generate all instructions asmjit can emit.
-static void opcode(asmjit::host::Assembler& a) {
+static void opcode(asmjit::X86X64Assembler& a) {
   using namespace asmjit;
-  using namespace asmjit::host;
+  using namespace asmjit::x86;
+
+  const X86GpReg& zax = a.zax;
+  const X86GpReg& zdx = a.zdx;
+  const X86GpReg& zcx = a.zcx;
+  const X86GpReg& zbx = a.zbx;
+  const X86GpReg& zsp = a.zsp;
+  const X86GpReg& zbp = a.zbp;
+  const X86GpReg& zsi = a.zsi;
+  const X86GpReg& zdi = a.zdi;
 
   // Prevent crashing when the generated function is called (for debugging to
   // see disassembly).
@@ -24,18 +33,18 @@ static void opcode(asmjit::host::Assembler& a) {
 
   // When any problem is found this section can be used to customize the index
   // of the registers used.
-  GpReg gp0 = zax;
-  GpReg gp1 = zsi;
-  FpReg fpx = fp6;
+  X86GpReg gp0 = zax;
+  X86GpReg gp1 = zsi;
+  X86FpReg fpx = fp6;
 
-  Mem ptr_gp0 = ptr(gp0);
-  Mem ptr_gp1 = ptr(gp1);
+  X86Mem ptr_gp0 = ptr(gp0);
+  X86Mem ptr_gp1 = ptr(gp1);
 
-  Mem vm32x = ptr(gp0, xmm1);
-  Mem vm32y = ptr(gp0, ymm1);
+  X86Mem vm32x = ptr(gp0, xmm1);
+  X86Mem vm32y = ptr(gp0, ymm1);
 
-  Mem intptr_gp0 = intptr_ptr(gp0);
-  Mem intptr_gp1 = intptr_ptr(gp1);
+  X86Mem intptr_gp0 = a.intptr_ptr(gp0);
+  X86Mem intptr_gp1 = a.intptr_ptr(gp1);
 
   // Base.
   a.adc(al, 1);

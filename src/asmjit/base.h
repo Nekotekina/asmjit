@@ -18,7 +18,6 @@
 #include "base/cpuinfo.h"
 #include "base/cputicks.h"
 #include "base/error.h"
-#include "base/func.h"
 #include "base/globals.h"
 #include "base/intutil.h"
 #include "base/lock.h"
