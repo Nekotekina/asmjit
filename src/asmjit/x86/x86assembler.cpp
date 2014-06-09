@@ -115,8 +115,9 @@ static ASMJIT_INLINE uint32_t x86EncodeSib(uint32_t s, uint32_t i, uint32_t b) {
   return (s << 6) + (i << 3) + b;
 }
 
+// Workaround for GCC & CLang.
 template<int Arch>
-static Error ASMJIT_CDECL X86X64Assembler_emit(X86X64Assembler* self, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3);
+static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc();
 
 // ============================================================================
 // [Macros]
@@ -235,7 +236,7 @@ Error X86X64Assembler::setArch(uint32_t arch) {
     _arch = kArchX86;
     _regSize = 4;
 
-    _emit = (EmitFunc)X86X64Assembler_emit<kArchX86>;
+    _emit = x86GetEmitFunc<kArchX86>();
 
     _regCount.reset();
     _regCount._gp = 8;
@@ -261,7 +262,7 @@ Error X86X64Assembler::setArch(uint32_t arch) {
     _arch = kArchX64;
     _regSize = 8;
 
-    _emit = (EmitFunc)X86X64Assembler_emit<kArchX64>;
+    _emit = x86GetEmitFunc<kArchX64>();
 
     _regCount.reset();
     _regCount._gp = 16;
@@ -998,9 +999,10 @@ static const Operand::VRegOp x86PatchedHiRegs[4] = {
 };
 
 template<int Arch>
-static Error ASMJIT_CDECL X86X64Assembler_emit(X86X64Assembler* self, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
-  uint8_t* cursor = self->getCursor();
+static Error ASMJIT_CDECL X86X64Assembler_emit(BaseAssembler* self_, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
+  X86X64Assembler* self = static_cast<X86X64Assembler*>(self_);
 
+  uint8_t* cursor = self->getCursor();
   uint32_t encoded = o0->getOp() + (o1->getOp() << 3) + (o2->getOp() << 6);
   uint32_t options = self->getOptionsAndClear();
 
@@ -4217,6 +4219,29 @@ _GrowBuffer:
   cursor = self->getCursor();
   goto _Prepare;
 }
+
+template<int Arch>
+static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc() {
+  return X86X64Assembler_emit<Arch>;
+}
+
+// ============================================================================
+// [asmjit::X86Assembler]
+// ============================================================================
+
+#if defined(ASMJIT_BUILD_X86)
+X86Assembler::X86Assembler(Runtime* runtime) :
+  X86X64Assembler(runtime, kArchX86) {}
+#endif // ASMJIT_BUILD_X86
+
+// ============================================================================
+// [asmjit::X64Assembler]
+// ============================================================================
+
+#if defined(ASMJIT_BUILD_X64)
+X64Assembler::X64Assembler(Runtime* runtime) :
+  X86X64Assembler(runtime, kArchX86) {}
+#endif // ASMJIT_BUILD_X64
 
 } // asmjit namespace
 

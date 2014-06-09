@@ -250,51 +250,59 @@ void* BaseAssembler::make() {
 #define no noOperand
 
 Error BaseAssembler::emit(uint32_t code) {
-  return _emit(this, code, no, no, no, no);
+  return _emit(this, code, &no, &no, &no, &no);
 }
 
 Error BaseAssembler::emit(uint32_t code, const Operand& o0) {
-  return _emit(this, code, o0, no, no, no);
+  return _emit(this, code, &o0, &no, &no, &no);
 }
 
 Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1) {
-  return _emit(this, code, o0, o1, no, no);
+  return _emit(this, code, &o0, &o1, &no, &no);
 }
 
 Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
-  return _emit(this, code, o0, o1, o2, no);
+  return _emit(this, code, &o0, &o1, &o2, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, int o0_) {
-  return _emit(this, code, Imm(o0_), no, no, no);
+Error BaseAssembler::emit(uint32_t code, int o0) {
+  Imm imm(o0);
+  return _emit(this, code, &imm, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, uint64_t o0_) {
-  return _emit(this, code, Imm(o0_), no, no, no);
+Error BaseAssembler::emit(uint32_t code, uint64_t o0) {
+  Imm imm(o0);
+  return _emit(this, code, &imm, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, int o1_) {
-  return _emit(this, code, o0, Imm(o1_), no, no);
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, int o1) {
+  Imm imm(o1);
+  return _emit(this, code, &o0, &imm, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, uint64_t o1_) {
-  return _emit(this, code, o0, Imm(o1_), no, no);
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, uint64_t o1) {
+  Imm imm(o1);
+  return _emit(this, code, &o0, &imm, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2_) {
-  return _emit(this, code, o0, o1, Imm(o2_), no);
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2) {
+  Imm imm(o2);
+  return _emit(this, code, &o0, &o1, &imm, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2_) {
-  return _emit(this, code, o0, o1, Imm(o2_), no);
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2) {
+  Imm imm(o2);
+  return _emit(this, code, &o0, &o1, &imm, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, int o3_) {
-  return _emit(this, code, o0, o1, o2, Imm(o3_));
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, int o3) {
+  Imm imm(o3);
+  return _emit(this, code, &o0, &o1, &o2, &imm);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3_) {
-  return _emit(this, code, o0, o1, o2, Imm(o3_));
+Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3) {
+  Imm imm(o3);
+  return _emit(this, code, &o0, &o1, &o2, &imm);
 }
 
 #undef no

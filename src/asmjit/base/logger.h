@@ -70,7 +70,7 @@ ASMJIT_ENUM(kLoggerStyle) {
 //!
 //! This class also contain `_enabled` member that can be used to enable
 //! or disable logging.
-struct Logger {
+struct ASMJIT_VCLASS Logger {
   ASMJIT_NO_COPY(Logger)
 
   // --------------------------------------------------------------------------
@@ -139,7 +139,7 @@ struct Logger {
 // ============================================================================
 
 //! Logger that can log to standard C `FILE*` stream.
-struct FileLogger : public Logger {
+struct ASMJIT_VCLASS FileLogger : public Logger {
   ASMJIT_NO_COPY(FileLogger)
 
   // --------------------------------------------------------------------------
@@ -184,7 +184,7 @@ struct FileLogger : public Logger {
 // ============================================================================
 
 //! String logger.
-struct StringLogger : public Logger {
+struct ASMJIT_VCLASS StringLogger : public Logger {
   ASMJIT_NO_COPY(StringLogger)
 
   // --------------------------------------------------------------------------

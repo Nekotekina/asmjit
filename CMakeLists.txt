@@ -82,7 +82,7 @@ Set(ASMJIT_CFLAGS_REL)
 Set(ASMJIT_DEFINE "-D")
 
 # MSVC.
-If(MSVC)
+If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   Message("-- Using MSVC")
 
   Set(ASMJIT_DEFINE "/D")
@@ -91,20 +91,15 @@ If(MSVC)
   Set(ASMJIT_CFLAGS_DBG /DASMJIT_DEBUG /GS /GR-)
   Set(ASMJIT_CFLAGS_REL /DASMJIT_RELEASE /Oi /Oy /GS- /GR-)
 
-  # Use Unicode by default on Windows target.
-  If(WIN32)
-    List(APPEND ASMJIT_CFLAGS /D_UNICODE)
-  EndIf()
-
   # Enable multi-process compilation.
   If(NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
      List(APPEND ASMJIT_CFLAGS /MP)
   EndIf()
 EndIf()
 
-# GCC.
-If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  Message("-- Using GCC")
+# GCC/CLang.
+If(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+  Message("-- Using GCC/Clang")
 
   Set(ASMJIT_CFLAGS
     -fno-exceptions)
@@ -115,11 +110,11 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     -fomit-frame-pointer
     -fmerge-all-constants
     -fno-keep-static-consts)
+EndIf()
 
-  # Use Unicode by default on Windows target.
-  If(WIN32)
-    List(APPEND ASMJIT_CFLAGS -D_UNICODE)
-  EndIf()
+# Use Unicode by default on Windows target.
+If(WIN32)
+  List(APPEND ASMJIT_CFLAGS "${ASMJIT_DEFINE}_UNICODE")
 EndIf()
 
 # Static library.

@@ -32,7 +32,7 @@ struct CpuInfo;
 // ============================================================================
 
 //! Base runtime.
-struct Runtime {
+struct ASMJIT_VCLASS Runtime {
   ASMJIT_NO_COPY(Runtime)
 
   // --------------------------------------------------------------------------
@@ -71,7 +71,7 @@ struct Runtime {
 // ============================================================================
 
 //! JIT runtime.
-struct JitRuntime : public Runtime {
+struct ASMJIT_VCLASS JitRuntime : public Runtime {
   ASMJIT_NO_COPY(JitRuntime)
 
   // --------------------------------------------------------------------------

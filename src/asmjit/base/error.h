@@ -109,7 +109,7 @@ typedef uint32_t Error;
 //! Please note that `addRef` and `release` functions are used, but there is
 //! no reference counting implemented by default, reimplement to change the
 //! default behavior.
-struct ErrorHandler {
+struct ASMJIT_VCLASS ErrorHandler {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------

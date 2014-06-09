@@ -127,30 +127,37 @@
 # define ASMJIT_STATIC
 #endif // ASMJIT_EMBED && !ASMJIT_STATIC
 
-#if !defined(ASMJIT_API)
-# if defined(ASMJIT_STATIC)
-#  define ASMJIT_API
-# elif defined(ASMJIT_OS_WINDOWS)
-#  if defined(__GNUC__) || defined(__clang__)
-#   if defined(ASMJIT_EXPORTS)
-#    define ASMJIT_API __attribute__((dllexport))
-#   else
-#    define ASMJIT_API __attribute__((dllimport))
-#   endif
-#  elif defined(ASMJIT_EXPORTS)
-#   define ASMJIT_API __declspec(dllexport)
+#if defined(ASMJIT_STATIC)
+# define ASMJIT_API
+#elif defined(ASMJIT_OS_WINDOWS)
+# if (defined(__GNUC__) || defined(__clang__)) && !defined(__MINGW32__)
+#  if defined(ASMJIT_EXPORTS)
+#   define ASMJIT_API __attribute__((dllexport))
 #  else
-#   define ASMJIT_API __declspec(dllimport)
+#   define ASMJIT_API __attribute__((dllimport))
 #  endif
+# elif defined(ASMJIT_EXPORTS)
+#  define ASMJIT_API __declspec(dllexport)
 # else
-#  if defined(__GNUC__)
-#   if __GNUC__ >= 4
-#    define ASMJIT_API __attribute__((visibility("default")))
-#    define ASMJIT_VAR extern ASMJIT_API
-#   endif
-#  endif
+#  define ASMJIT_API __declspec(dllimport)
 # endif
-#endif // ASMJIT_API
+#elif defined(__GNUC__) && (__GNUC__ >= 4)
+# define ASMJIT_API __attribute__((visibility("default")))
+#else
+# define ASMJIT_API
+#endif
+
+// This is basically a workaround. When using MSVC and marking class as DLL
+// export everything is exported, which is unwanted since there are many
+// inlines which mimic instructions. MSVC automatically exports typeinfo and
+// vtable if at least one symbol of that class is exported. However, GCC has
+// some strange behavior that even if one or more symbol is exported it doesn't
+// export `typeinfo` unless the class itself is marked as "visibility(default)".
+#if !defined(ASMJIT_OS_WINDOWS) && (defined(__GNUC__) || defined (__clang__))
+# define ASMJIT_VCLASS ASMJIT_API
+#else
+# define ASMJIT_VCLASS
+#endif
 
 #if !defined(ASMJIT_VAR)
 # define ASMJIT_VAR extern ASMJIT_API
@@ -165,9 +172,9 @@
 #  define ASMJIT_STDCALL   __attribute__((stdcall))
 #  define ASMJIT_CDECL     __attribute__((cdecl))
 # else
-#  define ASMJIT_FASTCALL   __fastcall
-#  define ASMJIT_STDCALL    __stdcall
-#  define ASMJIT_CDECL      __cdecl
+#  define ASMJIT_FASTCALL  __fastcall
+#  define ASMJIT_STDCALL   __stdcall
+#  define ASMJIT_CDECL     __cdecl
 # endif
 #else
 # define ASMJIT_FASTCALL
@@ -177,7 +184,9 @@
 
 #if defined(_MSC_VER)
 # define ASMJIT_INLINE __forceinline
-#elif (defined(__GNUC__) || defined(__clang__)) && !defined(__MINGW32__)
+#elif defined(__clang__)
+# define ASMJIT_INLINE inline __attribute__((always_inline)) __attribute__((visibility("hidden")))
+#elif defined(__GNUC__)
 # define ASMJIT_INLINE inline __attribute__((always_inline))
 #else
 # define ASMJIT_INLINE inline
@@ -266,9 +275,9 @@ public:
 // [asmjit::build - StdInt]
 // ============================================================================
 
-#if defined(__MINGW32__) || defined(__MINGW64__)
+#if defined(__MINGW32__)
 # include <sys/types.h>
-#endif // __MINGW32__ || __MINGW64__
+#endif // __MINGW32__
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 # if !defined(ASMJIT_SUPRESS_STD_TYPES)

@@ -141,15 +141,15 @@ struct RelocData {
 //! specific API is implemented by backends.
 //!
 //! @sa BaseCompiler.
-struct BaseAssembler : public CodeGen {
+struct ASMJIT_VCLASS BaseAssembler : public CodeGen {
   ASMJIT_NO_COPY(BaseAssembler)
 
   typedef Error (ASMJIT_CDECL *EmitFunc)(BaseAssembler* self,
     uint32_t code,
-    const Operand& o0,
-    const Operand& o1,
-    const Operand& o2,
-    const Operand& o3);
+    const Operand* o0,
+    const Operand* o1,
+    const Operand* o2,
+    const Operand* o3);
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -473,7 +473,7 @@ struct BaseAssembler : public CodeGen {
   ASMJIT_API Error emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2);
   //! \overload
   ASMJIT_INLINE Error emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3) {
-    return _emit(this, code, o0, o1, o2, o3);
+    return _emit(this, code, &o0, &o1, &o2, &o3);
   }
 
   //! Emit an instruction with integer immediate operand.

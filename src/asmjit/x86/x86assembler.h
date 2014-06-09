@@ -324,7 +324,7 @@ namespace asmjit {
 //! available.
 //!
 //! @sa `X86X64Compiler`.
-struct X86X64Assembler : public BaseAssembler {
+struct ASMJIT_VCLASS X86X64Assembler : public BaseAssembler {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
@@ -6559,11 +6559,13 @@ struct X86X64Assembler : public BaseAssembler {
 // [asmjit::X86Assembler]
 // ============================================================================
 
+// NOTE: Unfortunately these have to be exported.
+
 #if defined(ASMJIT_BUILD_X86)
 //! X86-only assembler.
-struct X86Assembler : public X86X64Assembler {
+struct ASMJIT_VCLASS X86Assembler : public X86X64Assembler {
   ASMJIT_NO_COPY(X86Assembler)
-  ASMJIT_INLINE X86Assembler(Runtime* runtime) : X86X64Assembler(runtime, kArchX86) {}
+  ASMJIT_API X86Assembler(Runtime* runtime);
 };
 #endif // ASMJIT_BUILD_X86
 
@@ -6573,9 +6575,9 @@ struct X86Assembler : public X86X64Assembler {
 
 #if defined(ASMJIT_BUILD_X64)
 //! X64-only assembler.
-struct X64Assembler : public X86X64Assembler {
+struct ASMJIT_VCLASS X64Assembler : public X86X64Assembler {
   ASMJIT_NO_COPY(X64Assembler)
-  ASMJIT_INLINE X64Assembler(Runtime* runtime) : X86X64Assembler(runtime, kArchX64) {}
+  ASMJIT_API X64Assembler(Runtime* runtime);
 };
 #endif // ASMJIT_BUILD_X64
 

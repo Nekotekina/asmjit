@@ -481,18 +481,6 @@ struct X86FuncDecl : public FuncDecl {
   uint8_t _passedOrderXmm[8];
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
 // [asmjit::k86VarType]
 // ============================================================================
@@ -606,16 +594,6 @@ ASMJIT_VAR const uint8_t _x86VarMapping[kX86VarTypeCount];
 //! - `kVarTypeUIntPtr` to `kVarTypeUInt64`.
 ASMJIT_VAR const uint8_t _x64VarMapping[kX86VarTypeCount];
 #endif // ASMJIT_BUILD_X64
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [asmjit::x86x64::X86Var]
@@ -1003,32 +981,6 @@ struct X86YmmVar : public X86Var {
   ASMJIT_INLINE bool operator==(const X86YmmVar& other) const { return X86Var::operator==(other); }
   ASMJIT_INLINE bool operator!=(const X86YmmVar& other) const { return X86Var::operator!=(other); }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [asmjit::X86VarMap]
@@ -2041,7 +1993,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! Other use cases are waiting for you! Be sure that instruction you are
 //! emitting is correct and encodable, because if not, Assembler will set
 //! status code to @c kErrorUnknownInst.
-struct X86X64Compiler : public BaseCompiler {
+struct ASMJIT_VCLASS X86X64Compiler : public BaseCompiler {
   ASMJIT_NO_COPY(X86X64Compiler)
 
   // --------------------------------------------------------------------------
@@ -5212,7 +5164,7 @@ struct X86X64Compiler : public BaseCompiler {
 
 #if defined(ASMJIT_BUILD_X86)
 //! X86-Only compiler.
-struct X86Compiler : public X86X64Compiler {
+struct ASMJIT_VCLASS X86Compiler : public X86X64Compiler {
   ASMJIT_NO_COPY(X86Compiler)
   ASMJIT_INLINE X86Compiler(Runtime* runtime) : X86X64Compiler(runtime, kArchX86) {};
 };
@@ -5224,7 +5176,7 @@ struct X86Compiler : public X86X64Compiler {
 
 #if defined(ASMJIT_BUILD_X64)
 //! X64-Only compiler.
-struct X64Compiler : public X86X64Compiler {
+struct ASMJIT_VCLASS X64Compiler : public X86X64Compiler {
   ASMJIT_NO_COPY(X64Compiler)
   ASMJIT_INLINE X64Compiler(Runtime* runtime) : X86X64Compiler(runtime, kArchX64) {};
 };

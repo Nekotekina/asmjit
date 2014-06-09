@@ -2458,7 +2458,7 @@ struct SArgNode : public Node {
 //! Base compiler.
 //!
 //! @sa BaseAssembler.
-struct BaseCompiler : public CodeGen {
+struct ASMJIT_VCLASS BaseCompiler : public CodeGen {
   ASMJIT_NO_COPY(BaseCompiler)
 
   // --------------------------------------------------------------------------
