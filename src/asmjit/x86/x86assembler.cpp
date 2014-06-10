@@ -4240,7 +4240,7 @@ X86Assembler::X86Assembler(Runtime* runtime) :
 
 #if defined(ASMJIT_BUILD_X64)
 X64Assembler::X64Assembler(Runtime* runtime) :
-  X86X64Assembler(runtime, kArchX86) {}
+  X86X64Assembler(runtime, kArchX64) {}
 #endif // ASMJIT_BUILD_X64
 
 } // asmjit namespace

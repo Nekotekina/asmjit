@@ -146,7 +146,7 @@ using namespace asmjit::host;
 int main(int argc, char* argv[]) {
   // Create JitRuntime and host specific Compiler.
   JitRuntime runtime;
-  Compiler c(&runtime);
+  HostCompiler c(&runtime);
 
   // Build function having two arguments and a return value of type 'int'.
   // First type in function builder describes the return value. kFuncConvHost
@@ -156,8 +156,8 @@ int main(int argc, char* argv[]) {
   // Create 32-bit variables (virtual registers) and assign some names to
   // them. Using names is purely optional and only greatly helps while
   // debugging.
-  GpVar a(c, kVarTypeInt32, "a");
-  GpVar b(c, kVarTypeInt32, "b");
+  X86GpVar a(c, kVarTypeInt32, "a");
+  X86GpVar b(c, kVarTypeInt32, "b");
 
   // Tell asmjit to use these variables as function arguments.
   c.setArg(0, a);
@@ -225,15 +225,15 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  Compiler c(&runtime);
+  HostCompiler c(&runtime);
 
   // This function uses 3 arguments.
   c.addFunc(kFuncConvHost, FuncBuilder3<int, int, int, int>());
 
   // New variable 'op' added.
-  GpVar op(c, kVarTypeInt32, "op");
-  GpVar a(c, kVarTypeInt32, "a");
-  GpVar b(c, kVarTypeInt32, "b");
+  X86GpVar op(c, kVarTypeInt32, "op");
+  X86GpVar a(c, kVarTypeInt32, "a");
+  X86GpVar b(c, kVarTypeInt32, "b");
 
   c.setArg(0, op);
   c.setArg(1, a);
@@ -297,21 +297,21 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  Compiler c(&runtime);
+  HostCompiler c(&runtime);
 
   // Function returning 'int' accepting pointer and two indexes.
   c.addFunc(kFuncConvHost, FuncBuilder3<int, const int*, intptr_t, intptr_t>());
 
-  GpVar p(c, kVarTypeIntPtr, "p");
-  GpVar aIndex(c, kVarTypeIntPtr, "aIndex");
-  GpVar bIndex(c, kVarTypeIntPtr, "bIndex");
+  X86GpVar p(c, kVarTypeIntPtr, "p");
+  X86GpVar aIndex(c, kVarTypeIntPtr, "aIndex");
+  X86GpVar bIndex(c, kVarTypeIntPtr, "bIndex");
 
   c.setArg(0, p);
   c.setArg(1, aIndex);
   c.setArg(2, bIndex);
 
-  GpVar a(c, kVarTypeInt32, "a");
-  GpVar b(c, kVarTypeInt32, "b");
+  X86GpVar a(c, kVarTypeInt32, "a");
+  X86GpVar b(c, kVarTypeInt32, "b");
 
   // Read 'a' by using a memory operand having base register, index register
   // and scale. Translates to 'mov a, dword ptr [p + aIndex << 2]'.
@@ -326,11 +326,11 @@ int main(int argc, char* argv[]) {
   c.add(p, bIndex);
 
   // Read 'b'.
-  c.mov(b, ptr(p));  
-  
+  c.mov(b, ptr(p));
+
   // a = a + b;
   c.add(a, b);
-  
+
   c.ret(a);
   c.endFunc();
 
@@ -366,16 +366,16 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  Compiler c(&runtime);
+  HostCompiler c(&runtime);
 
   // Function returning 'int' without any arguments.
   c.addFunc(kFuncConvHost, FuncBuilder0<int>());
 
   // Allocate a function stack of size 256 aligned to 4 bytes.
-  Mem stack = c.newStack(256, 4);
+  X86Mem stack = c.newStack(256, 4);
 
-  GpVar p(c, kVarTypeIntPtr, "p");
-  GpVar i(c, kVarTypeIntPtr, "i");
+  X86GpVar p(c, kVarTypeIntPtr, "p");
+  X86GpVar i(c, kVarTypeIntPtr, "i");
 
   // Load a stack address to 'p'. This step is purely optional and shows
   // that 'lea' is useful to load a memory operands address (even absolute)
@@ -404,8 +404,8 @@ int main(int argc, char* argv[]) {
   c.jb(L1);
 
   // Second loop, sum all bytes stored in 'stack'.
-  GpVar a(c, kVarTypeInt32, "a");
-  GpVar t(c, kVarTypeInt32, "t");
+  X86GpVar a(c, kVarTypeInt32, "a");
+  X86GpVar t(c, kVarTypeInt32, "t");
 
   c.xor_(i, i);
   c.xor_(a, a);
@@ -459,19 +459,19 @@ Code injection was one of key concepts of Compiler from the beginning. Compiler 
 To manipulate the current cursor use Compiler's `getCursor()` and `setCursor()` member functions. The following snippet demonstrates the proper way of code injection.
 
 ```C++
-Compiler c(...);
+HostCompiler c(...);
 
-GpVar a(c, kVarTypeInt32, "a");
-GpVar b(c, kVarTypeInt32, "b");
+X86GpVar a(c, kVarTypeInt32, "a");
+X86GpVar b(c, kVarTypeInt32, "b");
 
-BaseNode* here = c.getCursor();
+Node* here = c.getCursor();
 c.mov(b, 2);
 
 // Now, 'here' can be used to inject something before 'mov b, 2'. To inject
 // anything it's good to remember the current cursor so it can be set back
 // after the injecting is done. When setCursor() is called it returns the old
 // cursor.
-BaseNode* oldCursor = c.setCursor(here);
+Node* oldCursor = c.setCursor(here);
 c.mov(a, 1);
 c.setCursor(oldCursor);
 ```
