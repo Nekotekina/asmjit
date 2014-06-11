@@ -463,7 +463,7 @@ HintNode* BaseCompiler::addHint(Var& var, uint32_t hint, uint32_t value) {
 // [asmjit::BaseCompiler - Vars]
 // ============================================================================
 
-VarData* BaseCompiler:: _newVd(uint32_t type, uint32_t size, uint32_t c, const char* name) {
+VarData* BaseCompiler::_newVd(uint32_t type, uint32_t size, uint32_t c, const char* name) {
   VarData* vd = reinterpret_cast<VarData*>(_varZone.alloc(sizeof(VarData)));
   if (vd == NULL)
     goto _NoMemory;

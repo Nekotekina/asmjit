@@ -146,7 +146,7 @@ using namespace asmjit::host;
 int main(int argc, char* argv[]) {
   // Create JitRuntime and host specific Compiler.
   JitRuntime runtime;
-  HostCompiler c(&runtime);
+  X86Compiler c(&runtime);
 
   // Build function having two arguments and a return value of type 'int'.
   // First type in function builder describes the return value. kFuncConvHost
@@ -225,7 +225,7 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  HostCompiler c(&runtime);
+  X86Compiler c(&runtime);
 
   // This function uses 3 arguments.
   c.addFunc(kFuncConvHost, FuncBuilder3<int, int, int, int>());
@@ -297,7 +297,7 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  HostCompiler c(&runtime);
+  X86Compiler c(&runtime);
 
   // Function returning 'int' accepting pointer and two indexes.
   c.addFunc(kFuncConvHost, FuncBuilder3<int, const int*, intptr_t, intptr_t>());
@@ -366,7 +366,7 @@ using namespace asmjit::host;
 
 int main(int argc, char* argv[]) {
   JitRuntime runtime;
-  HostCompiler c(&runtime);
+  X86Compiler c(&runtime);
 
   // Function returning 'int' without any arguments.
   c.addFunc(kFuncConvHost, FuncBuilder0<int>());
@@ -459,7 +459,7 @@ Code injection was one of key concepts of Compiler from the beginning. Compiler 
 To manipulate the current cursor use Compiler's `getCursor()` and `setCursor()` member functions. The following snippet demonstrates the proper way of code injection.
 
 ```C++
-HostCompiler c(...);
+X86Compiler c(...);
 
 X86GpVar a(c, kVarTypeInt32, "a");
 X86GpVar b(c, kVarTypeInt32, "b");

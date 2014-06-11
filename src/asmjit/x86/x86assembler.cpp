@@ -927,7 +927,7 @@ static bool X86Assembler_dumpInstruction(StringBuilder& sb,
   }
 
   if (!o3->isNone()) {
-    sb._appendString(", ", 3);
+    sb._appendString(", ", 2);
     X86Assembler_dumpOperand(sb, arch, o3, loggerOptions);
   }
 

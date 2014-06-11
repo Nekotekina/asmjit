@@ -372,7 +372,7 @@ void ConstPool::fill(void* dst) {
 
 #if defined(ASMJIT_TEST)
 UNIT(base_constpool) {
-  Zone zone(16192);
+  Zone zone(32384 - kZoneOverhead);
   ConstPool pool(&zone);
 
   uint32_t i;

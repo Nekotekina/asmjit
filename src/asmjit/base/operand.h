@@ -131,19 +131,6 @@ struct Operand {
   // [Structs]
   // --------------------------------------------------------------------------
 
-  // \internal
-  //
-  // Register operand structure, allows to do register initialization at
-  // compile time instead of doing it "non-deterministically" at runtime.
-  struct InitRegOp {
-    uint8_t op;
-    uint8_t size;
-    uint16_t code;
-    uint32_t id;
-    uint32_t vType;
-    uint32_t vUnused;
-  };
-
   //! \internal
   //!
   //! Base operand data.
@@ -152,15 +139,20 @@ struct Operand {
     uint8_t op;
     //! Size of operand (register, address, immediate, or variable).
     uint8_t size;
-    //! Flags, each operand uses this byte for something else.
-    uint8_t reserved0;
-    //! Reserved (not used).
-    uint8_t reserved1;
+    //! \internal
+    uint8_t reserved_2_1;
+    //! \internal
+    uint8_t reserved_3_1;
 
     //! Operand id, identifier used by `BaseAssembler` and `BaseCompiler`.
     //!
     //! \note Uninitialized operand has always set id to `kInvalidValue`.
     uint32_t id;
+
+    //! \internal
+    uint32_t reserved_8_4;
+    //! \internal
+    uint32_t reserved_12_4;
   };
 
   //! \internal
@@ -198,9 +190,7 @@ struct Operand {
     //! Variable type.
     uint32_t vType;
     //! \internal
-    //!
-    //! Unused.
-    uint32_t vUnused;
+    uint32_t reserved_12_4;
   };
 
   //! \internal
@@ -234,12 +224,12 @@ struct Operand {
     uint8_t op;
     //! Size of immediate (or 0 to autodetect).
     uint8_t size;
-    //! Reserved (not used).
-    uint8_t reserved0;
-    //! Reserved (not used).
-    uint8_t reserved1;
+    //! \internal
+    uint8_t reserved_2_1;
+    //! \internal
+    uint8_t reserved_3_1;
 
-    //! Operand id, always set to `kInvalidValue`.
+    //! Operand id, always set to `kInvalidValue` (immediates don't have IDs).
     uint32_t id;
 
     union {
@@ -276,15 +266,21 @@ struct Operand {
   struct LabelOp {
     //! Type of operand, `kOperandTypeLabel`.
     uint8_t op;
-    //! Reserved (not used).
+    //! Always zero, labels don't have size.
     uint8_t size;
-    //! Reserved (not used).
-    uint8_t reserved0;
-    //! Reserved (not used).
-    uint8_t reserved1;
+    //! \internal
+    uint8_t reserved_2_1;
+    //! \internal
+    uint8_t reserved_3_1;
 
-    //! Operand id.
+    //! Operand id (`kInvalidValue` if the label is not initialized by code
+    //! generator).
     uint32_t id;
+
+    //! \internal
+    uint32_t reserved_8_4;
+    //! \internal
+    uint32_t reserved_12_4;
   };
 
   // --------------------------------------------------------------------------
@@ -358,10 +354,14 @@ struct Operand {
   // --------------------------------------------------------------------------
 
   template<typename T>
-  ASMJIT_INLINE T& getData() { return reinterpret_cast<T&>(_base); }
+  ASMJIT_INLINE T& getData() {
+    return reinterpret_cast<T&>(_base);
+  }
 
   template<typename T>
-  ASMJIT_INLINE const T& getData() const { return reinterpret_cast<const T&>(_base); }
+  ASMJIT_INLINE const T& getData() const {
+    return reinterpret_cast<const T&>(_base);
+  }
 
   // --------------------------------------------------------------------------
   // [Type]
@@ -426,7 +426,9 @@ struct Operand {
   // --------------------------------------------------------------------------
 
   //! Get size of the operand in bytes.
-  ASMJIT_INLINE uint32_t getSize() const { return _base.size; }
+  ASMJIT_INLINE uint32_t getSize() const {
+    return _base.size;
+  }
 
   // --------------------------------------------------------------------------
   // [Id]
@@ -438,7 +440,9 @@ struct Operand {
   //!
   //! There is no way to change or remove operand id. Unneeded operands can be
   //! simply reassigned by `operator=`.
-  ASMJIT_INLINE uint32_t getId() const { return _base.id; }
+  ASMJIT_INLINE uint32_t getId() const {
+    return _base.id;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -645,15 +649,25 @@ struct BaseMem : public Operand {
   }
 
   //! Get the type of the memory operand, see `kMemType`.
-  ASMJIT_INLINE uint32_t getMemType() const { return _vmem.type; }
+  ASMJIT_INLINE uint32_t getMemType() const {
+    return _vmem.type;
+  }
+
   //! Get whether the type of the memory operand is either `kMemTypeBaseIndex`
   //! or `kMemTypeStackIndex`.
-  ASMJIT_INLINE bool isBaseIndexType() const { return _vmem.type <= kMemTypeStackIndex; }
+  ASMJIT_INLINE bool isBaseIndexType() const {
+    return _vmem.type <= kMemTypeStackIndex;
+  }
 
   //! Get whether the memory operand has base register.
-  ASMJIT_INLINE bool hasBase() const { return _vmem.base != kInvalidValue; }
+  ASMJIT_INLINE bool hasBase() const {
+    return _vmem.base != kInvalidValue;
+  }
+
   //! Get memory operand base id, or `kInvalidValue`.
-  ASMJIT_INLINE uint32_t getBase() const { return _vmem.base; }
+  ASMJIT_INLINE uint32_t getBase() const {
+    return _vmem.base;
+  }
 
   //! Set memory operand size.
   ASMJIT_INLINE BaseMem& setSize(uint32_t size) {
@@ -685,7 +699,9 @@ struct BaseMem : public Operand {
     return (_packed[0] == other._packed[0]) & (_packed[1] == other._packed[1]);
   }
 
-  ASMJIT_INLINE bool operator!=(const BaseMem& other) const { return !(*this == other); }
+  ASMJIT_INLINE bool operator!=(const BaseMem& other) const {
+    return !(*this == other);
+  }
 };
 
 // ============================================================================

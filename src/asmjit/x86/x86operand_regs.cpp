@@ -20,15 +20,17 @@
 
 namespace asmjit {
 
+// Prevent static initialization.
+//
 // Remap all classes to POD structs so they can be statically initialized
 // without calling a constructor. Compiler will store these in data section.
-struct X86GpReg  { Operand::InitRegOp data; };
-struct X86FpReg  { Operand::InitRegOp data; };
-struct X86MmReg  { Operand::InitRegOp data; };
-struct X86XmmReg { Operand::InitRegOp data; };
-struct X86YmmReg { Operand::InitRegOp data; };
-struct X86SegReg { Operand::InitRegOp data; };
-  
+struct X86GpReg  { Operand::VRegOp data; };
+struct X86FpReg  { Operand::VRegOp data; };
+struct X86MmReg  { Operand::VRegOp data; };
+struct X86XmmReg { Operand::VRegOp data; };
+struct X86YmmReg { Operand::VRegOp data; };
+struct X86SegReg { Operand::VRegOp data; };
+
 namespace x86 {
 
 // ============================================================================
@@ -36,7 +38,7 @@ namespace x86 {
 // ============================================================================
 
 #define REG(_Class_, _Name_, _Type_, _Index_, _Size_) \
-  const _Class_ _Name_ = { { kOperandTypeReg, _Size_, ((_Type_) << 8) + _Index_, kInvalidValue, kInvalidVar, 0 } }
+  const _Class_ _Name_ = { { kOperandTypeReg, _Size_, { ((_Type_) << 8) + _Index_ }, kInvalidValue, kInvalidVar, 0 } }
 
 REG(X86GpReg, noGpReg, kInvalidReg, kInvalidReg, 0);
 

@@ -62,11 +62,21 @@ void Zone::reset() {
   if (cur == &Zone_zeroBlock)
     return;
 
+  // Since cur can be in the middle of the double-linked list, we have to
+  // traverse to both directions `prev` and `next` separately.
+  Block* next = cur->next;
   do {
     Block* prev = cur->prev;
     ASMJIT_FREE(cur);
     cur = prev;
   } while (cur != NULL);
+
+  cur = next;
+  while (cur != NULL) {
+    next = cur->next;
+    ASMJIT_FREE(cur);
+    cur = next;
+  }
 
   _block = const_cast<Zone::Block*>(&Zone_zeroBlock);
 }

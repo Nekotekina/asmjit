@@ -13,12 +13,14 @@
 
 namespace asmgen {
 
+enum { kGenBlendInstCount = 65 };
+
 // Generate a typical alpha blend function using SSE2 instruction set. Used
 // for benchmarking and also in test86. The generated code should be stable
 // and fully functional.
 static void blend(asmjit::X86Compiler& c) {
   using namespace asmjit;
-  using namespace asmjit::host;
+  using namespace asmjit::x86;
 
   X86GpVar dst(c, kVarTypeIntPtr, "dst");
   X86GpVar src(c, kVarTypeIntPtr, "src");
