@@ -14,7 +14,7 @@
 namespace asmgen {
 
 // Generate all instructions asmjit can emit.
-static void opcode(asmjit::X86X64Assembler& a) {
+static void opcode(asmjit::X86Assembler& a) {
   using namespace asmjit;
   using namespace asmjit::x86;
 

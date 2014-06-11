@@ -160,7 +160,7 @@ static ASMJIT_INLINE uint32_t x86GetArchFromCConv(uint32_t conv) {
 // ============================================================================
 
 #define R(_Index_) kX86RegIndex##_Index_
-static uint32_t X86X64FuncDecl_initConv(X86FuncDecl* self, uint32_t arch, uint32_t conv) {
+static uint32_t X86FuncDecl_initConv(X86FuncDecl* self, uint32_t arch, uint32_t conv) {
   // Setup defaults.
   self->_argStackSize = 0;
   self->_redZoneSize = 0;
@@ -305,7 +305,7 @@ static uint32_t X86X64FuncDecl_initConv(X86FuncDecl* self, uint32_t arch, uint32
 }
 #undef R
 
-static Error X86X64FuncDecl_initFunc(X86FuncDecl* self, uint32_t arch,
+static Error X86FuncDecl_initFunc(X86FuncDecl* self, uint32_t arch,
   uint32_t ret, const uint32_t* argList, uint32_t argCount) {
 
   ASMJIT_ASSERT(argCount <= kFuncArgCount);
@@ -599,8 +599,8 @@ Error X86FuncDecl::setPrototype(uint32_t conv, const FuncPrototype& p) {
     return kErrorInvalidState;
 #endif // !ASMJIT_BUILD_X86 && ASMJIT_BUILD_X64
 
-  ASMJIT_PROPAGATE_ERROR(X86X64FuncDecl_initConv(this, arch, conv));
-  ASMJIT_PROPAGATE_ERROR(X86X64FuncDecl_initFunc(this, arch, p.getRet(), p.getArgList(), p.getArgCount()));
+  ASMJIT_PROPAGATE_ERROR(X86FuncDecl_initConv(this, arch, conv));
+  ASMJIT_PROPAGATE_ERROR(X86FuncDecl_initFunc(this, arch, p.getRet(), p.getArgList(), p.getArgCount()));
 
   return kErrorOk;
 }
@@ -668,10 +668,10 @@ bool X86CallNode::_setRet(uint32_t i, const Operand& op) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Helpers (Private)]
+// [asmjit::X86Compiler - Helpers (Private)]
 // ============================================================================
 
-static Error X86X64Compiler_emitConstPool(X86X64Compiler* self,
+static Error X86Compiler_emitConstPool(X86Compiler* self,
   Label& label, ConstPool& pool) {
 
   if (label.getId() == kInvalidValue)
@@ -692,10 +692,10 @@ static Error X86X64Compiler_emitConstPool(X86X64Compiler* self,
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Construction / Destruction]
+// [asmjit::X86Compiler - Construction / Destruction]
 // ============================================================================
 
-X86X64Compiler::X86X64Compiler(Runtime* runtime, uint32_t arch) :
+X86Compiler::X86Compiler(Runtime* runtime, uint32_t arch) :
   BaseCompiler(runtime),
   zax(NoInit),
   zcx(NoInit),
@@ -709,13 +709,13 @@ X86X64Compiler::X86X64Compiler(Runtime* runtime, uint32_t arch) :
   setArch(arch);
 }
 
-X86X64Compiler::~X86X64Compiler() {}
+X86Compiler::~X86Compiler() {}
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Arch]
+// [asmjit::X86Compiler - Arch]
 // ============================================================================
 
-Error X86X64Compiler::setArch(uint32_t arch) {
+Error X86Compiler::setArch(uint32_t arch) {
 #if defined(ASMJIT_BUILD_X86)
   if (arch == kArchX86) {
     _arch = kArchX86;
@@ -771,15 +771,15 @@ Error X86X64Compiler::setArch(uint32_t arch) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Inst]
+// [asmjit::X86Compiler - Inst]
 // ============================================================================
 
 //! Get compiler instruction item size without operands assigned.
-static ASMJIT_INLINE size_t X86X64Compiler_getInstSize(uint32_t code) {
+static ASMJIT_INLINE size_t X86Compiler_getInstSize(uint32_t code) {
   return IntUtil::inInterval<uint32_t>(code, _kX86InstIdJbegin, _kX86InstIdJend) ? sizeof(JumpNode) : sizeof(InstNode);
 }
 
-static InstNode* X86X64Compiler_newInst(X86X64Compiler* self, void* p, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) {
+static InstNode* X86Compiler_newInst(X86Compiler* self, void* p, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) {
   if (IntUtil::inInterval<uint32_t>(code, _kX86InstIdJbegin, _kX86InstIdJend)) {
     JumpNode* node = new(p) JumpNode(self, code, options, opList, opCount);
     TargetNode* jTarget = self->getTargetById(opList[0].getId());
@@ -807,22 +807,22 @@ static InstNode* X86X64Compiler_newInst(X86X64Compiler* self, void* p, uint32_t 
   }
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size));
 
   if (inst == NULL)
     goto _NoMemory;
 
-  return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), NULL, 0);
+  return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), NULL, 0);
 
 _NoMemory:
   setError(kErrorNoHeapMemory);
   return NULL;
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size + 1 * sizeof(Operand)));
 
   if (inst == NULL)
@@ -832,7 +832,7 @@ InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0) {
     Operand* opList = reinterpret_cast<Operand*>(reinterpret_cast<uint8_t*>(inst) + size);
     opList[0] = o0;
     ASMJIT_DETECT_UNINITIALIZED(o0);
-    return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 1);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 1);
   }
 
 _NoMemory:
@@ -840,8 +840,8 @@ _NoMemory:
   return NULL;
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size + 2 * sizeof(Operand)));
 
   if (inst == NULL)
@@ -853,7 +853,7 @@ InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operan
     opList[1] = o1;
     ASMJIT_DETECT_UNINITIALIZED(o0);
     ASMJIT_DETECT_UNINITIALIZED(o1);
-    return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 2);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 2);
   }
 
 _NoMemory:
@@ -861,8 +861,8 @@ _NoMemory:
   return NULL;
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size + 3 * sizeof(Operand)));
 
   if (inst == NULL)
@@ -876,7 +876,7 @@ InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operan
     ASMJIT_DETECT_UNINITIALIZED(o0);
     ASMJIT_DETECT_UNINITIALIZED(o1);
     ASMJIT_DETECT_UNINITIALIZED(o2);
-    return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 3);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 3);
   }
 
 _NoMemory:
@@ -884,8 +884,8 @@ _NoMemory:
   return NULL;
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size + 4 * sizeof(Operand)));
 
   if (inst == NULL)
@@ -901,7 +901,7 @@ InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operan
     ASMJIT_DETECT_UNINITIALIZED(o1);
     ASMJIT_DETECT_UNINITIALIZED(o2);
     ASMJIT_DETECT_UNINITIALIZED(o3);
-    return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 4);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 4);
   }
 
 _NoMemory:
@@ -909,8 +909,8 @@ _NoMemory:
   return NULL;
 }
 
-InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3, const Operand& o4) {
-  size_t size = X86X64Compiler_getInstSize(code);
+InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3, const Operand& o4) {
+  size_t size = X86Compiler_getInstSize(code);
   InstNode* inst = static_cast<InstNode*>(_baseZone.alloc(size + 5 * sizeof(Operand)));
 
   if (inst == NULL)
@@ -928,7 +928,7 @@ InstNode* X86X64Compiler::newInst(uint32_t code, const Operand& o0, const Operan
     ASMJIT_DETECT_UNINITIALIZED(o2);
     ASMJIT_DETECT_UNINITIALIZED(o3);
     ASMJIT_DETECT_UNINITIALIZED(o4);
-    return X86X64Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 5);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 5);
   }
 
 _NoMemory:
@@ -936,49 +936,49 @@ _NoMemory:
   return NULL;
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code) {
+InstNode* X86Compiler::emit(uint32_t code) {
   InstNode* node = newInst(code);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0) {
   InstNode* node = newInst(code, o0);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1){
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1){
   InstNode* node = newInst(code, o0, o1);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
   InstNode* node = newInst(code, o0, o1, o2);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3){
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3){
   InstNode* node = newInst(code, o0, o1, o2, o3);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3, const Operand& o4) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3, const Operand& o4) {
   InstNode* node = newInst(code, o0, o1, o2, o3, o4);
   if (node == NULL)
     return NULL;
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, int o0_) {
+InstNode* X86Compiler::emit(uint32_t code, int o0_) {
   Imm o0(o0_);
   InstNode* node = newInst(code, o0);
   if (node == NULL)
@@ -986,7 +986,7 @@ InstNode* X86X64Compiler::emit(uint32_t code, int o0_) {
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, uint64_t o0_) {
+InstNode* X86Compiler::emit(uint32_t code, uint64_t o0_) {
   Imm o0(o0_);
   InstNode* node = newInst(code, o0);
   if (node == NULL)
@@ -994,7 +994,7 @@ InstNode* X86X64Compiler::emit(uint32_t code, uint64_t o0_) {
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, int o1_) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, int o1_) {
   Imm o1(o1_);
   InstNode* node = newInst(code, o0, o1);
   if (node == NULL)
@@ -1002,7 +1002,7 @@ InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, int o1_) {
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, uint64_t o1_) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, uint64_t o1_) {
   Imm o1(o1_);
   InstNode* node = newInst(code, o0, o1);
   if (node == NULL)
@@ -1010,7 +1010,7 @@ InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, uint64_t o1_) {
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2_) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2_) {
   Imm o2(o2_);
   InstNode* node = newInst(code, o0, o1, o2);
   if (node == NULL)
@@ -1018,7 +1018,7 @@ InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& 
   return static_cast<InstNode*>(addNode(node));
 }
 
-InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2_) {
+InstNode* X86Compiler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2_) {
   Imm o2(o2_);
   InstNode* node = newInst(code, o0, o1, o2);
   if (node == NULL)
@@ -1027,10 +1027,10 @@ InstNode* X86X64Compiler::emit(uint32_t code, const Operand& o0, const Operand& 
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Func]
+// [asmjit::X86Compiler - Func]
 // ============================================================================
 
-X86FuncNode* X86X64Compiler::newFunc(uint32_t conv, const FuncPrototype& p) {
+X86FuncNode* X86Compiler::newFunc(uint32_t conv, const FuncPrototype& p) {
   X86FuncNode* func = newNode<X86FuncNode>();
   Error error;
 
@@ -1080,7 +1080,7 @@ _NoMemory:
   return NULL;
 }
 
-X86FuncNode* X86X64Compiler::addFunc(uint32_t conv, const FuncPrototype& p) {
+X86FuncNode* X86Compiler::addFunc(uint32_t conv, const FuncPrototype& p) {
   X86FuncNode* func = newFunc(conv, p);
 
   if (func == NULL) {
@@ -1097,7 +1097,7 @@ X86FuncNode* X86X64Compiler::addFunc(uint32_t conv, const FuncPrototype& p) {
   return func;
 }
 
-EndNode* X86X64Compiler::endFunc() {
+EndNode* X86Compiler::endFunc() {
   X86FuncNode* func = getFunc();
   ASMJIT_ASSERT(func != NULL);
 
@@ -1105,7 +1105,7 @@ EndNode* X86X64Compiler::endFunc() {
   addNode(func->getExitNode());
 
   // Add local constant pool at the end of the function (if exist).
-  X86X64Compiler_emitConstPool(this, _localConstPoolLabel, _localConstPool);
+  X86Compiler_emitConstPool(this, _localConstPoolLabel, _localConstPool);
 
   // Add function end marker.
   addNode(func->getEnd());
@@ -1118,10 +1118,10 @@ EndNode* X86X64Compiler::endFunc() {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Ret]
+// [asmjit::X86Compiler - Ret]
 // ============================================================================
 
-RetNode* X86X64Compiler::newRet(const Operand& o0, const Operand& o1) {
+RetNode* X86Compiler::newRet(const Operand& o0, const Operand& o1) {
   RetNode* node = newNode<RetNode>(o0, o1);
   if (node == NULL)
     goto _NoMemory;
@@ -1132,7 +1132,7 @@ _NoMemory:
   return NULL;
 }
 
-RetNode* X86X64Compiler::addRet(const Operand& o0, const Operand& o1) {
+RetNode* X86Compiler::addRet(const Operand& o0, const Operand& o1) {
   RetNode* node = newRet(o0, o1);
   if (node == NULL)
     return node;
@@ -1140,10 +1140,10 @@ RetNode* X86X64Compiler::addRet(const Operand& o0, const Operand& o1) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Call]
+// [asmjit::X86Compiler - Call]
 // ============================================================================
 
-X86CallNode* X86X64Compiler::newCall(const Operand& o0, uint32_t conv, const FuncPrototype& p) {
+X86CallNode* X86Compiler::newCall(const Operand& o0, uint32_t conv, const FuncPrototype& p) {
   X86CallNode* node = newNode<X86CallNode>(o0);
   Error error;
   uint32_t nArgs;
@@ -1172,7 +1172,7 @@ _NoMemory:
   return NULL;
 }
 
-X86CallNode* X86X64Compiler::addCall(const Operand& o0, uint32_t conv, const FuncPrototype& p) {
+X86CallNode* X86Compiler::addCall(const Operand& o0, uint32_t conv, const FuncPrototype& p) {
   X86CallNode* node = newCall(o0, conv, p);
   if (node == NULL)
     return NULL;
@@ -1180,10 +1180,10 @@ X86CallNode* X86X64Compiler::addCall(const Operand& o0, uint32_t conv, const Fun
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Vars]
+// [asmjit::X86Compiler - Vars]
 // ============================================================================
 
-Error X86X64Compiler::setArg(uint32_t argIndex, Var& var) {
+Error X86Compiler::setArg(uint32_t argIndex, Var& var) {
   X86FuncNode* func = getFunc();
 
   if (func == NULL)
@@ -1198,7 +1198,7 @@ Error X86X64Compiler::setArg(uint32_t argIndex, Var& var) {
   return kErrorOk;
 }
 
-Error X86X64Compiler::_newVar(Var* var, uint32_t vType, const char* name) {
+Error X86Compiler::_newVar(Var* var, uint32_t vType, const char* name) {
   ASMJIT_ASSERT(vType < kX86VarTypeCount);
 
   vType = _targetVarMapping[vType];
@@ -1224,10 +1224,10 @@ Error X86X64Compiler::_newVar(Var* var, uint32_t vType, const char* name) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Stack]
+// [asmjit::X86Compiler - Stack]
 // ============================================================================
 
-Error X86X64Compiler::_newStack(BaseMem* mem, uint32_t size, uint32_t alignment, const char* name) {
+Error X86Compiler::_newStack(BaseMem* mem, uint32_t size, uint32_t alignment, const char* name) {
   if (size == 0)
     return kErrorInvalidArgument;
 
@@ -1248,10 +1248,10 @@ Error X86X64Compiler::_newStack(BaseMem* mem, uint32_t size, uint32_t alignment,
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Const]
+// [asmjit::X86Compiler - Const]
 // ============================================================================
 
-Error X86X64Compiler::_newConst(BaseMem* mem, uint32_t scope, const void* data, size_t size) {
+Error X86Compiler::_newConst(BaseMem* mem, uint32_t scope, const void* data, size_t size) {
   Error error = kErrorOk;
   size_t offset;
 
@@ -1289,14 +1289,14 @@ _OnError:
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Make]
+// [asmjit::X86Compiler - Make]
 // ============================================================================
 
-void* X86X64Compiler::make() {
+void* X86Compiler::make() {
   // Flush global constant pool
-  X86X64Compiler_emitConstPool(this, _globalConstPoolLabel, _globalConstPool);
+  X86Compiler_emitConstPool(this, _globalConstPoolLabel, _globalConstPool);
 
-  X86X64Assembler assembler(_runtime, _arch);
+  X86Assembler assembler(_runtime, _arch);
 
 #if !defined(ASMJIT_DISABLE_LOGGER)
   Logger* logger = _logger;
@@ -1328,14 +1328,14 @@ void* X86X64Compiler::make() {
 }
 
 // ============================================================================
-// [asmjit::X86X64Compiler - Assemble]
+// [asmjit::X86Compiler - Assemble]
 // ============================================================================
 
-Error X86X64Compiler::serialize(BaseAssembler& assembler) {
+Error X86Compiler::serialize(BaseAssembler& assembler) {
   if (_firstNode == NULL)
     return kErrorOk;
 
-  X86X64Context context(this);
+  X86Context context(this);
   Error error = kErrorOk;
 
   Node* node = _firstNode;

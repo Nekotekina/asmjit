@@ -27,7 +27,7 @@ namespace asmjit {
 //! \{
 
 // ============================================================================
-// [asmjit::X86X64Context]
+// [asmjit::X86Context]
 // ============================================================================
 
 #if defined(ASMJIT_DEBUG)
@@ -38,22 +38,22 @@ namespace asmjit {
 
 //! \internal
 //!
-//! Compiler context is used by `X86X64Compiler`.
+//! Compiler context is used by `X86Compiler`.
 //!
 //! Compiler context is used during compilation and normally developer doesn't
 //! need access to it. The context is user per function (it's reset after each
 //! function is generated).
-struct X86X64Context : public BaseContext {
-  ASMJIT_NO_COPY(X86X64Context)
+struct X86Context : public BaseContext {
+  ASMJIT_NO_COPY(X86Context)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! Create a new `X86X64Context` instance.
-  X86X64Context(X86X64Compiler* compiler);
-  //! Destroy the `X86X64Context` instance.
-  virtual ~X86X64Context();
+  //! Create a new `X86Context` instance.
+  X86Context(X86Compiler* compiler);
+  //! Destroy the `X86Context` instance.
+  virtual ~X86Context();
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -73,9 +73,9 @@ struct X86X64Context : public BaseContext {
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  //! Get compiler as `X86X64Compiler`.
-  ASMJIT_INLINE X86X64Compiler* getCompiler() const {
-    return static_cast<X86X64Compiler*>(_compiler);
+  //! Get compiler as `X86Compiler`.
+  ASMJIT_INLINE X86Compiler* getCompiler() const {
+    return static_cast<X86Compiler*>(_compiler);
   }
 
   //! Get function as `X86FuncNode`.

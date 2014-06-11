@@ -22,7 +22,7 @@ namespace asmjit {
 //! \{
 
 // ============================================================================
-// [asmjit::X86X64Assembler]
+// [asmjit::X86Assembler]
 // ============================================================================
 
 // \internal
@@ -323,14 +323,18 @@ namespace asmjit {
 //! other types there are functions `fp()`, `mm()`, `xmm()`, `ymm()` and `zmm()`
 //! available.
 //!
-//! @sa `X86X64Compiler`.
-struct ASMJIT_VCLASS X86X64Assembler : public BaseAssembler {
+//! @sa `X86Compiler`.
+struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ASMJIT_API X86X64Assembler(Runtime* runtime, uint32_t arch);
-  ASMJIT_API virtual ~X86X64Assembler();
+  ASMJIT_API X86Assembler(Runtime* runtime, uint32_t arch
+#if defined(ASMJIT_HOST_X86) || defined(ASMJIT_HOST_X64)
+    = kArchHost
+#endif // ASMJIT_HOST_X86 || ASMJIT_HOST_X64
+  );
+  ASMJIT_API virtual ~X86Assembler();
 
   // --------------------------------------------------------------------------
   // [Arch]
@@ -450,7 +454,7 @@ struct ASMJIT_VCLASS X86X64Assembler : public BaseAssembler {
   // [Options]
   // -------------------------------------------------------------------------
 
-  ASMJIT_X86_EMIT_OPTIONS(X86X64Assembler)
+  ASMJIT_X86_EMIT_OPTIONS(X86Assembler)
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -6554,32 +6558,6 @@ struct ASMJIT_VCLASS X86X64Assembler : public BaseAssembler {
 #undef INST_4x_
 #undef INST_4i
 };
-
-// ============================================================================
-// [asmjit::X86Assembler]
-// ============================================================================
-
-// NOTE: Unfortunately these have to be exported.
-
-#if defined(ASMJIT_BUILD_X86)
-//! X86-only assembler.
-struct ASMJIT_VCLASS X86Assembler : public X86X64Assembler {
-  ASMJIT_NO_COPY(X86Assembler)
-  ASMJIT_API X86Assembler(Runtime* runtime);
-};
-#endif // ASMJIT_BUILD_X86
-
-// ============================================================================
-// [asmjit::X64Assembler]
-// ============================================================================
-
-#if defined(ASMJIT_BUILD_X64)
-//! X64-only assembler.
-struct ASMJIT_VCLASS X64Assembler : public X86X64Assembler {
-  ASMJIT_NO_COPY(X64Assembler)
-  ASMJIT_API X64Assembler(Runtime* runtime);
-};
-#endif // ASMJIT_BUILD_X64
 
 //! \}
 

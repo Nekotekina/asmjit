@@ -9,9 +9,11 @@
 #define _ASMJIT_BUILD_H
 
 // [Include]
-#if !defined(ASMJIT_CONFIG_FILE)
-#include "./config.h"
-#endif // !ASMJIT_CONFIG_FILE
+#if defined(ASMJIT_CONFIG_FILE)
+# include ASMJIT_CONFIG_FILE
+#else
+# include "./config.h"
+#endif // ASMJIT_CONFIG_FILE
 
 // Turn off deprecation warnings when compiling AsmJit.
 #if defined(ASMJIT_EXPORTS) && defined(_MSC_VER)

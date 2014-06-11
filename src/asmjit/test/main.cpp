@@ -178,8 +178,8 @@ static void dumpSizeOf() {
 
 #if defined(ASMJIT_BUILD_X86) || defined(ASMJIT_BUILD_X64)
   INFO("SizeOf X86/X64:");
-  DUMP_TYPE(asmjit::X86X64Assembler);
-  DUMP_TYPE(asmjit::X86X64Compiler);
+  DUMP_TYPE(asmjit::X86Assembler);
+  DUMP_TYPE(asmjit::X86Compiler);
   DUMP_TYPE(asmjit::X86CallNode);
   DUMP_TYPE(asmjit::X86FuncNode);
   DUMP_TYPE(asmjit::X86FuncDecl);

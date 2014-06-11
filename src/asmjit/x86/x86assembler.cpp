@@ -207,10 +207,10 @@ static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc();
   } while (0)
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Construction / Destruction]
+// [asmjit::X86Assembler - Construction / Destruction]
 // ============================================================================
 
-X86X64Assembler::X86X64Assembler(Runtime* runtime, uint32_t arch) :
+X86Assembler::X86Assembler(Runtime* runtime, uint32_t arch) :
   BaseAssembler(runtime),
   zax(NoInit),
   zcx(NoInit),
@@ -224,13 +224,13 @@ X86X64Assembler::X86X64Assembler(Runtime* runtime, uint32_t arch) :
   setArch(arch);
 }
 
-X86X64Assembler::~X86X64Assembler() {}
+X86Assembler::~X86Assembler() {}
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Arch]
+// [asmjit::X86Assembler - Arch]
 // ============================================================================
 
-Error X86X64Assembler::setArch(uint32_t arch) {
+Error X86Assembler::setArch(uint32_t arch) {
 #if defined(ASMJIT_BUILD_X86)
   if (arch == kArchX86) {
     _arch = kArchX86;
@@ -288,10 +288,10 @@ Error X86X64Assembler::setArch(uint32_t arch) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Label]
+// [asmjit::X86Assembler - Label]
 // ============================================================================
 
-void X86X64Assembler::_bind(const Label& label) {
+void X86Assembler::_bind(const Label& label) {
   // Get label data based on label id.
   uint32_t index = label.getId();
   LabelData* data = getLabelDataById(index);
@@ -358,10 +358,10 @@ void X86X64Assembler::_bind(const Label& label) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Embed]
+// [asmjit::X86Assembler - Embed]
 // ============================================================================
 
-Error X86X64Assembler::embedLabel(const Label& op) {
+Error X86Assembler::embedLabel(const Label& op) {
   ASMJIT_ASSERT(op.getId() != kInvalidValue);
   uint32_t regSize = _regSize;
 
@@ -413,10 +413,10 @@ Error X86X64Assembler::embedLabel(const Label& op) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Align]
+// [asmjit::X86Assembler - Align]
 // ============================================================================
 
-Error X86X64Assembler::_align(uint32_t mode, uint32_t offset) {
+Error X86Assembler::_align(uint32_t mode, uint32_t offset) {
 #if !defined(ASMJIT_DISABLE_LOGGER)
   if (_logger)
     _logger->logFormat(kLoggerStyleDirective,
@@ -527,11 +527,11 @@ Error X86X64Assembler::_align(uint32_t mode, uint32_t offset) {
 }
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Reloc]
+// [asmjit::X86Assembler - Reloc]
 // ============================================================================
 
 template<int Arch>
-static ASMJIT_INLINE size_t X86X64Assembler_relocCode(const X86X64Assembler* self, void* _dst, Ptr base) {
+static ASMJIT_INLINE size_t X86Assembler_relocCode(const X86Assembler* self, void* _dst, Ptr base) {
   uint8_t* dst = static_cast<uint8_t*>(_dst);
 
   size_t codeOffset = self->getOffset();
@@ -635,22 +635,22 @@ static ASMJIT_INLINE size_t X86X64Assembler_relocCode(const X86X64Assembler* sel
     return (size_t)(codeOffset);
 }
 
-size_t X86X64Assembler::_relocCode(void* dst, Ptr base) const {
+size_t X86Assembler::_relocCode(void* dst, Ptr base) const {
 #if defined(ASMJIT_BUILD_X86)
   if (_arch == kArchX86)
-    return X86X64Assembler_relocCode<kArchX86>(this, dst, base);
+    return X86Assembler_relocCode<kArchX86>(this, dst, base);
 #endif // ASMJIT_BUILD_X86
 
 #if defined(ASMJIT_BUILD_X64)
   if (_arch == kArchX64)
-    return X86X64Assembler_relocCode<kArchX64>(this, dst, base);
+    return X86Assembler_relocCode<kArchX64>(this, dst, base);
 #endif // ASMJIT_BUILD_X64
 
   return kErrorInvalidState;
 }
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Logging]
+// [asmjit::X86Assembler - Logging]
 // ============================================================================
 
 #if !defined(ASMJIT_DISABLE_LOGGER)
@@ -984,7 +984,7 @@ static bool X86Assembler_dumpComment(StringBuilder& sb, size_t len, const uint8_
 #endif // !ASMJIT_DISABLE_LOGGER
 
 // ============================================================================
-// [asmjit::X86X64Assembler - Emit]
+// [asmjit::X86Assembler - Emit]
 // ============================================================================
 
 //! \internal
@@ -999,8 +999,8 @@ static const Operand::VRegOp x86PatchedHiRegs[4] = {
 };
 
 template<int Arch>
-static Error ASMJIT_CDECL X86X64Assembler_emit(BaseAssembler* self_, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
-  X86X64Assembler* self = static_cast<X86X64Assembler*>(self_);
+static Error ASMJIT_CDECL X86Assembler_emit(BaseAssembler* self_, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
+  X86Assembler* self = static_cast<X86Assembler*>(self_);
 
   uint8_t* cursor = self->getCursor();
   uint32_t encoded = o0->getOp() + (o1->getOp() << 3) + (o2->getOp() << 6);
@@ -1076,7 +1076,7 @@ static Error ASMJIT_CDECL X86X64Assembler_emit(BaseAssembler* self_, uint32_t co
 _Prepare:
   opCode = info.getPrimaryOpCode();
   opReg  = opCode >> kX86InstOpCode_O_Shift;
-  opX    = info.getFlags() >> (15 - 3);
+  opX    = extendedInfo.getFlags() >> (15 - 3);
 
   if (Arch == kArchX86) {
     // AVX.W prefix.
@@ -1128,7 +1128,7 @@ _Prepare:
   // --------------------------------------------------------------------------
 
   if (options & kX86InstOptionLock) {
-    if (!info.isLockable())
+    if (!extendedInfo.isLockable())
       goto _IllegalInst;
     EMIT_BYTE(0xF0);
   }
@@ -4222,26 +4222,8 @@ _GrowBuffer:
 
 template<int Arch>
 static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc() {
-  return X86X64Assembler_emit<Arch>;
+  return X86Assembler_emit<Arch>;
 }
-
-// ============================================================================
-// [asmjit::X86Assembler]
-// ============================================================================
-
-#if defined(ASMJIT_BUILD_X86)
-X86Assembler::X86Assembler(Runtime* runtime) :
-  X86X64Assembler(runtime, kArchX86) {}
-#endif // ASMJIT_BUILD_X86
-
-// ============================================================================
-// [asmjit::X64Assembler]
-// ============================================================================
-
-#if defined(ASMJIT_BUILD_X64)
-X64Assembler::X64Assembler(Runtime* runtime) :
-  X86X64Assembler(runtime, kArchX64) {}
-#endif // ASMJIT_BUILD_X64
 
 } // asmjit namespace
 

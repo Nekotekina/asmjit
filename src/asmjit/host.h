@@ -24,11 +24,7 @@ namespace asmjit {
 namespace host { using namespace ::asmjit::x86; }
 
 // Define host assembler.
-#if defined(ASMJIT_HOST_X86)
 typedef X86Assembler HostAssembler;
-#else
-typedef X64Assembler HostAssembler;
-#endif
 
 // Define host operands.
 typedef X86Reg HostReg;
@@ -49,12 +45,7 @@ typedef X86CpuInfo HostCpuInfo;
 
 // Define host compiler and related.
 #if !defined(ASMJIT_DISABLE_COMPILER)
-#if defined(ASMJIT_HOST_X86)
 typedef X86Compiler HostCompiler;
-#else
-typedef X64Compiler HostCompiler;
-#endif
-
 typedef X86CallNode HostCallNode;
 typedef X86FuncDecl HostFuncDecl;
 typedef X86FuncNode HostFuncNode;

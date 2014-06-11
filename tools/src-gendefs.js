@@ -18,6 +18,10 @@ var upFirst = function(s) {
   return s[0].toUpperCase() + s.substr(1);
 };
 
+var trimLeft = function(s) {
+  return s.replace(/^\s+/, "");
+}
+
 var inject = function(s, start, end, code) {
   var iStart = s.indexOf(start);
   var iEnd   = s.indexOf(end);
@@ -171,12 +175,22 @@ var generate = function(fileName, arch) {
     var name = m[2];
 
     // Extract data that goes to the secondary table (ExtendedInfo).
-    var opFlags0 = m[6];
-    var opFlags1 = m[7];
-    var opFlags2 = m[8];
-    var opFlags3 = m[9];
-    var opCode1 = m[11];
-    var extData = "{" + opFlags0 + "," + opFlags1 + "," + opFlags2 + "," + opFlags3 + "}," + opCode1;
+    var group = trimLeft(m[3]);
+    var flags = trimLeft(m[4]);
+    var moveSize = trimLeft(m[5]);
+    
+    var opFlags0 = trimLeft(m[6]);
+    var opFlags1 = trimLeft(m[7]);
+    var opFlags2 = trimLeft(m[8]);
+    var opFlags3 = trimLeft(m[9]);
+    var opCode1 = trimLeft(m[11]);
+
+    var extData = "" +
+      group    + ", " +
+      moveSize + ", " +
+      flags    + ", " + 
+      "{ " + opFlags0 + ", " + opFlags1 + ", " + opFlags2 + ", " + opFlags3 + "}, " +
+      opCode1;
 
     db.add(name, id, extData);
   }

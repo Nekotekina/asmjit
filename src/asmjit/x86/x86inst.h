@@ -59,17 +59,17 @@ ASMJIT_VAR const uint32_t _x86ReverseCond[20];
 
 //! \internal
 //!
-//! X86X64 condition codes to "cmovcc" group map.
+//! X86/X64 condition codes to "cmovcc" group map.
 ASMJIT_VAR const uint32_t _x86CondToCmovcc[20];
 
 //! \internal
 //!
-//! X86X64 condition codes to "jcc" group map.
+//! X86/X64 condition codes to "jcc" group map.
 ASMJIT_VAR const uint32_t _x86CondToJcc[20];
 
 //! \internal
 //!
-//! X86X64 condition codes to "setcc" group map.
+//! X86/X64 condition codes to "setcc" group map.
 ASMJIT_VAR const uint32_t _x86CondToSetcc[20];
 
 // ============================================================================
@@ -1156,7 +1156,7 @@ ASMJIT_ENUM(kX86InstOptions) {
 //!
 //! X86/X64 instruction groups.
 //!
-//! This group is specific to AsmJit and only used by `X86X64Assembler`.
+//! This group is specific to AsmJit and only used by `X86Assembler`.
 ASMJIT_ENUM(kX86InstGroup) {
   //! Never used.
   kX86InstGroupNone,
@@ -1736,14 +1736,121 @@ ASMJIT_ENUM(kX86FpCw) {
 //! used by few instructions.
 struct X86InstExtendedInfo {
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Accessors - Group]
   // --------------------------------------------------------------------------
 
+  //! Get instruction group, see \ref kX86InstGroup.
+  ASMJIT_INLINE uint32_t getGroup() const {
+    return _group;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Flags]
+  // --------------------------------------------------------------------------
+
+  //! Get whether the instruction has flag `flag`, see `kX86InstFlags`.
+  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
+    return (_flags & flag) != 0;
+  }
+
+  //! Get instruction flags, see `kX86InstFlags`.
+  ASMJIT_INLINE uint32_t getFlags() const {
+    return _flags;
+  }
+
+  //! Get whether the instruction is a control-flow intruction.
+  //!
+  //! Control flow instruction is instruction that modifies instruction pointer,
+  //! typically jmp, jcc, call, or ret.
+  ASMJIT_INLINE bool isFlow() const {
+    return (getFlags() & kX86InstFlagFlow) != 0;
+  }
+
+  //! Get whether the instruction is a compare/test like intruction.
+  ASMJIT_INLINE bool isTest() const {
+    return (getFlags() & kX86InstFlagTest) != 0;
+  }
+
+  //! Get whether the instruction is a typical move instruction.
+  //!
+  //! Move instructions overwrite the first operand or at least part of it,
+  //! This is a very useful hint that is used by variable liveness analysis
+  //! and `BaseCompiler` in general to know which variable is completely
+  //! overwritten.
+  //!
+  //! All AVX/XOP instructions that have 3 or more operands are considered to
+  //! have move semantics move by default.
+  ASMJIT_INLINE bool isMove() const {
+    return (getFlags() & kX86InstFlagMove) != 0;
+  }
+
+  //! Get whether the instruction is a typical Exchange instruction.
+  //!
+  //! Exchange instructios are 'xchg' and 'xadd'.
+  ASMJIT_INLINE bool isXchg() const {
+    return (getFlags() & kX86InstFlagXchg) != 0;
+  }
+
+  //! Get whether the instruction accesses Fp register(s).
+  ASMJIT_INLINE bool isFp() const {
+    return (getFlags() & kX86InstFlagFp) != 0;
+  }
+
+  //! Get whether the instruction can be prefixed by LOCK prefix.
+  ASMJIT_INLINE bool isLockable() const {
+    return (getFlags() & kX86InstFlagLock) != 0;
+  }
+
+  //! Get whether the instruction is special type (this is used by
+  //! `BaseCompiler` to manage additional variables or functionality).
+  ASMJIT_INLINE bool isSpecial() const {
+    return (getFlags() & kX86InstFlagSpecial) != 0;
+  }
+
+  //! Get whether the instruction is special type and it performs
+  //! memory access.
+  ASMJIT_INLINE bool isSpecialMem() const {
+    return (getFlags() & kX86InstFlagSpecialMem) != 0;
+  }
+
+  //! Get whether the move instruction zeroes the rest of the register
+  //! if the source is memory operand.
+  //!
+  //! Basically flag needed only to support `movsd` and `movss` instructions.
+  ASMJIT_INLINE bool isZeroIfMem() const {
+    return (getFlags() & kX86InstFlagZeroIfMem) != 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Move-Size]
+  // --------------------------------------------------------------------------
+
+  //! Get size of move instruction in bytes.
+  //!
+  //! See \ref X86InstInfo::getMoveSize() for more details.
+  ASMJIT_INLINE uint32_t getMoveSize() const {
+    return _moveSize;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Operand-Flags]
+  // --------------------------------------------------------------------------
+
+  //! Get flags of operand at index `index`.
+  //!
+  //! See \ref X86InstInfo::getOperandFlags() for more details.
   ASMJIT_INLINE uint16_t getOperandFlags(uint32_t index) const {
     ASMJIT_ASSERT(index < ASMJIT_ARRAY_SIZE(_opFlags));
     return _opFlags[index];
   }
 
+  // --------------------------------------------------------------------------
+  // [Accessors - OpCode]
+  // --------------------------------------------------------------------------
+
+  //! Get the secondary instruction opcode, see \ref kX86InstOpCode.
+  //!
+  //! See \ref X86InstInfo::getSecondaryOpCode() for more details.
   ASMJIT_INLINE uint32_t getSecondaryOpCode() const {
     return _secondaryOpCode;
   }
@@ -1752,7 +1859,22 @@ struct X86InstExtendedInfo {
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! Instruction group.
+  uint8_t _group;
+
+  //! Count of bytes overwritten by a move instruction.
+  //!
+  //! Only used with `kX86InstFlagMove` flag. If this value is zero move depends
+  //! on size of the destination register.
+  uint8_t _moveSize;
+
+  //! Instruction flags.
+  uint16_t _flags;
+
+  //! Operands' flags.
   uint16_t _opFlags[4];
+
+  //! Secondary opcode.
   uint32_t _secondaryOpCode;
 };
 
@@ -1798,84 +1920,21 @@ struct X86InstInfo {
 
   //! Get instruction group, see \ref kX86InstGroup.
   ASMJIT_INLINE uint32_t getGroup() const {
-    return _group;
+    return getExtendedInfo().getGroup();
   }
 
   // --------------------------------------------------------------------------
   // [Accessors - Flags]
   // --------------------------------------------------------------------------
 
-  //! Get whether the instruction has flag `flag`, see `kX86InstFlags`.
-  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
-    return (_flags & flag) != 0;
-  }
-
   //! Get instruction flags, see `kX86InstFlags`.
   ASMJIT_INLINE uint32_t getFlags() const {
-    return _flags;
+    return getExtendedInfo().getFlags();
   }
 
-  //! Get whether the instruction is a control-flow intruction.
-  //!
-  //! Control flow instruction is instruction that modifies instruction pointer,
-  //! typically jmp, jcc, call, or ret.
-  ASMJIT_INLINE bool isFlow() const {
-    return (_flags & kX86InstFlagFlow) != 0;
-  }
-
-  //! Get whether the instruction is a compare/test like intruction.
-  ASMJIT_INLINE bool isTest() const {
-    return (_flags & kX86InstFlagTest) != 0;
-  }
-
-  //! Get whether the instruction is a typical move instruction.
-  //!
-  //! Move instructions overwrite the first operand or at least part of it,
-  //! This is a very useful hint that is used by variable liveness analysis
-  //! and `BaseCompiler` in general to know which variable is completely
-  //! overwritten.
-  //!
-  //! All AVX/XOP instructions that have 3 or more operands are considered to
-  //! have move semantics move by default.
-  ASMJIT_INLINE bool isMove() const {
-    return (_flags & kX86InstFlagMove) != 0;
-  }
-
-  //! Get whether the instruction is a typical Exchange instruction.
-  //!
-  //! Exchange instructios are 'xchg' and 'xadd'.
-  ASMJIT_INLINE bool isXchg() const {
-    return (_flags & kX86InstFlagXchg) != 0;
-  }
-
-  //! Get whether the instruction accesses Fp register(s).
-  ASMJIT_INLINE bool isFp() const {
-    return (_flags & kX86InstFlagFp) != 0;
-  }
-
-  //! Get whether the instruction can be prefixed by LOCK prefix.
-  ASMJIT_INLINE bool isLockable() const {
-    return (_flags & kX86InstFlagLock) != 0;
-  }
-
-  //! Get whether the instruction is special type (this is used by
-  //! `BaseCompiler` to manage additional variables or functionality).
-  ASMJIT_INLINE bool isSpecial() const {
-    return (_flags & kX86InstFlagSpecial) != 0;
-  }
-
-  //! Get whether the instruction is special type and it performs
-  //! memory access.
-  ASMJIT_INLINE bool isSpecialMem() const {
-    return (_flags & kX86InstFlagSpecialMem) != 0;
-  }
-
-  //! Get whether the move instruction zeroes the rest of the register
-  //! if the source is memory operand.
-  //!
-  //! Basically flag needed only to support `movsd` and `movss` instructions.
-  ASMJIT_INLINE bool isZeroIfMem() const {
-    return (_flags & kX86InstFlagZeroIfMem) != 0;
+  //! Get whether the instruction has flag `flag`, see `kX86InstFlags`.
+  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
+    return (getFlags() & flag) != 0;
   }
 
   // --------------------------------------------------------------------------
@@ -1890,11 +1949,11 @@ struct X86InstInfo {
   //! be overwritten or not. Basically if the move size is equal or greater
   //! than a variable itself it is considered overwritten.
   ASMJIT_INLINE uint32_t getMoveSize() const {
-    return _moveSize;
+    return getExtendedInfo().getMoveSize();
   }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Operands]
+  // [Accessors - Operand-Flags]
   // --------------------------------------------------------------------------
 
   //! Get flags of operand at index `index`.
@@ -1924,19 +1983,6 @@ struct X86InstInfo {
   uint16_t _nameIndex;
   //! Extended information name index in `_x86InstExtendedInfo[]` array.
   uint16_t _extendedIndex;
-
-  //! Instruction flags.
-  uint16_t _flags;
-
-  //! Instruction group, used by assembler to decide which encoding to use to
-  //! emit the instruction.
-  uint8_t _group;
-
-  //! Count of bytes overwritten by a move instruction.
-  //!
-  //! Only used with `kX86InstFlagMove` flag. If this value is zero move depends
-  //! on size of the destination register.
-  uint8_t _moveSize;
 
   //! Primary opcode, secondary opcode is stored in `X86InstExtendedInfo` table.
   uint32_t _primaryOpCode;
@@ -2018,7 +2064,7 @@ struct X86Util {
   //! \param y Second component position, number at interval [0, 1] inclusive.
   //!
   //! Shuffle constants can be used to make immediate value for these intrinsics:
-  //! - `X86X64Assembler::shufpd()` and `X86X64Compiler::shufpd()`
+  //! - `X86Assembler::shufpd()` and `X86Compiler::shufpd()`
   static ASMJIT_INLINE int mmShuffle(uint32_t x, uint32_t y) {
     return static_cast<int>((x << 1) | y);
   }
@@ -2031,11 +2077,11 @@ struct X86Util {
   //! \param w Fourth component position, number at interval [0, 3] inclusive.
   //!
   //! Shuffle constants can be used to make immediate value for these intrinsics:
-  //! - `X86X64Assembler::pshufw()` and `X86X64Compiler::pshufw()`
-  //! - `X86X64Assembler::pshufd()` and `X86X64Compiler::pshufd()`
-  //! - `X86X64Assembler::pshufhw()` and `X86X64Compiler::pshufhw()`
-  //! - `X86X64Assembler::pshuflw()` and `X86X64Compiler::pshuflw()`
-  //! - `X86X64Assembler::shufps()` and `X86X64Compiler::shufps()`
+  //! - `X86Assembler::pshufw()` and `X86Compiler::pshufw()`
+  //! - `X86Assembler::pshufd()` and `X86Compiler::pshufd()`
+  //! - `X86Assembler::pshufhw()` and `X86Compiler::pshufhw()`
+  //! - `X86Assembler::pshuflw()` and `X86Compiler::pshuflw()`
+  //! - `X86Assembler::shufps()` and `X86Compiler::shufps()`
   static ASMJIT_INLINE int mmShuffle(uint32_t z, uint32_t y, uint32_t x, uint32_t w) {
     return static_cast<int>((z << 6) | (y << 4) | (x << 2) | w);
   }

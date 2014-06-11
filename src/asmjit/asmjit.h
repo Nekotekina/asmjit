@@ -85,7 +85,7 @@
 //!
 //! Contains all `asmjit` classes and helper functions that are architecture
 //! independent or abstract. Abstract classes are implemented by the backend,
-//! for example `BaseAssembler` is implemented by `X86X64Assembler`.
+//! for example `BaseAssembler` is implemented by `X86Assembler`.
 //!
 //! - See `BaseAssembler` for low level code generation documentation.
 //! - See `BaseCompiler` for high level code generation documentation.

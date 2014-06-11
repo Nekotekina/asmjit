@@ -1205,7 +1205,7 @@ struct X86VarState : VarState {
   //! Modified registers (mask).
   X86RegMask _modified;
 
-  //! Variables data, the length is stored in `X86X64Context`.
+  //! Variables data, the length is stored in `X86Context`.
   X86StateCell _cells[1];
 };
 
@@ -1395,8 +1395,8 @@ struct X86CallNode : public CallNode {
   X86FuncDecl _x86Decl;
   //! Mask of all registers actually used to pass function arguments.
   //!
-  //! \note This bit-mask is not the same as @c X86X64Func::_passed. It contains
-  //! only registers actually used to do the call while X86X64Func::_passed
+  //! \note This bit-mask is not the same as `X86Func::_passed`. It contains
+  //! only registers actually used to do the call while `X86Func::_passed`
   //! mask contains all registers for all function prototype combinations.
   X86RegMask _usedArgs;
 };
@@ -1415,7 +1415,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 #endif // !ASMJIT_DOCGEN
 
 // ============================================================================
-// [asmjit::X86X64Compiler]
+// [asmjit::X86Compiler]
 // ============================================================================
 
 //! X86/X64 compiler.
@@ -1427,9 +1427,9 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! array instead. This allows to modify instruction stream later and for
 //! example to reorder instructions to make better performance.
 //!
-//! `X86X64Compiler` moves code generation to a higher level. Higher level
+//! `X86Compiler` moves code generation to a higher level. Higher level
 //! constructs allows to write more abstract and extensible code that is not
-//! possible with pure `X86X64Assembler`.
+//! possible with pure `X86Assembler`.
 //!
 //! The Story
 //! ---------
@@ -1993,17 +1993,21 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! Other use cases are waiting for you! Be sure that instruction you are
 //! emitting is correct and encodable, because if not, Assembler will set
 //! status code to @c kErrorUnknownInst.
-struct ASMJIT_VCLASS X86X64Compiler : public BaseCompiler {
-  ASMJIT_NO_COPY(X86X64Compiler)
+struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
+  ASMJIT_NO_COPY(X86Compiler)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! Create a `X86X64Compiler` instance.
-  ASMJIT_API X86X64Compiler(Runtime* runtime, uint32_t arch);
-  //! Destroy the `X86X64Compiler` instance.
-  ASMJIT_API ~X86X64Compiler();
+  //! Create a `X86Compiler` instance.
+  ASMJIT_API X86Compiler(Runtime* runtime, uint32_t arch
+#if defined(ASMJIT_HOST_X86) || defined(ASMJIT_HOST_X64)
+    = kArchHost
+#endif // ASMJIT_HOST_X86 || ASMJIT_HOST_X64
+  );
+  //! Destroy the `X86Compiler` instance.
+  ASMJIT_API ~X86Compiler();
 
   // --------------------------------------------------------------------------
   // [Arch]
@@ -2405,7 +2409,7 @@ struct ASMJIT_VCLASS X86X64Compiler : public BaseCompiler {
   // [Options]
   // -------------------------------------------------------------------------
 
-  ASMJIT_X86_EMIT_OPTIONS(X86X64Compiler)
+  ASMJIT_X86_EMIT_OPTIONS(X86Compiler)
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -5157,30 +5161,6 @@ struct ASMJIT_VCLASS X86X64Compiler : public BaseCompiler {
 #undef INST_4x_
 #undef INST_4i
 };
-
-// ============================================================================
-// [asmjit::X86Compiler]
-// ============================================================================
-
-#if defined(ASMJIT_BUILD_X86)
-//! X86-Only compiler.
-struct ASMJIT_VCLASS X86Compiler : public X86X64Compiler {
-  ASMJIT_NO_COPY(X86Compiler)
-  ASMJIT_INLINE X86Compiler(Runtime* runtime) : X86X64Compiler(runtime, kArchX86) {};
-};
-#endif // ASMJIT_BUILD_X86
-
-// ============================================================================
-// [asmjit::X64Compiler]
-// ============================================================================
-
-#if defined(ASMJIT_BUILD_X64)
-//! X64-Only compiler.
-struct ASMJIT_VCLASS X64Compiler : public X86X64Compiler {
-  ASMJIT_NO_COPY(X64Compiler)
-  ASMJIT_INLINE X64Compiler(Runtime* runtime) : X86X64Compiler(runtime, kArchX64) {};
-};
-#endif // ASMJIT_BUILD_X64
 
 //! \}
 

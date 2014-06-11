@@ -16,7 +16,7 @@ namespace asmgen {
 // Generate a typical alpha blend function using SSE2 instruction set. Used
 // for benchmarking and also in test86. The generated code should be stable
 // and fully functional.
-static void blend(asmjit::X86X64Compiler& c) {
+static void blend(asmjit::X86Compiler& c) {
   using namespace asmjit;
   using namespace asmjit::host;
 
