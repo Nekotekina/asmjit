@@ -137,17 +137,21 @@
 #   define ASMJIT_API __attribute__((dllexport))
 #  else
 #   define ASMJIT_API __attribute__((dllimport))
-#  endif
-# elif defined(ASMJIT_EXPORTS)
-#  define ASMJIT_API __declspec(dllexport)
+#  endif // ASMJIT_EXPORTS
 # else
-#  define ASMJIT_API __declspec(dllimport)
+#  if defined(ASMJIT_EXPORTS)
+#   define ASMJIT_API __declspec(dllexport)
+#  else
+#   define ASMJIT_API __declspec(dllimport)
+#  endif
 # endif
 #elif defined(__GNUC__) && (__GNUC__ >= 4)
 # define ASMJIT_API __attribute__((visibility("default")))
-#else
-# define ASMJIT_API
 #endif
+
+#if !defined(ASMJIT_API)
+# define ASMJIT_API
+#endif // ASMJIT_API
 
 // This is basically a workaround. When using MSVC and marking class as DLL
 // export everything is exported, which is unwanted since there are many
@@ -164,6 +168,16 @@
 #if !defined(ASMJIT_VAR)
 # define ASMJIT_VAR extern ASMJIT_API
 #endif // !ASMJIT_VAR
+
+#if defined(_MSC_VER)
+# define ASMJIT_INLINE __forceinline
+#elif defined(__clang__)
+# define ASMJIT_INLINE inline __attribute__((always_inline)) __attribute__((visibility("hidden")))
+#elif defined(__GNUC__)
+# define ASMJIT_INLINE inline __attribute__((always_inline))
+#else
+# define ASMJIT_INLINE inline
+#endif
 
 #if defined(ASMJIT_HOST_X86)
 # if defined(__GNUC__) || defined(__clang__)
@@ -183,16 +197,6 @@
 # define ASMJIT_STDCALL
 # define ASMJIT_CDECL
 #endif // ASMJIT_HOST_X86
-
-#if defined(_MSC_VER)
-# define ASMJIT_INLINE __forceinline
-#elif defined(__clang__)
-# define ASMJIT_INLINE inline __attribute__((always_inline)) __attribute__((visibility("hidden")))
-#elif defined(__GNUC__)
-# define ASMJIT_INLINE inline __attribute__((always_inline))
-#else
-# define ASMJIT_INLINE inline
-#endif
 
 // ============================================================================
 // [asmjit::build - Enum]

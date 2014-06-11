@@ -455,7 +455,7 @@ UNIT(base_constpool) {
       "pool.add() - Didn't return aligned offset.");
   }
 
-  INFO("Adding 2 byte constant verify the gap is filled.");
+  INFO("Adding 2 byte constant to verify the gap is filled.");
   {
     uint16_t c = 0xFFFE;
     size_t offset;
