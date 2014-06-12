@@ -13,7 +13,7 @@
 
 namespace asmgen {
 
-enum { kGenOpCodeInstCount = 2600 };
+enum { kGenOpCodeInstCount = 2640 };
 
 // Generate all instructions asmjit can emit.
 static void opcode(asmjit::X86Assembler& a) {
@@ -278,6 +278,49 @@ static void opcode(asmjit::X86Assembler& a) {
   a.xor_(gp0, 0);
   a.xor_(intptr_gp0, gp1);
   a.xor_(intptr_gp0, 0);
+
+  a.nop();
+
+  a.lodsb();
+  a.lodsd();
+  a.lodsw();
+  a.rep_lodsb();
+  a.rep_lodsd();
+  a.rep_lodsw();
+
+  a.movsb();
+  a.movsd();
+  a.movsw();
+  a.rep_movsb();
+  a.rep_movsd();
+  a.rep_movsw();
+
+  a.stosb();
+  a.stosd();
+  a.stosw();
+  a.rep_stosb();
+  a.rep_stosd();
+  a.rep_stosw();
+
+  a.cmpsb();
+  a.cmpsd();
+  a.cmpsw();
+  a.repe_cmpsb();
+  a.repe_cmpsd();
+  a.repe_cmpsw();
+  a.repne_cmpsb();
+  a.repne_cmpsd();
+  a.repne_cmpsw();
+
+  a.scasb();
+  a.scasd();
+  a.scasw();
+  a.repe_scasb();
+  a.repe_scasd();
+  a.repe_scasw();
+  a.repne_scasb();
+  a.repne_scasd();
+  a.repne_scasw();
 
   // Label...Jcc/Jecxz/Jmp.
   {

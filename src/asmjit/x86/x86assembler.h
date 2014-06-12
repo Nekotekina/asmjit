@@ -387,51 +387,48 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   // [Embed]
   // --------------------------------------------------------------------------
 
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE void db(uint8_t x) { embed(&x, 1); }
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE void dw(uint16_t x) { embed(&x, 2); }
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE void dd(uint32_t x) { embed(&x, 4); }
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE void dq(uint64_t x) { embed(&x, 8); }
 
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE void dint8(int8_t x) { embed(&x, sizeof(int8_t)); }
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE void duint8(uint8_t x) { embed(&x, sizeof(uint8_t)); }
 
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE void dint16(int16_t x) { embed(&x, sizeof(int16_t)); }
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE void duint16(uint16_t x) { embed(&x, sizeof(uint16_t)); }
 
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE void dint32(int32_t x) { embed(&x, sizeof(int32_t)); }
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE void duint32(uint32_t x) { embed(&x, sizeof(uint32_t)); }
 
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE void dint64(int64_t x) { embed(&x, sizeof(int64_t)); }
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE void duint64(uint64_t x) { embed(&x, sizeof(uint64_t)); }
 
-  //! Add float data to the instuction stream.
+  //! Add float data to the instruction stream.
   ASMJIT_INLINE void dfloat(float x) { embed(&x, sizeof(float)); }
-  //! Add double data to the instuction stream.
+  //! Add double data to the instruction stream.
   ASMJIT_INLINE void ddouble(double x) { embed(&x, sizeof(double)); }
 
-  //! Add pointer data to the instuction stream.
-  ASMJIT_INLINE void dptr(void* x) { embed(&x, sizeof(void*)); }
-
-  //! Add Mm data to the instuction stream.
+  //! Add Mm data to the instruction stream.
   ASMJIT_INLINE void dmm(const Vec64& x) { embed(&x, sizeof(Vec64)); }
-  //! Add Xmm data to the instuction stream.
+  //! Add Xmm data to the instruction stream.
   ASMJIT_INLINE void dxmm(const Vec128& x) { embed(&x, sizeof(Vec128)); }
-  //! Add Ymm data to the instuction stream.
+  //! Add Ymm data to the instruction stream.
   ASMJIT_INLINE void dymm(const Vec256& x) { embed(&x, sizeof(Vec256)); }
 
-  //! Add data in a given structure instance to the instuction stream.
+  //! Add data in a given structure instance to the instruction stream.
   template<typename T>
   ASMJIT_INLINE void dstruct(const T& x) { embed(&x, static_cast<uint32_t>(sizeof(T))); }
 
@@ -460,24 +457,24 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! Count of registers depending on current architecture.
+  //! Count of registers depending on the current architecture.
   X86RegCount _regCount;
 
-  //! EAX or RAX register depending on current architecture.
+  //! EAX or RAX register depending on the current architecture.
   X86GpReg zax;
-  //! ECX or RCX register depending on current architecture.
+  //! ECX or RCX register depending on the current architecture.
   X86GpReg zcx;
-  //! EDX or RDX register depending on current architecture.
+  //! EDX or RDX register depending on the current architecture.
   X86GpReg zdx;
-  //! EBX or RBX register depending on current architecture.
+  //! EBX or RBX register depending on the current architecture.
   X86GpReg zbx;
-  //! ESP or RSP register depending on current architecture.
+  //! ESP or RSP register depending on the current architecture.
   X86GpReg zsp;
-  //! EBP or RBP register depending on current architecture.
+  //! EBP or RBP register depending on the current architecture.
   X86GpReg zbp;
-  //! ESI or RSI register depending on current architecture.
+  //! ESI or RSI register depending on the current architecture.
   X86GpReg zsi;
-  //! EDI or RDI register depending on current architecture.
+  //! EDI or RDI register depending on the current architecture.
   X86GpReg zdi;
 
   // --------------------------------------------------------------------------
@@ -780,7 +777,7 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_1x(call, kX86InstIdCall, Imm)
   //! \overload
-  ASMJIT_INLINE Error call(void* dst) { return call(Imm((intptr_t)dst)); }
+  ASMJIT_INLINE Error call(Ptr o0) { return call(Imm(o0)); }
 
   //! Clear carry flag.
   INST_0x(clc, kX86InstIdClc)
@@ -791,12 +788,16 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
 
   //! Convert BYTE to WORD (AX <- Sign Extend AL).
   INST_0x(cbw, kX86InstIdCbw)
+  //! Convert DWORD to QWORD (EDX:EAX <- Sign Extend EAX).
+  INST_0x(cdq, kX86InstIdCdq)
+  //! Convert DWORD to QWORD (RAX <- Sign Extend EAX) (X64 Only).
+  INST_0x(cdqe, kX86InstIdCdqe)
+  //! Convert QWORD to OWORD (RDX:RAX <- Sign Extend RAX) (X64 Only).
+  INST_0x(cqo, kX86InstIdCqo)
   //! Convert WORD to DWORD (DX:AX <- Sign Extend AX).
   INST_0x(cwd, kX86InstIdCwd)
   //! Convert WORD to DWORD (EAX <- Sign Extend AX).
   INST_0x(cwde, kX86InstIdCwde)
-  //! Convert DWORD to QWORD (EDX:EAX <- Sign Extend EAX).
-  INST_0x(cdq, kX86InstIdCdq)
 
   //! Conditional move.
   INST_2cc(cmov, kX86InstIdCmov, X86Util::condToCmovcc, X86GpReg, X86GpReg)
@@ -814,12 +815,23 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_2i(cmp, kX86InstIdCmp, X86Mem, Imm)
 
+  //! Compare BYTE in ES:[EDI/RDI] and DS:[ESI/RSI].
+  INST_0x(cmpsb, kX86InstIdCmpsb)
+  //! Compare DWORD in ES:[EDI/RDI] and DS:[ESI/RSI].
+  INST_0x(cmpsd, kX86InstIdCmpsd)
+  //! Compare QWORD in ES:[RDI] and DS:[RDI] (X64 Only).
+  INST_0x(cmpsq, kX86InstIdCmpsq)
+  //! Compare WORD in ES:[EDI/RDI] and DS:[ESI/RSI].
+  INST_0x(cmpsw, kX86InstIdCmpsw)
+
   //! Compare and exchange (i486).
   INST_2x(cmpxchg, kX86InstIdCmpxchg, X86GpReg, X86GpReg)
   //! \overload
   INST_2x(cmpxchg, kX86InstIdCmpxchg, X86Mem, X86GpReg)
 
-  //! Compares the 64-bit value in EDX:EAX with the memory operand (Pentium).
+  //! Compare and exchange 128-bit value in RDX:RAX with the memory operand (X64 Only).
+  INST_1x(cmpxchg16b, kX86InstIdCmpxchg16b, X86Mem)
+  //! Compare and exchange 64-bit value in EDX:EAX with the memory operand (Pentium).
   INST_1x(cmpxchg8b, kX86InstIdCmpxchg8b, X86Mem)
 
   //! CPU identification (i486).
@@ -829,6 +841,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_2x_(crc32, kX86InstIdCrc32, X86GpReg, X86GpReg, o0.isRegType(kX86RegTypeGpd) || o0.isRegType(kX86RegTypeGpq))
   //! \overload
   INST_2x_(crc32, kX86InstIdCrc32, X86GpReg, X86Mem, o0.isRegType(kX86RegTypeGpd) || o0.isRegType(kX86RegTypeGpq))
+
+  //! Decimal adjust AL after addition (X86 Only).
+  INST_0x(daa, kX86InstIdDaa)
+  //! Decimal adjust AL after subtraction (X86 Only).
+  INST_0x(das, kX86InstIdDas)
 
   //! Decrement by 1.
   INST_1x(dec, kX86InstIdDec, X86GpReg)
@@ -890,7 +907,7 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_1x(jmp, kX86InstIdJmp, Imm)
   //! \overload
-  ASMJIT_INLINE Error jmp(void* dst) { return jmp(Imm((intptr_t)dst)); }
+  ASMJIT_INLINE Error jmp(Ptr dst) { return jmp(Imm(dst)); }
 
   //! Load AH from flags.
   INST_0x(lahf, kX86InstIdLahf)
@@ -900,6 +917,15 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
 
   //! High level procedure exit.
   INST_0x(leave, kX86InstIdLeave)
+
+  //! Load ECX/RCX BYTE from DS:[ESI/RSI] to AL.
+  INST_0x(lodsb, kX86InstIdLodsb)
+  //! Load ECX/RCX DWORD from DS:[ESI/RSI] to EAX.
+  INST_0x(lodsd, kX86InstIdLodsd)
+  //! Load ECX/RCX QWORD from DS:[RDI] to RAX (X64 Only).
+  INST_0x(lodsq, kX86InstIdLodsq)
+  //! Load ECX/RCX WORD from DS:[ESI/RSI] to AX.
+  INST_0x(lodsw, kX86InstIdLodsw)
 
   //! Move.
   INST_2x(mov, kX86InstIdMov, X86GpReg, X86GpReg)
@@ -922,19 +948,19 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_2x(mov, kX86InstIdMov, X86SegReg, X86Mem)
 
   //! Move (AL|AX|EAX|RAX <- absolute address in immediate).
-  ASMJIT_INLINE Error mov_ptr(const X86GpReg& dst, void* src) {
-    ASMJIT_ASSERT(dst.getRegIndex() == 0);
-
-    Imm imm(static_cast<int64_t>((intptr_t)src));
-    return emit(kX86InstIdMovPtr, dst, imm);
+  INST_2x_(mov_ptr, kX86InstIdMovPtr, X86GpReg, Imm, o0.getRegIndex() == 0);
+  //! \overload
+  ASMJIT_INLINE Error mov_ptr(const X86GpReg& o0, Ptr o1) {
+    ASMJIT_ASSERT(o0.getRegIndex() == 0);
+    return emit(kX86InstIdMovPtr, o0, Imm(o1));
   }
 
   //! Move (absolute address in immediate <- AL|AX|EAX|RAX).
-  ASMJIT_INLINE Error mov_ptr(void* dst, const X86GpReg& src) {
-    ASMJIT_ASSERT(src.getRegIndex() == 0);
-
-    Imm imm(static_cast<int64_t>((intptr_t)dst));
-    return emit(kX86InstIdMovPtr, imm, src);
+  INST_2x_(mov_ptr, kX86InstIdMovPtr, Imm, X86GpReg, o1.getRegIndex() == 0);
+  //! \overload
+  ASMJIT_INLINE Error mov_ptr(Ptr o0, const X86GpReg& o1) {
+    ASMJIT_ASSERT(o1.getRegIndex() == 0);
+    return emit(kX86InstIdMovPtr, Imm(o0), o1);
   }
 
   //! Move data after dwapping bytes (SSE3 - Atom).
@@ -942,10 +968,24 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_2x_(movbe, kX86InstIdMovbe, X86Mem, X86GpReg, !o1.isGpb());
 
+  //! Move ECX/RCX BYTE from DS:[ESI/RSI] to ES:[EDI/RDI].
+  INST_0x(movsb, kX86InstIdMovsb)
+  //! Move ECX/RCX DWORD from DS:[ESI/RSI] to ES:[EDI/RDI].
+  INST_0x(movsd, kX86InstIdMovsd)
+  //! Move ECX/RCX QWORD from DS:[RSI] to ES:[RDI] (X64 Only).
+  INST_0x(movsq, kX86InstIdMovsq)
+  //! Move ECX/RCX WORD from DS:[ESI/RSI] to ES:[EDI/RDI].
+  INST_0x(movsw, kX86InstIdMovsw)
+
   //! Move with sign-extension.
   INST_2x(movsx, kX86InstIdMovsx, X86GpReg, X86GpReg)
   //! \overload
   INST_2x(movsx, kX86InstIdMovsx, X86GpReg, X86Mem)
+
+  //! Move DWORD to QWORD with sign-extension (X64 Only).
+  INST_2x(movsxd, kX86InstIdMovsxd, X86GpReg, X86GpReg)
+  //! \overload
+  INST_2x(movsxd, kX86InstIdMovsxd, X86GpReg, X86Mem)
 
   //! Move with zero-extension.
   INST_2x(movzx, kX86InstIdMovzx, X86GpReg, X86GpReg)
@@ -991,6 +1031,9 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \note There is no instruction to pop a cs segment register.
   INST_1x_(pop, kX86InstIdPop, X86SegReg, o0.getRegIndex() != kX86SegCs);
 
+  //! Pop all Gp registers - EDI|ESI|EBP|Ign|EBX|EDX|ECX|EAX (X86 Only).
+  INST_0x(popa, kX86InstIdPopa)
+
   //! Pop stack into EFLAGS register (32-bit or 64-bit).
   INST_0x(popf, kX86InstIdPopf)
 
@@ -1007,6 +1050,9 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_1x(push, kX86InstIdPush, X86SegReg)
   //! Push WORD or DWORD/QWORD on the stack.
   INST_1i(push, kX86InstIdPush, Imm)
+
+  //! Push all Gp registers - EAX|ECX|EDX|EBX|ESP|EBP|ESI|EDI (X86 Only).
+  INST_0x(pusha, kX86InstIdPusha)
 
   //! Push EFLAGS register (32-bit or 64-bit) on the stack.
   INST_0x(pushf, kX86InstIdPushf)
@@ -1038,53 +1084,67 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! Read time-stamp counter and processor id (Pentium).
   INST_0x(rdtscp, kX86InstIdRdtscp)
 
-  //! Load ECX/RCX bytes from DS:[ESI/RSI] to AL.
+  //! Repeated load ECX/RCX BYTEs from DS:[ESI/RSI] to AL.
   INST_0x(rep_lodsb, kX86InstIdRepLodsb)
-  //! Load ECX/RCX dwords from DS:[ESI/RSI] to EAX.
+  //! Repeated load ECX/RCX DWORDs from DS:[ESI/RSI] to EAX.
   INST_0x(rep_lodsd, kX86InstIdRepLodsd)
-  //! Load ECX/RCX Words from DS:[ESI/RSI] to AX.
+  //! Repeated load ECX/RCX QWORDs from DS:[RDI] to RAX (X64 Only).
+  INST_0x(rep_lodsq, kX86InstIdRepLodsq)
+  //! Repeated load ECX/RCX WORDs from DS:[ESI/RSI] to AX.
   INST_0x(rep_lodsw, kX86InstIdRepLodsw)
 
-  //! Move ECX/RCX bytes from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX BYTEs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(rep_movsb, kX86InstIdRepMovsb)
-  //! Move ECX/RCX dwords from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(rep_movsd, kX86InstIdRepMovsd)
-  //! Move ECX/RCX words from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
+  INST_0x(rep_movsq, kX86InstIdRepMovsq)
+  //! Repeated move ECX/RCX WORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(rep_movsw, kX86InstIdRepMovsw)
 
-  //! Fill ECX/RCX bytes at ES:[EDI/RDI] with AL.
+  //! Repeated fill ECX/RCX BYTEs at ES:[EDI/RDI] with AL.
   INST_0x(rep_stosb, kX86InstIdRepStosb)
-  //! Fill ECX/RCX dwords at ES:[EDI/RDI] with EAX.
+  //! Repeated fill ECX/RCX DWORDs at ES:[EDI/RDI] with EAX.
   INST_0x(rep_stosd, kX86InstIdRepStosd)
-  //! Fill ECX/RCX words at ES:[EDI/RDI] with AX.
+  //! Repeated fill ECX/RCX QWORDs at ES:[RDI] with RAX (X64 Only).
+  INST_0x(rep_stosq, kX86InstIdRepStosq)
+  //! Repeated fill ECX/RCX WORDs at ES:[EDI/RDI] with AX.
   INST_0x(rep_stosw, kX86InstIdRepStosw)
 
-  //! Repeated find nonmatching bytes in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find non-AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repe_cmpsb, kX86InstIdRepeCmpsb)
-  //! Repeated find nonmatching dwords in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find non-EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repe_cmpsd, kX86InstIdRepeCmpsd)
-  //! Repeated find nonmatching words in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find non-RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
+  INST_0x(repe_cmpsq, kX86InstIdRepeCmpsq)
+  //! Repeated find non-AX WORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repe_cmpsw, kX86InstIdRepeCmpsw)
 
-  //! Find non-AL byte starting at ES:[EDI/RDI].
+  //! Repeated find non-AL BYTE starting at ES:[EDI/RDI].
   INST_0x(repe_scasb, kX86InstIdRepeScasb)
-  //! Find non-EAX dword starting at ES:[EDI/RDI].
+  //! Repeated find non-EAX DWORD starting at ES:[EDI/RDI].
   INST_0x(repe_scasd, kX86InstIdRepeScasd)
-  //! Find non-AX word starting at ES:[EDI/RDI].
+  //! Repeated find non-RAX QWORD starting at ES:[RDI] (X64 Only).
+  INST_0x(repe_scasq, kX86InstIdRepeScasq)
+  //! Repeated find non-AX WORD starting at ES:[EDI/RDI].
   INST_0x(repe_scasw, kX86InstIdRepeScasw)
 
-  //! Repeated find nonmatching bytes in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repne_cmpsb, kX86InstIdRepneCmpsb)
-  //! Repeated find nonmatching dwords in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repne_cmpsd, kX86InstIdRepneCmpsd)
-  //! Repeated find nonmatching words in ES:[EDI/RDI] and DS:[ESI/RSI].
+  //! Repeated find RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
+  INST_0x(repne_cmpsq, kX86InstIdRepneCmpsq)
+  //! Repeated find AX WORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
   INST_0x(repne_cmpsw, kX86InstIdRepneCmpsw)
 
-  //! Find AL, starting at ES:[EDI/RDI].
+  //! Repeated find AL BYTEs starting at ES:[EDI/RDI].
   INST_0x(repne_scasb, kX86InstIdRepneScasb)
-  //! Find EAX, starting at ES:[EDI/RDI].
+  //! Repeated find EAX DWORDs starting at ES:[EDI/RDI].
   INST_0x(repne_scasd, kX86InstIdRepneScasd)
-  //! Find AX, starting at ES:[EDI/RDI].
+  //! Repeated find RAX QWORDs starting at ES:[RDI] (X64 Only).
+  INST_0x(repne_scasq, kX86InstIdRepneScasq)
+  //! Repeated find AX WORDs starting at ES:[EDI/RDI].
   INST_0x(repne_scasw, kX86InstIdRepneScasw)
 
   //! Return.
@@ -1150,6 +1210,15 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_2i(sar, kX86InstIdSar, X86Mem, Imm)
 
+  //! Find non-AL BYTE starting at ES:[EDI/RDI].
+  INST_0x(scasb, kX86InstIdScasb)
+  //! Find non-EAX DWORD starting at ES:[EDI/RDI].
+  INST_0x(scasd, kX86InstIdScasd)
+  //! Find non-rax QWORD starting at ES:[RDI] (X64 Only).
+  INST_0x(scasq, kX86InstIdScasq)
+  //! Find non-AX WORD starting at ES:[EDI/RDI].
+  INST_0x(scasw, kX86InstIdScasw)
+
   //! Set byte on condition.
   INST_1cc(set, kX86InstIdSet, X86Util::condToSetcc, X86GpReg)
   //! Set byte on condition.
@@ -1204,6 +1273,15 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! Set direction flag to 1.
   INST_0x(std, kX86InstIdStd)
 
+  //! Fill ECX/RCX BYTE at ES:[EDI/RDI] with AL.
+  INST_0x(stosb, kX86InstIdStosb)
+  //! Fill ECX/RCX DWORD at ES:[EDI/RDI] with EAX.
+  INST_0x(stosd, kX86InstIdStosd)
+  //! Fill ECX/RCX QWORD at ES:[RDI] with RAX (X64 Only).
+  INST_0x(stosq, kX86InstIdStosq)
+  //! Fill ECX/RCX WORD at ES:[EDI/RDI] with AX.
+  INST_0x(stosw, kX86InstIdStosw)
+
   //! Subtract.
   INST_2x(sub, kX86InstIdSub, X86GpReg, X86GpReg)
   //! \overload
@@ -1256,17 +1334,14 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
 
   //! Compute 2^x - 1 (FPU).
   INST_0x(f2xm1, kX86InstIdF2xm1)
-
   //! Absolute value of fp0 (FPU).
   INST_0x(fabs, kX86InstIdFabs)
 
-  //! Add `o1` to `o0` and store result in `o0` (FPU).
-  //!
-  //! \note One of dst or src must be fp0.
+  //! Add `o1` to `o0` (one has to be `fp0`) and store result in `o0` (FPU).
   INST_2x_(fadd, kX86InstIdFadd, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
   //! Add 4-byte or 8-byte FP `o0` to fp0 and store result in fp0 (FPU).
   INST_1x(fadd, kX86InstIdFadd, X86Mem)
-  //! Add fp0 to `o0` and POP register stack (FPU).
+  //! Add fp0 to `o0` and pop the FPU stack (FPU).
   INST_1x(faddp, kX86InstIdFaddp, X86FpReg)
   //! \overload
   INST_0x(faddp, kX86InstIdFaddp)
@@ -1277,25 +1352,24 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_1x(fbstp, kX86InstIdFbstp, X86Mem)
   //! Change fp0 sign (FPU).
   INST_0x(fchs, kX86InstIdFchs)
-
   //! Clear exceptions (FPU).
   INST_0x(fclex, kX86InstIdFclex)
 
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovb, kX86InstIdFcmovb, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovbe, kX86InstIdFcmovbe, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmove, kX86InstIdFcmove, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovnb, kX86InstIdFcmovnb, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovnbe, kX86InstIdFcmovnbe, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovne, kX86InstIdFcmovne, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovnu, kX86InstIdFcmovnu, X86FpReg)
-  //! FP Conditional move (FPU).
+  //! Conditional move (FPU).
   INST_1x(fcmovu, kX86InstIdFcmovu, X86FpReg)
 
   //! Compare fp0 with `o0` (FPU).
@@ -1304,28 +1378,25 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_0x(fcom, kX86InstIdFcom)
   //! Compare fp0 with 4-byte or 8-byte FP at `src` (FPU).
   INST_1x(fcom, kX86InstIdFcom, X86Mem)
-  //! Compare fp0 with `o0` and pop the stack (FPU).
+  //! Compare fp0 with `o0` and pop the FPU stack (FPU).
   INST_1x(fcomp, kX86InstIdFcomp, X86FpReg)
-  //! Compare fp0 with fp1 and pop the stack (FPU).
+  //! Compare fp0 with fp1 and pop the FPU stack (FPU).
   INST_0x(fcomp, kX86InstIdFcomp)
-  //! Compare fp0 with 4-byte or 8-byte FP at `adr` and pop the stack (FPU).
+  //! Compare fp0 with 4-byte or 8-byte FP at `adr` and pop the FPU stack (FPU).
   INST_1x(fcomp, kX86InstIdFcomp, X86Mem)
-    //! Compare fp0 with fp1 and pop register stack twice (FPU).
+    //! Compare fp0 with fp1 and pop the FPU stack twice (FPU).
   INST_0x(fcompp, kX86InstIdFcompp)
   //! Compare fp0 and `o0` and Set EFLAGS (FPU).
   INST_1x(fcomi, kX86InstIdFcomi, X86FpReg)
-  //! Compare fp0 and `o0` and Set EFLAGS and pop the stack (FPU).
+  //! Compare fp0 and `o0` and Set EFLAGS and pop the FPU stack (FPU).
   INST_1x(fcomip, kX86InstIdFcomip, X86FpReg)
 
   //! Calculate cosine of fp0 and store result in fp0 (FPU).
   INST_0x(fcos, kX86InstIdFcos)
-
-  //! Decrement stack-top pointer (FPU).
+  //! Decrement FPU stack-top pointer (FPU).
   INST_0x(fdecstp, kX86InstIdFdecstp)
 
-  //! Divide `o0` by `o1` (FPU).
-  //!
-  //! \note One of `o0` or `o1` register must be fp0.
+  //! Divide `o0` by `o1` (one has to be `fp0`) (FPU).
   INST_2x_(fdiv, kX86InstIdFdiv, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
   //! Divide fp0 by 32-bit or 64-bit FP value (FPU).
   INST_1x(fdiv, kX86InstIdFdiv, X86Mem)
@@ -1334,9 +1405,7 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_0x(fdivp, kX86InstIdFdivp)
 
-  //! Reverse divide `o0` by `o1` (FPU).
-  //!
-  //! \note One of `o0` or `src` register must be fp0.
+  //! Reverse divide `o0` by `o1` (one has to be `fp0`) (FPU).
   INST_2x_(fdivr, kX86InstIdFdivr, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
   //! Reverse divide fp0 by 32-bit or 64-bit FP value (FPU).
   INST_1x(fdivr, kX86InstIdFdivr, X86Mem)
@@ -1346,34 +1415,26 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_0x(fdivrp, kX86InstIdFdivrp)
 
   //! Free FP register (FPU).
-  //!
-  //! Sets the tag in the FPU tag register associated with register `o0`
-  //! to empty (11B). The contents of `o0` and the FPU stack-top pointer
-  //! (TOP) are not affected.
   INST_1x(ffree, kX86InstIdFfree, X86FpReg)
 
   //! Add 16-bit or 32-bit integer to fp0 (FPU).
   INST_1x_(fiadd, kX86InstIdFiadd, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
-
   //! Compare fp0 with 16-bit or 32-bit Integer (FPU).
   INST_1x_(ficom, kX86InstIdFicom, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
-  //! Compare fp0 with 16-bit or 32-bit Integer and pop the stack (FPU).
+  //! Compare fp0 with 16-bit or 32-bit Integer and pop the FPU stack (FPU).
   INST_1x_(ficomp, kX86InstIdFicomp, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
-
   //! Divide fp0 by 32-bit or 16-bit integer (`src`) (FPU).
   INST_1x_(fidiv, kX86InstIdFidiv, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
   //! Reverse divide fp0 by 32-bit or 16-bit integer (`src`) (FPU).
   INST_1x_(fidivr, kX86InstIdFidivr, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
 
-  //! Load 16-bit, 32-bit or 64-bit Integer and push it to the stack (FPU).
+  //! Load 16-bit, 32-bit or 64-bit Integer and push it to the FPU stack (FPU).
   INST_1x_(fild, kX86InstIdFild, X86Mem, o0.getSize() == 2 || o0.getSize() == 4 || o0.getSize() == 8)
-
   //! Multiply fp0 by 16-bit or 32-bit integer and store it to fp0 (FPU).
   INST_1x_(fimul, kX86InstIdFimul, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
 
-  //! Increment stack-top pointer (FPU).
+  //! Increment FPU stack-top pointer (FPU).
   INST_0x(fincstp, kX86InstIdFincstp)
-
   //! Initialize FPU (FPU).
   INST_0x(finit, kX86InstIdFinit)
 
@@ -1387,27 +1448,26 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
 
   //! Store fp0 as 16-bit or 32-bit Integer to `o0` (FPU).
   INST_1x_(fist, kX86InstIdFist, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
-  //! Store fp0 as 16-bit, 32-bit or 64-bit Integer to `o0` and pop stack (FPU).
+  //! Store fp0 as 16-bit, 32-bit or 64-bit Integer to `o0` and pop the FPU stack (FPU).
   INST_1x_(fistp, kX86InstIdFistp, X86Mem, o0.getSize() == 2 || o0.getSize() == 4 || o0.getSize() == 8)
-
-  //! Push 32-bit, 64-bit or 80-bit floating point value on the FPU register stack (FPU).
+  //! Push 32-bit, 64-bit or 80-bit floating point value on the FPU stack (FPU).
   INST_1x_(fld, kX86InstIdFld, X86Mem, o0.getSize() == 4 || o0.getSize() == 8 || o0.getSize() == 10)
-  //! Push `o0` on the FPU register stack (FPU).
+  //! Push `o0` on the FPU stack (FPU).
   INST_1x(fld, kX86InstIdFld, X86FpReg)
 
-  //! Push +1.0 on the FPU register stack (FPU).
+  //! Push +1.0 on the FPU stack (FPU).
   INST_0x(fld1, kX86InstIdFld1)
-  //! Push log2(10) on the FPU register stack (FPU).
+  //! Push log2(10) on the FPU stack (FPU).
   INST_0x(fldl2t, kX86InstIdFldl2t)
-  //! Push log2(e) on the FPU register stack (FPU).
+  //! Push log2(e) on the FPU stack (FPU).
   INST_0x(fldl2e, kX86InstIdFldl2e)
-  //! Push pi on the FPU register stack (FPU).
+  //! Push pi on the FPU stack (FPU).
   INST_0x(fldpi, kX86InstIdFldpi)
-  //! Push log10(2) on the FPU register stack (FPU).
+  //! Push log10(2) on the FPU stack (FPU).
   INST_0x(fldlg2, kX86InstIdFldlg2)
-  //! Push ln(2) on the FPU register stack (FPU).
+  //! Push ln(2) on the FPU stack (FPU).
   INST_0x(fldln2, kX86InstIdFldln2)
-  //! Push +0.0 on the FPU register stack (FPU).
+  //! Push +0.0 on the FPU stack (FPU).
   INST_0x(fldz, kX86InstIdFldz)
 
   //! Load x87 FPU control word (2 bytes) (FPU).
@@ -1415,30 +1475,23 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! Load x87 FPU environment (14 or 28 bytes) (FPU).
   INST_1x(fldenv, kX86InstIdFldenv, X86Mem)
 
-  //! Multiply `o0` by `o1` and store result in `o0` (FPU).
-  //!
-  //! \note One of dst or src must be fp0.
+  //! Multiply `o0` by `o1` (one has to be `fp0`) and store result in `o0` (FPU).
   INST_2x_(fmul, kX86InstIdFmul, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
   //! Multiply fp0 by 32-bit or 64-bit `o0` and store result in fp0 (FPU).
   INST_1x(fmul, kX86InstIdFmul, X86Mem)
-
-  //! Multiply fp0 by `o0` and POP register stack (FPU).
+  //! Multiply fp0 by `o0` and pop the FPU stack (FPU).
   INST_1x(fmulp, kX86InstIdFmulp, X86FpReg)
   //! \overload
   INST_0x(fmulp, kX86InstIdFmulp)
 
   //! Clear exceptions (FPU).
   INST_0x(fnclex, kX86InstIdFnclex)
-
   //! No operation (FPU).
   INST_0x(fnop, kX86InstIdFnop)
-
   //! Save FPU state (FPU).
   INST_1x(fnsave, kX86InstIdFnsave, X86Mem)
-
   //! Store x87 FPU environment (FPU).
   INST_1x(fnstenv, kX86InstIdFnstenv, X86Mem)
-
   //! Store x87 FPU control word (FPU).
   INST_1x(fnstcw, kX86InstIdFnstcw, X86Mem)
 
@@ -1447,160 +1500,102 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! Store x87 FPU status word to `o0` (2 bytes) (FPU).
   INST_1x(fnstsw, kX86InstIdFnstsw, X86Mem)
 
-  //! Calculate arctan(fp1 / fp0) and pop the register stack (FPU).
+  //! Arctan(`fp1` / `fp0`) and pop the FPU stack (FPU).
   INST_0x(fpatan, kX86InstIdFpatan)
-
-  //! Calculate fprem(fp0, fp1) and pop the register stack (FPU).
+  //! Fprem(`fp0`, `fp1`) and pop the FPU stack (FPU).
   INST_0x(fprem, kX86InstIdFprem)
-  //! Calculate IEEE fprem(fp0, fp1) and pop the register stack (FPU).
+  //! Fprem(`fp0`, `fp1`) and pop the FPU stack (FPU).
   INST_0x(fprem1, kX86InstIdFprem1)
-
-  //! Calculate arctan(fp0) and pop the register stack (FPU).
+  //! Arctan(`fp0`) and pop the FPU stack (FPU).
   INST_0x(fptan, kX86InstIdFptan)
-  //! Round fp0 to Integer (FPU).
+  //! Round `fp0` to Integer (FPU).
   INST_0x(frndint, kX86InstIdFrndint)
 
   //! Restore FPU state from `o0` (94 or 108 bytes) (FPU).
   INST_1x(frstor, kX86InstIdFrstor, X86Mem)
-
-  //! Save FPU state to `o0` (FPU).
-  //!
-  //! Store FPU state to 94 or 108-bytes after checking for
-  //! pending unmasked FP exceptions. Then reinitialize
-  //! the FPU.
+  //! Save FPU state to `o0` (94 or 108 bytes) (FPU).
   INST_1x(fsave, kX86InstIdFsave, X86Mem)
 
-  //! Scale (FPU).
-  //!
-  //! Scale fp0 by fp1.
+  //! Scale `fp0` by `fp1` (FPU).
   INST_0x(fscale, kX86InstIdFscale)
-
-  //! Calculate sine of fp0 and store result in fp0 (FPU).
+  //! Sine of `fp0` and store result in `fp0` (FPU).
   INST_0x(fsin, kX86InstIdFsin)
-
-  //! Sine and cosine (FPU).
-  //!
-  //! Compute the sine and cosine of fp0; replace fp0 with the sine
-  //! and push the cosine on the register stack.
+  //! Sine and cosine of `fp0`, store sine in `fp0` and push cosine on the FPU stack (FPU).
   INST_0x(fsincos, kX86InstIdFsincos)
-
-  //! Square root (FPU).
-  //!
-  //! Calculates square root of fp0 and stores the result in fp0.
+  //! Square root of `fp0` and store it in `fp0` (FPU).
   INST_0x(fsqrt, kX86InstIdFsqrt)
 
-  //! Store floating point value (FPU).
-  //!
-  //! Store fp0 as 32-bit or 64-bit floating point value to `o0`.
+  //! Store floating point value to 32-bit or 64-bit memory location (FPU).
   INST_1x_(fst, kX86InstIdFst, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
-
   //! Store floating point value to `o0` (FPU).
   INST_1x(fst, kX86InstIdFst, X86FpReg)
-
-  //! Store floating point value and pop register stack (FPU).
-  //!
-  //! Store fp0 as 32-bit or 64-bit floating point value to `o0`
-  //! and pop register stack.
+  //! Store floating point value to 32-bit or 64-bit memory location and pop the FPU stack (FPU).
   INST_1x_(fstp, kX86InstIdFstp, X86Mem, o0.getSize() == 4 || o0.getSize() == 8 || o0.getSize() == 10)
-
-  //! Store floating point value and pop register stack (FPU).
-  //!
-  //! Store fp0 to `o0` and pop register stack.
+  //! Store floating point value to `o0` and pop the FPU stack (FPU).
   INST_1x(fstp, kX86InstIdFstp, X86FpReg)
 
-  //! Store x87 FPU control word (FPU).
-  //!
-  //! Store FPU control word to `o0` (2 bytes) after checking for pending
-  //! unmasked floating-point exceptions.
+  //! Store x87 FPU control word to `o0` (2 bytes) (FPU).
   INST_1x(fstcw, kX86InstIdFstcw, X86Mem)
-
-  //! Store x87 FPU environment (FPU).
-  //!
-  //! Store FPU environment to `o0` (14 or 28 bytes) after checking for
-  //! pending unmasked floating-point exceptions. Then mask all floating
-  //! point exceptions.
+  //! Store x87 FPU environment to `o0` (14 or 28 bytes) (FPU).
   INST_1x(fstenv, kX86InstIdFstenv, X86Mem)
-
-  //! Store x87 FPU status word (AX) (FPU).
-  INST_1x_(fstsw, kX86InstIdFstsw, X86GpReg, o0.isRegCode(kX86RegTypeGpw, kX86RegIndexAx))
-  //! Store x87 FPU status sord (2 bytes) (FPU).
+  //! Store x87 FPU status word to AX (FPU).
+  INST_1x_(fstsw, kX86InstIdFstsw, X86GpReg, o0.getRegIndex() == kX86RegIndexAx)
+  //! Store x87 FPU status word (2 bytes) (FPU).
   INST_1x(fstsw, kX86InstIdFstsw, X86Mem)
 
-  //! Subtract `o0` from `o0` and store result in `o0` (FPU).
-  //!
-  //! \note One of dst or src must be fp0.
+  //! Subtract `o0` from `o0` (one has to be `fp0`) and store result in `o0` (FPU).
   INST_2x_(fsub, kX86InstIdFsub, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
   //! Subtract 32-bit or 64-bit `o0` from fp0 and store result in fp0 (FPU).
   INST_1x_(fsub, kX86InstIdFsub, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
-  //! Subtract fp0 from `o0` and POP register stack (FPU).
+  //! Subtract fp0 from `o0` and pop FPU stack (FPU).
   INST_1x(fsubp, kX86InstIdFsubp, X86FpReg)
   //! \overload
   INST_0x(fsubp, kX86InstIdFsubp)
 
-  //! Reverse subtract `o1` from `o0` and store result in `o0` (FPU).
-  //!
-  //! \note One of dst or src must be fp0.
+  //! Reverse subtract `o1` from `o0` (one has to be `fp0`) and store result in `o0` (FPU).
   INST_2x_(fsubr, kX86InstIdFsubr, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
-  //! Reverse subtract 32-bit or 64-bit `o0` from fp0 and store result in fp0 (FPU).
+  //! Reverse subtract 32-bit or 64-bit `o0` from `fp0` and store result in `fp0` (FPU).
   INST_1x_(fsubr, kX86InstIdFsubr, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
-  //! Reverse subtract fp0 from `o0` and POP register stack (FPU).
+  //! Reverse subtract `fp0` from `o0` and pop FPU stack (FPU).
   INST_1x(fsubrp, kX86InstIdFsubrp, X86FpReg)
   //! \overload
   INST_0x(fsubrp, kX86InstIdFsubrp)
 
-  //! Floating point test - Compare fp0 with 0.0. (FPU).
+  //! Floating point test - Compare `fp0` with 0.0. (FPU).
   INST_0x(ftst, kX86InstIdFtst)
 
-  //! Unordered compare fp0 with `o0` (FPU).
+  //! Unordered compare `fp0` with `o0` (FPU).
   INST_1x(fucom, kX86InstIdFucom, X86FpReg)
-  //! Unordered compare fp0 with fp1 (FPU).
+  //! Unordered compare `fp0` with `fp1` (FPU).
   INST_0x(fucom, kX86InstIdFucom)
-  //! Unordered compare fp0 and `o0`, check for ordered values and Set EFLAGS (FPU).
+  //! Unordered compare `fp0` and `o0`, check for ordered values and set EFLAGS (FPU).
   INST_1x(fucomi, kX86InstIdFucomi, X86FpReg)
-  //! Unordered compare fp0 and `o0`, Check for ordered values and Set EFLAGS and pop the stack (FPU).
+  //! Unordered compare `fp0` and `o0`, check for ordered values and set EFLAGS and pop the FPU stack (FPU).
   INST_1x(fucomip, kX86InstIdFucomip, X86FpReg)
-  //! Unordered compare fp0 with `o0` and pop register stack (FPU).
+  //! Unordered compare `fp0` with `o0` and pop the FPU stack (FPU).
   INST_1x(fucomp, kX86InstIdFucomp, X86FpReg)
-  //! Unordered compare fp0 with fp1 and pop register stack (FPU).
+  //! Unordered compare `fp0` with `fp1` and pop the FPU stack (FPU).
   INST_0x(fucomp, kX86InstIdFucomp)
-  //! Unordered compare fp0 with fp1 and pop register stack twice (FPU).
+  //! Unordered compare `fp0` with `fp1` and pop the FPU stack twice (FPU).
   INST_0x(fucompp, kX86InstIdFucompp)
 
   INST_0x(fwait, kX86InstIdFwait)
 
   //! Examine fp0 (FPU).
   INST_0x(fxam, kX86InstIdFxam)
-
-  //! Exchange register contents (FPU).
-  //!
-  //! Exchange content of fp0 with `o0`.
+  //! Exchange content of fp0 with `o0` (FPU).
   INST_1x(fxch, kX86InstIdFxch, X86FpReg)
 
-  //! Restore FP, MMX and streaming SIMD extension states (FPU, MMX, SSE).
-  //!
-  //! Load FP and MMX technology and Streaming SIMD Extension state from
-  //! src (512 bytes).
+  //! Restore FP/MMX/SIMD extension states to `o0` (512 bytes) (FPU, MMX, SSE).
   INST_1x(fxrstor, kX86InstIdFxrstor, X86Mem)
-
-  //! Store FP, MMX and streaming SIMD extension states (FPU, MMX, SSE).
-  //!
-  //! Store FP and MMX technology state and Streaming SIMD Extension state
-  //! to dst (512 bytes).
+  //! Store FP/MMX/SIMD extension states to `o0` (512 bytes) (FPU, MMX, SSE).
   INST_1x(fxsave, kX86InstIdFxsave, X86Mem)
-
-  //! Extract exponent and significand (FPU).
-  //!
-  //! Separate value in fp0 into exponent and significand, store exponent
-  //! in fp0 and push the significand on the register stack.
+  //! Extract exponent and store to `fp0` and push significand on the FPU stack (FPU).
   INST_0x(fxtract, kX86InstIdFxtract)
 
-  //! Compute y * log2(x).
-  //!
-  //! Replace fp1 with (fp1 * log2(fp0)) and pop the register stack.
+  //! Compute `fp1 * log2(fp0)`, pop the FPU stack and store result in `fp0` (FPU).
   INST_0x(fyl2x, kX86InstIdFyl2x)
-  //! Compute y * log_2(x+1).
-  //!
-  //! Replace fp1 with (fp1 * (log2(fp0)+1)) and pop the register stack.
+  //! Compute `fp1 * log2(fp0 + 1)`, pop the FPU stack and store result in `fp0` (FPU).
   INST_0x(fyl2xp1, kX86InstIdFyl2xp1)
 
   // --------------------------------------------------------------------------
@@ -1622,6 +1617,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_2x(movq, kX86InstIdMovq, X86Mem, X86MmReg)
   //! \overload
   INST_2x(movq, kX86InstIdMovq, X86MmReg, X86Mem)
+
+  //! Move QWORD (X64 Only).
+  INST_2x(movq, kX86InstIdMovq, X86GpReg, X86MmReg)
+  //! \overload
+  INST_2x(movq, kX86InstIdMovq, X86MmReg, X86GpReg)
 
   //! Pack DWORDs to WORDs with signed saturation (MMX).
   INST_2x(packssdw, kX86InstIdPackssdw, X86MmReg, X86MmReg)
@@ -2112,6 +2112,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_2x(movq, kX86InstIdMovq, X86Mem, X86XmmReg)
   //! \overload
   INST_2x(movq, kX86InstIdMovq, X86XmmReg, X86Mem)
+
+  //! Move QWORD (X64 Only).
+  INST_2x(movq, kX86InstIdMovq, X86GpReg, X86XmmReg)
+  //! \overload
+  INST_2x(movq, kX86InstIdMovq, X86XmmReg, X86GpReg)
 
   //! Move QWORD using NT hint (SSE).
   INST_2x(movntq, kX86InstIdMovntq, X86Mem, X86MmReg)
@@ -2946,7 +2951,8 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_2x(addsubps, kX86InstIdAddsubps, X86XmmReg, X86Mem)
 
-  //! Store integer with truncation (SSE3).
+  //! Store truncated `fp0` as 16-bit, 32-bit or 64-bit integer to `o0` and pop
+  //! the FPU stack (FPU / SSE3).
   INST_1x(fisttp, kX86InstIdFisttp, X86Mem)
 
   //! Packed DP-FP horizontal add (SSE3).
@@ -3974,6 +3980,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_2x(vmovq, kX86InstIdVmovq, X86Mem, X86XmmReg)
 
+  //! Move QWORD (AVX and X64 Only).
+  INST_2x(vmovq, kX86InstIdVmovq, X86XmmReg, X86GpReg)
+  //! \overload
+  INST_2x(vmovq, kX86InstIdVmovq, X86GpReg, X86XmmReg)
+
   //! Move one DP-FP and duplicate (AVX).
   INST_2x(vmovddup, kX86InstIdVmovddup, X86XmmReg, X86XmmReg)
   //! \overload
@@ -4391,6 +4402,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   //! \overload
   INST_3i(vpextrd, kX86InstIdVpextrd, X86Mem, X86XmmReg, Imm)
 
+  //! Extract QWORD (AVX and X64 Only).
+  INST_3i(vpextrq, kX86InstIdVpextrq, X86GpReg, X86XmmReg, Imm)
+  //! \overload
+  INST_3i(vpextrq, kX86InstIdVpextrq, X86Mem, X86XmmReg, Imm)
+
   //! Extract WORD (AVX).
   INST_3i(vpextrw, kX86InstIdVpextrw, X86GpReg, X86XmmReg, Imm)
   //! \overload
@@ -4440,6 +4456,11 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_4i(vpinsrd, kX86InstIdVpinsrd, X86XmmReg, X86XmmReg, X86GpReg, Imm)
   //! \overload
   INST_4i(vpinsrd, kX86InstIdVpinsrd, X86XmmReg, X86XmmReg, X86Mem, Imm)
+
+  //! Insert QWORD based on selector (AVX and X64 Only).
+  INST_4i(vpinsrq, kX86InstIdVpinsrq, X86XmmReg, X86XmmReg, X86GpReg, Imm)
+  //! \overload
+  INST_4i(vpinsrq, kX86InstIdVpinsrq, X86XmmReg, X86XmmReg, X86Mem, Imm)
 
   //! Insert WORD based on selector (AVX).
   INST_4i(vpinsrw, kX86InstIdVpinsrw, X86XmmReg, X86XmmReg, X86GpReg, Imm)
@@ -6457,77 +6478,6 @@ struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
   INST_3i(vcvtps2ph, kX86InstIdVcvtps2ph, X86XmmReg, X86YmmReg, Imm)
   //! \overload
   INST_3i(vcvtps2ph, kX86InstIdVcvtps2ph, X86Mem, X86YmmReg, Imm)
-
-  // --------------------------------------------------------------------------
-  // [X86-Only Instructions]
-  // --------------------------------------------------------------------------
-
-  //! Decimal adjust AL after addition (X86 Only).
-  INST_0x(daa, kX86InstIdDaa)
-  //! Decimal adjust AL after subtraction (X86 Only).
-  INST_0x(das, kX86InstIdDas)
-
-  //! Pop all Gp registers - EDI|ESI|EBP|Ign|EBX|EDX|ECX|EAX (X86 Only).
-  INST_0x(popa, kX86InstIdPopa)
-  //! Push all Gp registers - EAX|ECX|EDX|EBX|ESP|EBP|ESI|EDI (X86 Only).
-  INST_0x(pusha, kX86InstIdPusha)
-
-  // --------------------------------------------------------------------------
-  // [X64-Only Instructions]
-  // --------------------------------------------------------------------------
-
-  //! Convert DWORD to QWORD (RAX <- Sign Extend EAX) (X64 Only).
-  INST_0x(cdqe, kX86InstIdCdqe)
-  //! Convert QWORD to OWORD (RDX:RAX <- Sign Extend RAX) (X64 Only).
-  INST_0x(cqo, kX86InstIdCqo)
-
-  //! Compares the 128-bit value in RDX:RAX with the memory operand (X64 Only).
-  INST_1x(cmpxchg16b, kX86InstIdCmpxchg16b, X86Mem)
-
-  //! Move DWORD to QWORD with sign-extension (X64 Only).
-  INST_2x(movsxd, kX86InstIdMovsxd, X86GpReg, X86GpReg)
-  //! \overload
-  INST_2x(movsxd, kX86InstIdMovsxd, X86GpReg, X86Mem)
-
-  //! Load Ecx/Rcx QWORDs from DS:[RDI] to RAX (X64 Only).
-  INST_0x(rep_lodsq, kX86InstIdRepLodsq)
-  //! Move Ecx/Rcx QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
-  INST_0x(rep_movsq, kX86InstIdRepMovsq)
-  //! Fill Ecx/Rcx QWORDs at ES:[RDI] with RAX (X64 Only).
-  INST_0x(rep_stosq, kX86InstIdRepStosq)
-
-  //! Repeated find nonmatching QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_0x(repe_cmpsq, kX86InstIdRepeCmpsq)
-  //! Find non-rax QWORD starting at ES:[RDI] (X64 Only).
-  INST_0x(repe_scasq, kX86InstIdRepeScasq)
-
-  //! Repeated find nonmatching QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_0x(repne_cmpsq, kX86InstIdRepneCmpsq)
-  //! Find RAX, starting at ES:[RDI] (X64 Only).
-  INST_0x(repne_scasq, kX86InstIdRepneScasq)
-
-  //! Move QWORD (X64 Only).
-  INST_2x(movq, kX86InstIdMovq, X86GpReg, X86MmReg)
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86MmReg, X86GpReg)
-
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86GpReg, X86XmmReg)
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86XmmReg, X86GpReg)
-
-  // --------------------------------------------------------------------------
-  // [AVX]
-  // --------------------------------------------------------------------------
-
-  INST_2x(vmovq, kX86InstIdVmovq, X86XmmReg, X86GpReg)
-  INST_2x(vmovq, kX86InstIdVmovq, X86GpReg, X86XmmReg)
-
-  INST_3i(vpextrq, kX86InstIdVpextrq, X86GpReg, X86XmmReg, Imm)
-  INST_3i(vpextrq, kX86InstIdVpextrq, X86Mem, X86XmmReg, Imm)
-
-  INST_4i(vpinsrq, kX86InstIdVpinsrq, X86XmmReg, X86XmmReg, X86GpReg, Imm)
-  INST_4i(vpinsrq, kX86InstIdVpinsrq, X86XmmReg, X86XmmReg, X86Mem, Imm)
 
   // --------------------------------------------------------------------------
   // [FSGSBASE]

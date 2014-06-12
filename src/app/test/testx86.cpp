@@ -2126,7 +2126,7 @@ struct X86Test_CallConditional : public X86Test {
     c.bind(opAdd);
     result = c.newGpVar(kVarTypeInt32, "result");
 
-    call = c.call((void*)calledFuncAdd, kFuncConvHost, FuncBuilder2<int, int, int>());
+    call = c.call((Ptr)calledFuncAdd, kFuncConvHost, FuncBuilder2<int, int, int>());
     call->setArg(0, x);
     call->setArg(1, y);
     call->setRet(0, result);
@@ -2135,7 +2135,7 @@ struct X86Test_CallConditional : public X86Test {
     c.bind(opMul);
     result = c.newGpVar(kVarTypeInt32, "result");
 
-    call = c.call((void*)calledFuncMul, kFuncConvHost, FuncBuilder2<int, int, int>());
+    call = c.call((Ptr)calledFuncMul, kFuncConvHost, FuncBuilder2<int, int, int>());
     call->setArg(0, x);
     call->setArg(1, y);
     call->setRet(0, result);
@@ -2204,7 +2204,7 @@ struct X86Test_CallMultiple : public X86Test {
       c.mov(ptr, buf);
       c.mov(idx, static_cast<int>(i));
 
-      call = c.call((void*)calledFunc, kFuncConvHostFastCall, FuncBuilder2<int, int*, int>());
+      call = c.call((Ptr)calledFunc, kFuncConvHostFastCall, FuncBuilder2<int, int*, int>());
       call->setArg(0, ptr);
       call->setArg(1, idx);
       call->setRet(0, ret);
@@ -2214,7 +2214,7 @@ struct X86Test_CallMultiple : public X86Test {
       c.mov(ptr, buf);
       c.mov(idx, static_cast<int>(i));
 
-      call = c.call((void*)calledFunc, kFuncConvHostFastCall, FuncBuilder2<int, int*, int>());
+      call = c.call((Ptr)calledFunc, kFuncConvHostFastCall, FuncBuilder2<int, int*, int>());
       call->setArg(0, ptr);
       call->setArg(1, idx);
       call->setRet(0, ret);

@@ -33,6 +33,54 @@ struct X86VarState;
 //! \{
 
 // ============================================================================
+// [asmjit::k86VarType]
+// ============================================================================
+
+//! X86/X64 variable type.
+ASMJIT_ENUM(k86VarType) {
+  //! Variable is SP-FP (x87).
+  kX86VarTypeFp32 = kVarTypeFp32,
+  //! Variable is DP-FP (x87).
+  kX86VarTypeFp64 = kVarTypeFp64,
+
+  //! Variable is Mm (MMX).
+  kX86VarTypeMm = 12,
+
+  //! Variable is Xmm (SSE+).
+  kX86VarTypeXmm,
+  //! Variable is scalar Xmm SP-FP number.
+  kX86VarTypeXmmSs,
+  //! Variable is packed Xmm SP-FP number (4 floats).
+  kX86VarTypeXmmPs,
+  //! Variable is scalar Xmm DP-FP number.
+  kX86VarTypeXmmSd,
+  //! Variable is packed Xmm DP-FP number (2 doubles).
+  kX86VarTypeXmmPd,
+
+  //! Variable is Ymm (AVX+).
+  kX86VarTypeYmm,
+  //! Variable is packed Ymm SP-FP number (8 floats).
+  kX86VarTypeYmmPs,
+  //! Variable is packed Ymm DP-FP number (4 doubles).
+  kX86VarTypeYmmPd,
+
+  //! Count of variable types.
+  kX86VarTypeCount,
+
+  //! \internal
+  //! \{
+  _kX86VarTypeMmStart = kX86VarTypeMm,
+  _kX86VarTypeMmEnd = kX86VarTypeMm,
+
+  _kX86VarTypeXmmStart = kX86VarTypeXmm,
+  _kX86VarTypeXmmEnd = kX86VarTypeXmmPd,
+
+  _kX86VarTypeYmmStart = kX86VarTypeYmm,
+  _kX86VarTypeYmmEnd = kX86VarTypeYmmPd
+  //! \}
+};
+
+// ============================================================================
 // [asmjit::kX86VarAttr]
 // ============================================================================
 
@@ -386,150 +434,6 @@ ASMJIT_ENUM(kX86FuncFlags) {
 };
 
 // ============================================================================
-// [asmjit::X86FuncDecl]
-// ============================================================================
-
-//! X86 function, including calling convention, arguments and their
-//! register indices or stack positions.
-struct X86FuncDecl : public FuncDecl {
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  //! Create a new `X86FuncDecl` instance.
-  ASMJIT_INLINE X86FuncDecl() {
-    reset();
-  }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - X86]
-  // --------------------------------------------------------------------------
-
-  //! Get used registers (mask).
-  //!
-  //! \note The result depends on the function calling convention AND the
-  //! function prototype. Returned mask contains only registers actually used
-  //! to pass function arguments.
-  ASMJIT_INLINE uint32_t getUsed(uint32_t c) const {
-    return _used.get(c);
-  }
-
-  //! Get passed registers (mask).
-  //!
-  //! \note The result depends on the function calling convention used; the
-  //! prototype of the function doesn't affect the mask returned.
-  ASMJIT_INLINE uint32_t getPassed(uint32_t c) const {
-    return _passed.get(c);
-  }
-
-  //! Get preserved registers (mask).
-  //!
-  //! \note The result depends on the function calling convention used; the
-  //! prototype of the function doesn't affect the mask returned.
-  ASMJIT_INLINE uint32_t getPreserved(uint32_t c) const {
-    return _preserved.get(c);
-  }
-
-  //! Get ther order of passed registers (Gp).
-  //!
-  //! \note The result depends on the function calling convention used; the
-  //! prototype of the function doesn't affect the mask returned.
-  ASMJIT_INLINE const uint8_t* getPassedOrderGp() const {
-    return _passedOrderGp;
-  }
-
-  //! Get ther order of passed registers (Xmm).
-  //!
-  //! \note The result depends on the function calling convention used; the
-  //! prototype of the function doesn't affect the mask returned.
-  ASMJIT_INLINE const uint8_t* getPassedOrderXmm() const {
-    return _passedOrderXmm;
-  }
-
-  // --------------------------------------------------------------------------
-  // [SetPrototype]
-  // --------------------------------------------------------------------------
-
-  //! Set function prototype.
-  //!
-  //! This will set function calling convention and setup arguments variables.
-  //!
-  //! \note This function will allocate variables, it can be called only once.
-  ASMJIT_API Error setPrototype(uint32_t conv, const FuncPrototype& p);
-
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  ASMJIT_API void reset();
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! Used registers.
-  X86RegMask _used;
-
-  //! Passed registers (defined by the calling convention).
-  X86RegMask _passed;
-  //! Preserved registers (defined by the calling convention).
-  X86RegMask _preserved;
-
-  //! Order of registers defined to pass function arguments (Gp).
-  uint8_t _passedOrderGp[8];
-  //! Order of registers defined to pass function arguments (Xmm).
-  uint8_t _passedOrderXmm[8];
-};
-
-// ============================================================================
-// [asmjit::k86VarType]
-// ============================================================================
-
-//! X86/X64 variable type.
-ASMJIT_ENUM(k86VarType) {
-  //! Variable is SP-FP (x87).
-  kX86VarTypeFp32 = kVarTypeFp32,
-  //! Variable is DP-FP (x87).
-  kX86VarTypeFp64 = kVarTypeFp64,
-
-  //! Variable is Mm (MMX).
-  kX86VarTypeMm = 12,
-
-  //! Variable is Xmm (SSE+).
-  kX86VarTypeXmm,
-  //! Variable is scalar Xmm SP-FP number.
-  kX86VarTypeXmmSs,
-  //! Variable is packed Xmm SP-FP number (4 floats).
-  kX86VarTypeXmmPs,
-  //! Variable is scalar Xmm DP-FP number.
-  kX86VarTypeXmmSd,
-  //! Variable is packed Xmm DP-FP number (2 doubles).
-  kX86VarTypeXmmPd,
-
-  //! Variable is Ymm (AVX+).
-  kX86VarTypeYmm,
-  //! Variable is packed Ymm SP-FP number (8 floats).
-  kX86VarTypeYmmPs,
-  //! Variable is packed Ymm DP-FP number (4 doubles).
-  kX86VarTypeYmmPd,
-
-  //! Count of variable types.
-  kX86VarTypeCount,
-
-  //! \internal
-  //! \{
-  _kX86VarTypeMmStart = kX86VarTypeMm,
-  _kX86VarTypeMmEnd = kX86VarTypeMm,
-
-  _kX86VarTypeXmmStart = kX86VarTypeXmm,
-  _kX86VarTypeXmmEnd = kX86VarTypeXmmPd,
-
-  _kX86VarTypeYmmStart = kX86VarTypeYmm,
-  _kX86VarTypeYmmEnd = kX86VarTypeYmmPd
-  //! \}
-};
-
-// ============================================================================
 // [asmjit::X86VarInfo]
 // ============================================================================
 
@@ -596,7 +500,7 @@ ASMJIT_VAR const uint8_t _x64VarMapping[kX86VarTypeCount];
 #endif // ASMJIT_BUILD_X64
 
 // ============================================================================
-// [asmjit::x86x64::X86Var]
+// [asmjit::X86Var]
 // ============================================================================
 
 //! Base class for all X86 variables.
@@ -637,29 +541,29 @@ struct X86Var : public Var {
   //! Get variable type.
   ASMJIT_INLINE uint32_t getVarType() const { return _vreg.vType; }
 
-  //! Get whether the variable is Gpb register.
+  //! Get whether the variable is Gp register.
   ASMJIT_INLINE bool isGp() const { return _vreg.type <= kX86RegTypeGpq; }
-  //! Get whether the variable is Gpb register.
+  //! Get whether the variable is Gpb (8-bit) register.
   ASMJIT_INLINE bool isGpb() const { return _vreg.type <= kX86RegTypeGpbHi; }
-  //! Get whether the variable is Gpb-lo register.
+  //! Get whether the variable is Gpb-lo (8-bit) register.
   ASMJIT_INLINE bool isGpbLo() const { return _vreg.type == kX86RegTypeGpbLo; }
-  //! Get whether the variable is Gpb-hi register.
+  //! Get whether the variable is Gpb-hi (8-bit) register.
   ASMJIT_INLINE bool isGpbHi() const { return _vreg.type == kX86RegTypeGpbHi; }
-  //! Get whether the variable is Gpw register.
+  //! Get whether the variable is Gpw (16-bit) register.
   ASMJIT_INLINE bool isGpw() const { return _vreg.type == kX86RegTypeGpw; }
-  //! Get whether the variable is Gpd register.
+  //! Get whether the variable is Gpd (32-bit) register.
   ASMJIT_INLINE bool isGpd() const { return _vreg.type == kX86RegTypeGpd; }
-  //! Get whether the variable is Gpq register.
+  //! Get whether the variable is Gpq (64-bit) register.
   ASMJIT_INLINE bool isGpq() const { return _vreg.type == kX86RegTypeGpq; }
 
-  //! Get whether the variable is Fp register.
-  ASMJIT_INLINE bool isFp() const { return _vreg.type == kX86RegTypeFp; }
-  //! Get whether the variable is Mm type.
+  //! Get whether the variable is Mm (64-bit) register.
   ASMJIT_INLINE bool isMm() const { return _vreg.type == kX86RegTypeMm; }
-  //! Get whether the variable is Xmm type.
+  //! Get whether the variable is Xmm (128-bit) register.
   ASMJIT_INLINE bool isXmm() const { return _vreg.type == kX86RegTypeXmm; }
-  //! Get whether the variable is Ymm type.
+  //! Get whether the variable is Ymm (256-bit) register.
   ASMJIT_INLINE bool isYmm() const { return _vreg.type == kX86RegTypeYmm; }
+  //! Get whether the variable is Zmm (512-bit) register.
+  ASMJIT_INLINE bool isZmm() const { return _vreg.type == kX86RegTypeZmm; }
 
   // --------------------------------------------------------------------------
   // [Memory Cast]
@@ -748,14 +652,32 @@ struct X86Var : public Var {
     return X86Mem(Init, kMemTypeStackIndex, *this, index, shift, disp, 32);
   }
 
+  //! Cast this variable to 256-bit memory operand.
+  ASMJIT_INLINE X86Mem m512(int32_t disp = 0) const {
+    return X86Mem(Init, kMemTypeStackIndex, *this, disp, 64);
+  }
+
+  //! \overload
+  ASMJIT_INLINE X86Mem m512(const X86GpVar& index, uint32_t shift = 0, int32_t disp = 0) const {
+    return X86Mem(Init, kMemTypeStackIndex, *this, index, shift, disp, 64);
+  }
+
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  ASMJIT_INLINE X86Var& operator=(const X86Var& other) { _copy(other); return *this; }
+  ASMJIT_INLINE X86Var& operator=(const X86Var& other) {
+    _copy(other);
+    return *this;
+  }
 
-  ASMJIT_INLINE bool operator==(const X86Var& other) const { return _packed[0] == other._packed[0]; }
-  ASMJIT_INLINE bool operator!=(const X86Var& other) const { return !operator==(other); }
+  ASMJIT_INLINE bool operator==(const X86Var& other) const {
+    return _packed[0] == other._packed[0];
+  }
+
+  ASMJIT_INLINE bool operator!=(const X86Var& other) const {
+    return _packed[0] != other._packed[0];
+  }
 
   // --------------------------------------------------------------------------
   // [Private]
@@ -769,7 +691,7 @@ protected:
 };
 
 // ============================================================================
-// [asmjit::x86x64::X86GpVar]
+// [asmjit::X86GpVar]
 // ============================================================================
 
 //! Gp variable.
@@ -842,7 +764,7 @@ protected:
 };
 
 // ============================================================================
-// [asmjit::x86x64::X86MmVar]
+// [asmjit::X86MmVar]
 // ============================================================================
 
 //! Mm variable.
@@ -889,7 +811,7 @@ struct X86MmVar : public X86Var {
 };
 
 // ============================================================================
-// [asmjit::x86x64::X86XmmVar]
+// [asmjit::X86XmmVar]
 // ============================================================================
 
 //! Xmm variable.
@@ -936,7 +858,7 @@ struct X86XmmVar : public X86Var {
 };
 
 // ============================================================================
-// [asmjit::x86x64::X86YmmVar]
+// [asmjit::X86YmmVar]
 // ============================================================================
 
 //! Ymm variable.
@@ -1210,6 +1132,102 @@ struct X86VarState : VarState {
 };
 
 // ============================================================================
+// [asmjit::X86FuncDecl]
+// ============================================================================
+
+//! X86 function, including calling convention, arguments and their
+//! register indices or stack positions.
+struct X86FuncDecl : public FuncDecl {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  //! Create a new `X86FuncDecl` instance.
+  ASMJIT_INLINE X86FuncDecl() {
+    reset();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - X86]
+  // --------------------------------------------------------------------------
+
+  //! Get used registers (mask).
+  //!
+  //! \note The result depends on the function calling convention AND the
+  //! function prototype. Returned mask contains only registers actually used
+  //! to pass function arguments.
+  ASMJIT_INLINE uint32_t getUsed(uint32_t c) const {
+    return _used.get(c);
+  }
+
+  //! Get passed registers (mask).
+  //!
+  //! \note The result depends on the function calling convention used; the
+  //! prototype of the function doesn't affect the mask returned.
+  ASMJIT_INLINE uint32_t getPassed(uint32_t c) const {
+    return _passed.get(c);
+  }
+
+  //! Get preserved registers (mask).
+  //!
+  //! \note The result depends on the function calling convention used; the
+  //! prototype of the function doesn't affect the mask returned.
+  ASMJIT_INLINE uint32_t getPreserved(uint32_t c) const {
+    return _preserved.get(c);
+  }
+
+  //! Get ther order of passed registers (Gp).
+  //!
+  //! \note The result depends on the function calling convention used; the
+  //! prototype of the function doesn't affect the mask returned.
+  ASMJIT_INLINE const uint8_t* getPassedOrderGp() const {
+    return _passedOrderGp;
+  }
+
+  //! Get ther order of passed registers (Xmm).
+  //!
+  //! \note The result depends on the function calling convention used; the
+  //! prototype of the function doesn't affect the mask returned.
+  ASMJIT_INLINE const uint8_t* getPassedOrderXmm() const {
+    return _passedOrderXmm;
+  }
+
+  // --------------------------------------------------------------------------
+  // [SetPrototype]
+  // --------------------------------------------------------------------------
+
+  //! Set function prototype.
+  //!
+  //! This will set function calling convention and setup arguments variables.
+  //!
+  //! \note This function will allocate variables, it can be called only once.
+  ASMJIT_API Error setPrototype(uint32_t conv, const FuncPrototype& p);
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  ASMJIT_API void reset();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! Used registers.
+  X86RegMask _used;
+
+  //! Passed registers (defined by the calling convention).
+  X86RegMask _passed;
+  //! Preserved registers (defined by the calling convention).
+  X86RegMask _preserved;
+
+  //! Order of registers defined to pass function arguments (Gp).
+  uint8_t _passedOrderGp[8];
+  //! Order of registers defined to pass function arguments (Xmm).
+  uint8_t _passedOrderXmm[8];
+};
+
+// ============================================================================
 // [asmjit::X86FuncNode]
 // ============================================================================
 
@@ -1382,10 +1400,15 @@ struct X86CallNode : public CallNode {
 
   //! Set argument at `i` to `var`.
   ASMJIT_INLINE bool setArg(uint32_t i, const Var& var) { return _setArg(i, var); }
+  //! Set argument at `i` to `reg` (FP registers only).
+  ASMJIT_INLINE bool setArg(uint32_t i, const X86FpReg& reg) { return _setArg(i, reg); }
   //! Set argument at `i` to `imm`.
   ASMJIT_INLINE bool setArg(uint32_t i, const Imm& imm) { return _setArg(i, imm); }
+
   //! Set return at `i` to `var`.
   ASMJIT_INLINE bool setRet(uint32_t i, const Var& var) { return _setRet(i, var); }
+  //! Set return at `i` to `reg` (FP registers only).
+  ASMJIT_INLINE bool setRet(uint32_t i, const X86FpReg& reg) { return _setRet(i, reg); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1420,12 +1443,12 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 
 //! X86/X64 compiler.
 //!
-//! This class is used to store instruction stream and allows to modify
-//! it on the fly. It uses different concept than @c asmjit::Assembler class
-//! and in fact @c asmjit::Assembler is only used as a backend. Compiler never
-//! emits machine code and each instruction you use is stored to instruction
-//! array instead. This allows to modify instruction stream later and for
-//! example to reorder instructions to make better performance.
+//! This class is used to store instruction stream and allows to modify it on
+//! the fly. It uses different concept than `Assembler` class and in fact
+//! `Assembler` is only used as a backend. Compiler never emits machine code
+//! and each instruction you use is stored to instruction array instead. This
+//! allows to modify instruction stream later and for example to reorder
+//! instructions to make better performance.
 //!
 //! `X86Compiler` moves code generation to a higher level. Higher level
 //! constructs allows to write more abstract and extensible code that is not
@@ -1625,9 +1648,9 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! ~~~
 //!
 //! This code snipped needs to be explained. You can see that there are more
-//! variable types that can be used by @c Compiler. Most useful variables can
-//! be allocated using general purpose registers (@c X86GpVar), MMX registers
-//! (@c X86MmVar) or SSE/SSE2 registers (@c X86XmmVar).
+//! variable types that can be used by `Compiler`. Most useful variables can
+//! be allocated using general purpose registers (`X86GpVar`), MMX registers
+//! (`X86MmVar`) or SSE/SSE2 registers (`X86XmmVar`).
 //!
 //! X86/X64 variable types:
 //!
@@ -1670,12 +1693,12 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! - `kVarStateMem - State that means that variable is currently only in
 //!    memory location.
 //!
-//! When you create new variable, initial state is always @c kVarStateUnused,
+//! When you create new variable, initial state is always `kVarStateUnused`,
 //! allocating it to register or spilling to memory changes this state to
-//! @c kVarStateReg or @c kVarStateMem, respectively.
-//! During variable lifetime it's usual that its state is changed multiple
-//! times. To generate better code, you can control allocating and spilling
-//! by using up to four types of methods that allows it (see next list).
+//! `kVarStateReg` or `kVarStateMem`, respectively. During variable lifetime
+//! it's usual that its state is changed multiple times. To generate better
+//! code, you can control allocating and spilling by using up to four types
+//! of methods that allows it (see next list).
 //!
 //! Explicit variable allocating / spilling methods:
 //!
@@ -1695,8 +1718,9 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! Memory Management
 //! -----------------
 //!
-//! @c Compiler Memory management follows these rules:
-//! - Everything created by @c Compiler is always freed by @c Compiler.
+//! Compiler Memory management follows these rules:
+//!
+//! - Everything created by `Compiler` is always freed by `Compiler`.
 //! - To get decent performance, compiler always uses larger memory buffer
 //!   for objects to allocate and when compiler instance is destroyed, this
 //!   buffer is freed. Destructors of active objects are called when
@@ -1704,23 +1728,23 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //!   objects are called immediately after abadonding them.
 //! - This type of memory management is called 'zone memory management'.
 //!
-//! This means that you can't use any @c Compiler object after destructing it,
-//! it also means that each object like @c Label, @c Var and others are
-//! created and managed by @c BaseCompiler itself. These objects contain ID
-//! which is used internally by Compiler to store additional information about
-//! these objects.
+//! This means that you can't use any `Compiler` object after destructing it,
+//! it also means that each object like `Label`, `Var` and others are created
+//! and managed by @c BaseCompiler itself. These objects contain ID which is
+//! used internally by Compiler to store additional information about these
+//! objects.
 //!
 //! Control-Flow and State Management
 //! ---------------------------------
 //!
-//! The @c Compiler automatically manages state of the variables when using
+//! The `Compiler` automatically manages state of the variables when using
 //! control flow instructions like jumps, conditional jumps and calls. There
 //! is minimal heuristics for choosing the method how state is saved or restored.
 //!
 //! Generally the state can be changed only when using jump or conditional jump
 //! instruction. When using non-conditional jump then state change is embedded
 //! into the instruction stream before the jump. When using conditional jump
-//! the @c Compiler decides whether to restore state before the jump or whether
+//! the `Compiler` decides whether to restore state before the jump or whether
 //! to use another block where state is restored. The last case is that no-code
 //! have to be emitted and there is no state change (this is of course ideal).
 //!
@@ -1818,7 +1842,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! forward jump (the code is generated from first to last instruction and
 //! the target state is simply not known at this time).
 //!
-//! To tell @c Compiler that you want to embed state-switch code before jump
+//! To tell `Compiler` that you want to embed state-switch code before jump
 //! it's needed to create backward jump (where also processor expects that it
 //! will be taken). To demonstrate the possibility to embed state-switch before
 //! jump we use slightly modified code:
@@ -1890,7 +1914,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! ret
 //! ~~~
 //!
-//! Please notice where the state-switch section is located. The @c Compiler
+//! Please notice where the state-switch section is located. The `Compiler`
 //! decided that jump is likely to be taken so the state change is embedded
 //! before the conditional jump. To change this behavior into the previous
 //! case it's needed to add an option (kInstOptionTaken/kInstOptionNotTaken).
@@ -1926,11 +1950,11 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! ------------------------
 //!
 //! This section describes advanced method of code generation available to
-//! @c Compiler (but also to @c Assembler). When emitting code to instruction
-//! stream the methods like @c mov(), @c add(), @c sub() can be called directly
+//! `Compiler` (but also to `Assembler`). When emitting code to instruction
+//! stream the methods like `mov()`, `add()`, `sub()` can be called directly
 //! (advantage is static-type control performed also by C++ compiler) or
-//! indirectly using @c emit() method. The @c emit() method needs only
-//! instruction code and operands.
+//! indirectly using `emit()` method. The `emit()` method needs only instruction
+//! code and operands.
 //!
 //! Example of code generating by standard type-safe API:
 //!
@@ -1965,8 +1989,8 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! The advantage of first snippet is very friendly API and type-safe control
 //! that is controlled by the C++ compiler. The advantage of second snippet is
 //! availability to replace or generate instruction code in different places.
-//! See the next example how the @c emit() method can be used to generate
-//! abstract code.
+//! See the next example how the `emit()` method can be used to generate abstract
+//! code.
 //!
 //! Use case:
 //!
@@ -1992,7 +2016,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //!
 //! Other use cases are waiting for you! Be sure that instruction you are
 //! emitting is correct and encodable, because if not, Assembler will set
-//! status code to @c kErrorUnknownInst.
+//! status code to `kErrorUnknownInst`.
 struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   ASMJIT_NO_COPY(X86Compiler)
 
@@ -2123,11 +2147,10 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! \param params Function arguments prototype.
   //!
   //! This method is usually used as a first step when generating functions
-  //! by @c Compiler. First parameter `cconv` specifies function calling
+  //! by `Compiler`. First parameter `cconv` specifies function calling
   //! convention to use. Second parameter `params` specifies function
   //! arguments. To create function arguments are used templates
-  //! @c FuncBuilder0<...>, @c FuncBuilder1<...>, @c FuncBuilder2<...>,
-  //! etc...
+  //! `FuncBuilder0<...>`, `FuncBuilder1<...>`, `FuncBuilder2<...>`, etc...
   //!
   //! Templates with FuncBuilder prefix are used to generate argument IDs
   //! based on real C++ types. See next example how to generate function with
@@ -2139,20 +2162,20 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! // Compiler instance
   //! Compiler c;
   //!
-  //! // Begin of function (also emits function @c Prolog)
+  //! // Begin of function, also emits function prolog.
   //! c.addFunc(
   //!   // Default calling convention (32-bit cdecl or 64-bit for host OS)
   //!   kFuncConvHost,
   //!   // Using function builder to generate arguments list
   //!   FuncBuilder2<Void, int, int>());
   //!
-  //! // End of function (also emits function @c Epilog)
+  //! // End of function, also emits function epilog.
   //! c.endFunc();
   //! ~~~
   //!
   //! You can see that building functions is really easy. Previous code snipped
   //! will generate code for function with two 32-bit integer arguments. You
-  //! can access arguments by @c asmjit::Function::argument() method. Arguments
+  //! can access arguments by `asmjit::Function::getArg()` method. Arguments
   //! are indexed from 0 (like everything in C).
   //!
   //! ~~~
@@ -2163,7 +2186,7 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! X86GpVar a0(c, kVarTypeInt32);
   //! X86GpVar a1(c, kVarTypeInt32);
   //!
-  //! // Begin of function (also emits function @c Prolog)
+  //! // Begin of function (also emits function prolog)
   //! c.addFunc(
   //!   // Default calling convention (32-bit cdecl or 64-bit for host OS)
   //!   kFuncConvHost,
@@ -2181,13 +2204,14 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! ~~~
   //!
   //! Arguments are like variables. How to manipulate with variables is
-  //! documented in @c asmjit::Compiler, variables section.
+  //! documented in `Compiler`, variables section.
   //!
-  //! \note To get current function use @c currentFunction() method or save
-  //! pointer to @c asmjit::Function returned by @c asmjit::Compiler::addFunc<>
-  //! method. Recommended is to save the pointer.
+  //! \note To get current function use `getFunc()` method or save pointer to
+  //! `FuncNode` returned by `Compiler::addFunc<>` method. The recommended way
+  //! is saving the pointer and using it to specify function arguments and
+  //! return value.
   //!
-  //! @sa @c FuncBuilder0, @c FuncBuilder1, @c FuncBuilder2, ...
+  //! @sa \ref FuncBuilder0, \ref FuncBuilder1, \ref FuncBuilder2, ...
   ASMJIT_API X86FuncNode* addFunc(uint32_t conv, const FuncPrototype& p);
 
   //! End of current function.
@@ -2195,12 +2219,13 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
 
   //! Get current function as `X86FuncNode`.
   //!
-  //! This method can be called within @c addFunc() and @c endFunc()
-  //! block to get current function you are working with. It's recommended
-  //! to store @c asmjit::Function pointer returned by @c addFunc<> method,
-  //! because this allows you in future implement function sections outside of
-  //! function itself (yeah, this is possible!).
-  ASMJIT_INLINE X86FuncNode* getFunc() const { return static_cast<X86FuncNode*>(_func); }
+  //! This method can be called within `addFunc()` and `endFunc()` block to get
+  //! current function you are working with. It's recommended to store `FuncNode`
+  //! pointer returned by `addFunc<>` method, because this allows you in future
+  //! implement function sections outside of function itself.
+  ASMJIT_INLINE X86FuncNode* getFunc() const {
+    return static_cast<X86FuncNode*>(_func);
+  }
 
   // --------------------------------------------------------------------------
   // [Ret]
@@ -2269,33 +2294,6 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
     return var;
   }
 
-  //! Get memory home of variable `var`.
-  ASMJIT_API void getMemoryHome(Var& var, X86GpVar* home, int* displacement = NULL);
-
-  //! Set memory home of variable `var`.
-  //!
-  //! Default memory home location is on stack (ESP/RSP), but when needed the
-  //! bebahior can be changed by this method.
-  //!
-  //! It is an error to chaining memory home locations. For example the given
-  //! code is invalid:
-  //!
-  //! ~~~
-  //! Compiler c;
-  //!
-  //! ...
-  //!
-  //! X86GpVar v0(c, kVarTypeIntPtr);
-  //! X86GpVar v1(c, kVarTypeIntPtr);
-  //! X86GpVar v2(c, kVarTypeIntPtr);
-  //! X86GpVar v3(c, kVarTypeIntPtr);
-  //!
-  //! c.setMemoryHome(v1, v0, 0); // Allowed, [v0+0] is memory home for v1.
-  //! c.setMemoryHome(v2, v0, 4); // Allowed, [v0+4] is memory home for v2.
-  //! c.setMemoryHome(v3, v2);    // CHAINING, NOT ALLOWED!
-  //! ~~~
-  ASMJIT_API void setMemoryHome(Var& var, const X86GpVar& home, int displacement = 0);
-
   // --------------------------------------------------------------------------
   // [Stack]
   // --------------------------------------------------------------------------
@@ -2322,74 +2320,86 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
     return m;
   }
 
+  //! Put a BYTE `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newByteConst(uint32_t scope, uint8_t val) { return newConst(scope, &val, 1); }
+  //! Put a WORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newWordConst(uint32_t scope, uint16_t val) { return newConst(scope, &val, 2); }
+  //! Put a DWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newDWordConst(uint32_t scope, uint32_t val) { return newConst(scope, &val, 4); }
+  //! Put a QWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newQWordConst(uint32_t scope, uint64_t val) { return newConst(scope, &val, 8); }
 
+  //! Put a WORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newInt16Const(uint32_t scope, int16_t val) { return newConst(scope, &val, 2); }
+  //! Put a WORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newUInt16Const(uint32_t scope, uint16_t val) { return newConst(scope, &val, 2); }
+  //! Put a DWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newInt32Const(uint32_t scope, int32_t val) { return newConst(scope, &val, 4); }
+  //! Put a DWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newUInt32Const(uint32_t scope, uint32_t val) { return newConst(scope, &val, 4); }
+  //! Put a QWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newInt64Const(uint32_t scope, int64_t val) { return newConst(scope, &val, 8); }
+  //! Put a QWORD `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newUInt64Const(uint32_t scope, uint64_t val) { return newConst(scope, &val, 8); }
 
+  //! Put a SP-FP `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newFloatConst(uint32_t scope, float val) { return newConst(scope, &val, 4); }
+  //! Put a DP-FP `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newDoubleConst(uint32_t scope, double val) { return newConst(scope, &val, 8); }
 
+  //! Put a MMX `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newMmConst(uint32_t scope, const Vec64& val) { return newConst(scope, &val, 8); }
+  //! Put a XMM `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newXmmConst(uint32_t scope, const Vec128& val) { return newConst(scope, &val, 16); }
+  //! Put a YMM `val` to a constant-pool.
   ASMJIT_INLINE X86Mem newYmmConst(uint32_t scope, const Vec256& val) { return newConst(scope, &val, 32); }
 
   // --------------------------------------------------------------------------
   // [Embed]
   // --------------------------------------------------------------------------
 
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* db(uint8_t x) { return embed(&x, 1); }
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dw(uint16_t x) { return embed(&x, 2); }
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dd(uint32_t x) { return embed(&x, 4); }
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dq(uint64_t x) { return embed(&x, 8); }
 
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dint8(int8_t x) { return embed(&x, static_cast<uint32_t>(sizeof(int8_t))); }
-  //! Add 8-bit integer data to the instuction stream.
+  //! Add 8-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* duint8(uint8_t x) { return embed(&x, static_cast<uint32_t>(sizeof(uint8_t))); }
 
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dint16(int16_t x) { return embed(&x, static_cast<uint32_t>(sizeof(int16_t))); }
-  //! Add 16-bit integer data to the instuction stream.
+  //! Add 16-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* duint16(uint16_t x) { return embed(&x, static_cast<uint32_t>(sizeof(uint16_t))); }
 
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dint32(int32_t x) { return embed(&x, static_cast<uint32_t>(sizeof(int32_t))); }
-  //! Add 32-bit integer data to the instuction stream.
+  //! Add 32-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* duint32(uint32_t x) { return embed(&x, static_cast<uint32_t>(sizeof(uint32_t))); }
 
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dint64(int64_t x) { return embed(&x, static_cast<uint32_t>(sizeof(int64_t))); }
-  //! Add 64-bit integer data to the instuction stream.
+  //! Add 64-bit integer data to the instruction stream.
   ASMJIT_INLINE EmbedNode* duint64(uint64_t x) { return embed(&x, static_cast<uint32_t>(sizeof(uint64_t))); }
 
-  //! Add float data to the instuction stream.
+  //! Add float data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dfloat(float x) { return embed(&x, static_cast<uint32_t>(sizeof(float))); }
-  //! Add double data to the instuction stream.
+  //! Add double data to the instruction stream.
   ASMJIT_INLINE EmbedNode* ddouble(double x) { return embed(&x, static_cast<uint32_t>(sizeof(double))); }
 
-  //! Add pointer data to the instuction stream.
-  ASMJIT_INLINE EmbedNode* dptr(void* x) { return embed(&x, static_cast<uint32_t>(sizeof(void*))); }
-
-  //! Add Mm data to the instuction stream.
+  //! Add Mm data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dmm(const Vec64& x) { return embed(&x, static_cast<uint32_t>(sizeof(Vec64))); }
-  //! Add Xmm data to the instuction stream.
+  //! Add Xmm data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dxmm(const Vec128& x) { return embed(&x, static_cast<uint32_t>(sizeof(Vec128))); }
-  //! Add Ymm data to the instuction stream.
+  //! Add Ymm data to the instruction stream.
   ASMJIT_INLINE EmbedNode* dymm(const Vec256& x) { return embed(&x, static_cast<uint32_t>(sizeof(Vec256))); }
 
-  //! Add data in a given structure instance to the instuction stream.
+  //! Add data in a given structure instance to the instruction stream.
   template<typename T>
   ASMJIT_INLINE EmbedNode* dstruct(const T& x) { return embed(&x, static_cast<uint32_t>(sizeof(T))); }
 
@@ -2415,30 +2425,29 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! Count of registers depending on current architecture.
+  //! Count of registers depending on the current architecture.
   X86RegCount _regCount;
 
-  //! EAX or RAX register depending on current architecture.
+  //! EAX or RAX register depending on the current architecture.
   X86GpReg zax;
-  //! ECX or RCX register depending on current architecture.
+  //! ECX or RCX register depending on the current architecture.
   X86GpReg zcx;
-  //! EDX or RDX register depending on current architecture.
+  //! EDX or RDX register depending on the current architecture.
   X86GpReg zdx;
-  //! EBX or RBX register depending on current architecture.
+  //! EBX or RBX register depending on the current architecture.
   X86GpReg zbx;
-  //! ESP or RSP register depending on current architecture.
+  //! ESP or RSP register depending on the current architecture.
   X86GpReg zsp;
-  //! EBP or RBP register depending on current architecture.
+  //! EBP or RBP register depending on the current architecture.
   X86GpReg zbp;
-  //! ESI or RSI register depending on current architecture.
+  //! ESI or RSI register depending on the current architecture.
   X86GpReg zsi;
-  //! EDI or RDI register depending on current architecture.
+  //! EDI or RDI register depending on the current architecture.
   X86GpReg zdi;
 
   // --------------------------------------------------------------------------
   // [X86 Instructions]
   // --------------------------------------------------------------------------
-
 
 #define INST_0x(_Inst_, _Code_) \
   ASMJIT_INLINE InstNode* _Inst_() { \
@@ -2727,7 +2736,7 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! \overload
   INST_2i(bts, kX86InstIdBts, X86Mem, Imm)
 
-  //! Call.
+  //! Call a function.
   ASMJIT_INLINE X86CallNode* call(const X86GpVar& dst, uint32_t conv, const FuncPrototype& p) {
     return addCall(dst, conv, p);
   }
@@ -2736,17 +2745,16 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
     return addCall(dst, conv, p);
   }
   //! \overload
+  ASMJIT_INLINE X86CallNode* call(const Label& label, uint32_t conv, const FuncPrototype& p) {
+    return addCall(label, conv, p);
+  }
+  //! \overload
   ASMJIT_INLINE X86CallNode* call(const Imm& dst, uint32_t conv, const FuncPrototype& p) {
     return addCall(dst, conv, p);
   }
   //! \overload
-  ASMJIT_INLINE X86CallNode* call(void* dst, uint32_t conv, const FuncPrototype& p) {
-    Imm imm((intptr_t)dst);
-    return addCall(imm, conv, p);
-  }
-  //! \overload
-  ASMJIT_INLINE X86CallNode* call(const Label& label, uint32_t conv, const FuncPrototype& p) {
-    return addCall(label, conv, p);
+  ASMJIT_INLINE X86CallNode* call(Ptr dst, uint32_t conv, const FuncPrototype& p) {
+    return addCall(Imm(dst), conv, p);
   }
 
   //! Clear carry flag
@@ -2758,12 +2766,16 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
 
   //! Convert BYTE to WORD (AX <- Sign Extend AL).
   INST_1x(cbw, kX86InstIdCbw, X86GpVar  /* al */)
+  //! Convert DWORD to QWORD (EDX:EAX <- Sign Extend EAX).
+  INST_2x(cdq, kX86InstIdCdq, X86GpVar /* edx */, X86GpVar /* eax */)
+  //! Convert DWORD to QWORD (RAX <- Sign Extend EAX) (X64 Only).
+  INST_1x(cdqe, kX86InstIdCdqe, X86GpVar /* eax */)
+  //! Convert QWORD to OWORD (RDX:RAX <- Sign Extend RAX) (X64 Only).
+  INST_2x(cqo, kX86InstIdCdq, X86GpVar /* rdx */, X86GpVar /* rax */)
   //! Convert WORD to DWORD (DX:AX <- Sign Extend AX).
   INST_2x(cwd, kX86InstIdCwd, X86GpVar  /* dx */, X86GpVar /* ax */)
   //! Convert WORD to DWORD (EAX <- Sign Extend AX).
   INST_1x(cwde, kX86InstIdCwde, X86GpVar /* eax */)
-  //! Convert DWORD to QWORD (EDX:EAX <- Sign Extend EAX).
-  INST_2x(cdq, kX86InstIdCdq, X86GpVar /* edx */, X86GpVar /* eax */)
 
   //! Conditional move.
   INST_2cc(cmov, kX86InstIdCmov, X86Util::condToCmovcc, X86GpVar, X86GpVar)
@@ -2786,34 +2798,48 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! \overload
   INST_3x(cmpxchg, kX86InstIdCmpxchg, X86GpVar /* eax */, X86Mem, X86GpVar)
 
-  //! Compares the 64-bit value in EDX:EAX with the memory operand (Pentium).
-  ASMJIT_INLINE InstNode* cmpxchg8b(
-    const X86GpVar& cmp_edx, const X86GpVar& cmp_eax,
-    const X86GpVar& cmp_ecx, const X86GpVar& cmp_ebx,
-    const X86Mem& dst) {
+  //! Compare and exchange 128-bit value in RDX:RAX with `x_mem` (X64 Only).
+  ASMJIT_INLINE InstNode* cmpxchg16b(
+    const X86GpVar& r_edx, const X86GpVar& r_eax,
+    const X86GpVar& r_ecx, const X86GpVar& r_ebx,
+    const X86Mem& x_mem) {
 
-    return emit(kX86InstIdCmpxchg8b, cmp_edx, cmp_eax, cmp_ecx, cmp_ebx, dst);
+    return emit(kX86InstIdCmpxchg16b, r_edx, r_eax, r_ecx, r_ebx, x_mem);
+  }
+
+  //! Compare and exchange 64-bit value in EDX:EAX with `x_mem` (Pentium).
+  ASMJIT_INLINE InstNode* cmpxchg8b(
+    const X86GpVar& r_edx, const X86GpVar& r_eax,
+    const X86GpVar& r_ecx, const X86GpVar& r_ebx,
+    const X86Mem& x_mem) {
+
+    return emit(kX86InstIdCmpxchg8b, r_edx, r_eax, r_ecx, r_ebx, x_mem);
   }
 
   //! CPU identification (i486).
   ASMJIT_INLINE InstNode* cpuid(
-    const X86GpVar& inout_eax,
-    const X86GpVar& out_ebx,
-    const X86GpVar& out_ecx,
-    const X86GpVar& out_edx) {
+    const X86GpVar& x_eax,
+    const X86GpVar& w_ebx,
+    const X86GpVar& x_ecx,
+    const X86GpVar& w_edx) {
 
     // Destination variables must be different.
-    ASMJIT_ASSERT(inout_eax.getId() != out_ebx.getId() &&
-                  out_ebx.getId() != out_ecx.getId() &&
-                  out_ecx.getId() != out_edx.getId());
+    ASMJIT_ASSERT(x_eax.getId() != w_ebx.getId() &&
+                  w_ebx.getId() != x_ecx.getId() &&
+                  x_ecx.getId() != w_edx.getId());
 
-    return emit(kX86InstIdCpuid, inout_eax, out_ebx, out_ecx, out_edx);
+    return emit(kX86InstIdCpuid, x_eax, w_ebx, x_ecx, w_edx);
   }
 
   //! Accumulate crc32 value (polynomial 0x11EDC6F41) (SSE4.2).
   INST_2x_(crc32, kX86InstIdCrc32, X86GpVar, X86GpVar, o0.isRegType(kX86RegTypeGpd) || o0.isRegType(kX86RegTypeGpq))
   //! \overload
   INST_2x_(crc32, kX86InstIdCrc32, X86GpVar, X86Mem, o0.isRegType(kX86RegTypeGpd) || o0.isRegType(kX86RegTypeGpq))
+
+  //! Decimal adjust AL after addition (X86 Only).
+  INST_1x(daa, kX86InstIdDaa, X86GpVar)
+  //! Decimal adjust AL after subtraction (X86 Only).
+  INST_1x(das, kX86InstIdDas, X86GpVar)
 
   //! Decrement by 1.
   INST_1x(dec, kX86InstIdDec, X86GpVar)
@@ -2878,7 +2904,7 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! \overload
   INST_1x(jmp, kX86InstIdJmp, Imm)
   //! \overload
-  ASMJIT_INLINE InstNode* jmp(void* dst) { return jmp(Imm((intptr_t)dst)); }
+  ASMJIT_INLINE InstNode* jmp(Ptr dst) { return jmp(Imm(dst)); }
 
   //! Load AH from flags.
   INST_1x(lahf, kX86InstIdLahf, X86GpVar)
@@ -2907,14 +2933,19 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_2x(mov, kX86InstIdMov, X86SegReg, X86Mem)
 
   //! Move (AL|AX|EAX|RAX <- absolute address in immediate).
-  ASMJIT_INLINE InstNode* mov_ptr(const X86GpVar& dst, void* src) {
-    Imm imm(static_cast<int64_t>((intptr_t)src));
-    return emit(kX86InstIdMovPtr, dst, imm);
+  INST_2x(mov_ptr, kX86InstIdMovPtr, X86GpReg, Imm);
+  //! \overload
+  ASMJIT_INLINE InstNode* mov_ptr(const X86GpReg& o0, Ptr o1) {
+    ASMJIT_ASSERT(o0.getRegIndex() == 0);
+    return emit(kX86InstIdMovPtr, o0, Imm(o1));
   }
+
   //! Move (absolute address in immediate <- AL|AX|EAX|RAX).
-  ASMJIT_INLINE InstNode* mov_ptr(void* dst, const X86GpVar& src) {
-    Imm imm(static_cast<int64_t>((intptr_t)dst));
-    return emit(kX86InstIdMovPtr, imm, src);
+  INST_2x(mov_ptr, kX86InstIdMovPtr, Imm, X86GpReg);
+  //! \overload
+  ASMJIT_INLINE InstNode* mov_ptr(Ptr o0, const X86GpReg& o1) {
+    ASMJIT_ASSERT(o1.getRegIndex() == 0);
+    return emit(kX86InstIdMovPtr, Imm(o0), o1);
   }
 
   //! Move data after swapping bytes (SSE3 - Atom).
@@ -2926,6 +2957,11 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_2x(movsx, kX86InstIdMovsx, X86GpVar, X86GpVar)
   //! \overload
   INST_2x(movsx, kX86InstIdMovsx, X86GpVar, X86Mem)
+
+  //! Move DWORD to QWORD with sign-extension (X64 Only).
+  INST_2x(movsxd, kX86InstIdMovsxd, X86GpVar, X86GpVar)
+  //! \overload
+  INST_2x(movsxd, kX86InstIdMovsxd, X86GpVar, X86Mem)
 
   //! Move with zero-extension.
   INST_2x(movzx, kX86InstIdMovzx, X86GpVar, X86GpVar)
@@ -3009,53 +3045,67 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! Read time-stamp counter and processor id (Pentium).
   INST_3x_(rdtscp, kX86InstIdRdtscp, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Load ECX/RCX bytes from DS:[ESI/RSI] to AL.
+  //! Repeated load ECX/RCX BYTEs from DS:[ESI/RSI] to AL.
   INST_3x_(rep_lodsb, kX86InstIdRepLodsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Load ECX/RCX dwords from DS:[ESI/RSI] to AL.
+  //! Repeated load ECX/RCX DWORDs from DS:[ESI/RSI] to AL.
   INST_3x_(rep_lodsd, kX86InstIdRepLodsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Load ECX/RCX words from DS:[ESI/RSI] to AX.
+  //! Repeated load ECX/RCX QWORDs from DS:[RSI] to RAX (X64 Only).
+  INST_3x_(rep_lodsq, kX86InstIdRepLodsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated load ECX/RCX WORDs from DS:[ESI/RSI] to AX.
   INST_3x_(rep_lodsw, kX86InstIdRepLodsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Move ECX/RCX bytes from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX BYTEs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_3x_(rep_movsb, kX86InstIdRepMovsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Move ECX/RCX dwords from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_3x_(rep_movsd, kX86InstIdRepMovsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Move ECX/RCX dwords from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Repeated move ECX/RCX QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
+  INST_3x_(rep_movsq, kX86InstIdRepMovsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_3x_(rep_movsw, kX86InstIdRepMovsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Fill ECX/RCX bytes at ES:[EDI/RDI] with AL.
+  //! Repeated fill ECX/RCX BYTEs at ES:[EDI/RDI] with AL.
   INST_3x_(rep_stosb, kX86InstIdRepStosb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Fill ECX/RCX dwords at ES:[EDI/RDI] with EAX.
+  //! Repeated fill ECX/RCX DWORDs at ES:[EDI/RDI] with EAX.
   INST_3x_(rep_stosd, kX86InstIdRepStosd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Fill ECX/RCX words at ES:[EDI/RDI] with AX.
+  //! Repeated fill ECX/RCX QWORDs at ES:[RDI] with RAX (X64 Only).
+  INST_3x_(rep_stosq, kX86InstIdRepStosq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated fill ECX/RCX WORDs at ES:[EDI/RDI] with AX.
   INST_3x_(rep_stosw, kX86InstIdRepStosw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Repeated find nonmatching bytes in ES:[EDI/RDI] and DS:[ESI/RDI].
+  //! Repeated find non-AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RDI].
   INST_3x_(repe_cmpsb, kX86InstIdRepeCmpsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Repeated find nonmatching dwords in ES:[EDI/RDI] and DS:[ESI/RDI].
+  //! Repeated find non-EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RDI].
   INST_3x_(repe_cmpsd, kX86InstIdRepeCmpsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Repeated find nonmatching words in ES:[EDI/RDI] and DS:[ESI/RDI].
+  //! Repeated find non-RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
+  INST_3x_(repe_cmpsq, kX86InstIdRepeCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated find non-AX WORDs in ES:[EDI/RDI] and DS:[ESI/RDI].
   INST_3x_(repe_cmpsw, kX86InstIdRepeCmpsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Find non-AL byte starting at ES:[EDI/RDI].
+  //! Repeated find non-AL BYTE starting at ES:[EDI/RDI].
   INST_3x_(repe_scasb, kX86InstIdRepeScasb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find non-EAX dword starting at ES:[EDI/RDI].
+  //! Repeated find non-EAX DWORD starting at ES:[EDI/RDI].
   INST_3x_(repe_scasd, kX86InstIdRepeScasd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find non-AX word starting at ES:[EDI/RDI].
+  //! Repeated find non-RAX QWORD starting at ES:[RDI] (X64 Only).
+  INST_3x_(repe_scasq, kX86InstIdRepeScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated find non-AX WORD starting at ES:[EDI/RDI].
   INST_3x_(repe_scasw, kX86InstIdRepeScasw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Find matching bytes in [RDI] and [RSI].
+  //! Repeated find AL BYTEs in [RDI] and [RSI].
   INST_3x_(repne_cmpsb, kX86InstIdRepneCmpsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find matching dwords in [RDI] and [RSI].
+  //! Repeated find EAX DWORDs in [RDI] and [RSI].
   INST_3x_(repne_cmpsd, kX86InstIdRepneCmpsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find matching words in [RDI] and [RSI].
+  //! Repeated find RAX QWORDs in [RDI] and [RSI] (X64 Only).
+  INST_3x_(repne_cmpsq, kX86InstIdRepneCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated find AX WORDs in [RDI] and [RSI].
   INST_3x_(repne_cmpsw, kX86InstIdRepneCmpsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
-  //! Find AL, starting at ES:[EDI/RDI].
+  //! Repeated Find AL BYTEs, starting at ES:[EDI/RDI].
   INST_3x_(repne_scasb, kX86InstIdRepneScasb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find EAX, starting at ES:[EDI/RDI].
+  //! Repeated find EAX DWORDs, starting at ES:[EDI/RDI].
   INST_3x_(repne_scasd, kX86InstIdRepneScasd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find AX, starting at ES:[EDI/RDI].
+  //! Repeated find RAX QWORDs, starting at ES:[RDI] (X64 Only).
+  INST_3x_(repne_scasq, kX86InstIdRepneScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  //! Repeated find AX WORDs, starting at ES:[EDI/RDI].
   INST_3x_(repne_scasw, kX86InstIdRepneScasw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Return.
@@ -3212,6 +3262,276 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_2i(xor_, kX86InstIdXor, X86Mem, Imm)
 
   // --------------------------------------------------------------------------
+  // [Fpu]
+  // --------------------------------------------------------------------------
+
+  //! Compute 2^x - 1 (FPU).
+  INST_0x(f2xm1, kX86InstIdF2xm1)
+  //! Absolute value of fp0 (FPU).
+  INST_0x(fabs, kX86InstIdFabs)
+
+  //! Add `o1` to `o0` (one has to be `fp0`) and store result in `o0` (FPU).
+  INST_2x_(fadd, kX86InstIdFadd, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Add 4-byte or 8-byte FP `o0` to fp0 and store result in fp0 (FPU).
+  INST_1x(fadd, kX86InstIdFadd, X86Mem)
+  //! Add fp0 to `o0` and pop the FPU stack (FPU).
+  INST_1x(faddp, kX86InstIdFaddp, X86FpReg)
+  //! \overload
+  INST_0x(faddp, kX86InstIdFaddp)
+
+  //! Load binary coded decimal (FPU).
+  INST_1x(fbld, kX86InstIdFbld, X86Mem)
+  //! Store BCD integer and Pop (FPU).
+  INST_1x(fbstp, kX86InstIdFbstp, X86Mem)
+  //! Change fp0 sign (FPU).
+  INST_0x(fchs, kX86InstIdFchs)
+  //! Clear exceptions (FPU).
+  INST_0x(fclex, kX86InstIdFclex)
+
+  //! Conditional move (FPU).
+  INST_1x(fcmovb, kX86InstIdFcmovb, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovbe, kX86InstIdFcmovbe, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmove, kX86InstIdFcmove, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovnb, kX86InstIdFcmovnb, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovnbe, kX86InstIdFcmovnbe, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovne, kX86InstIdFcmovne, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovnu, kX86InstIdFcmovnu, X86FpReg)
+  //! Conditional move (FPU).
+  INST_1x(fcmovu, kX86InstIdFcmovu, X86FpReg)
+
+  //! Compare fp0 with `o0` (FPU).
+  INST_1x(fcom, kX86InstIdFcom, X86FpReg)
+  //! Compare fp0 with fp1 (FPU).
+  INST_0x(fcom, kX86InstIdFcom)
+  //! Compare fp0 with 4-byte or 8-byte FP at `src` (FPU).
+  INST_1x(fcom, kX86InstIdFcom, X86Mem)
+  //! Compare fp0 with `o0` and pop the FPU stack (FPU).
+  INST_1x(fcomp, kX86InstIdFcomp, X86FpReg)
+  //! Compare fp0 with fp1 and pop the FPU stack (FPU).
+  INST_0x(fcomp, kX86InstIdFcomp)
+  //! Compare fp0 with 4-byte or 8-byte FP at `adr` and pop the FPU stack (FPU).
+  INST_1x(fcomp, kX86InstIdFcomp, X86Mem)
+    //! Compare fp0 with fp1 and pop the FPU stack twice (FPU).
+  INST_0x(fcompp, kX86InstIdFcompp)
+  //! Compare fp0 and `o0` and Set EFLAGS (FPU).
+  INST_1x(fcomi, kX86InstIdFcomi, X86FpReg)
+  //! Compare fp0 and `o0` and Set EFLAGS and pop the FPU stack (FPU).
+  INST_1x(fcomip, kX86InstIdFcomip, X86FpReg)
+
+  //! Calculate cosine of fp0 and store result in fp0 (FPU).
+  INST_0x(fcos, kX86InstIdFcos)
+  //! Decrement FPU stack-top pointer (FPU).
+  INST_0x(fdecstp, kX86InstIdFdecstp)
+
+  //! Divide `o0` by `o1` (one has to be `fp0`) (FPU).
+  INST_2x_(fdiv, kX86InstIdFdiv, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Divide fp0 by 32-bit or 64-bit FP value (FPU).
+  INST_1x(fdiv, kX86InstIdFdiv, X86Mem)
+  //! Divide `o0` by fp0 (FPU).
+  INST_1x(fdivp, kX86InstIdFdivp, X86FpReg)
+  //! \overload
+  INST_0x(fdivp, kX86InstIdFdivp)
+
+  //! Reverse divide `o0` by `o1` (one has to be `fp0`) (FPU).
+  INST_2x_(fdivr, kX86InstIdFdivr, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Reverse divide fp0 by 32-bit or 64-bit FP value (FPU).
+  INST_1x(fdivr, kX86InstIdFdivr, X86Mem)
+  //! Reverse divide `o0` by fp0 (FPU).
+  INST_1x(fdivrp, kX86InstIdFdivrp, X86FpReg)
+  //! \overload
+  INST_0x(fdivrp, kX86InstIdFdivrp)
+
+  //! Free FP register (FPU).
+  INST_1x(ffree, kX86InstIdFfree, X86FpReg)
+
+  //! Add 16-bit or 32-bit integer to fp0 (FPU).
+  INST_1x_(fiadd, kX86InstIdFiadd, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Compare fp0 with 16-bit or 32-bit Integer (FPU).
+  INST_1x_(ficom, kX86InstIdFicom, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Compare fp0 with 16-bit or 32-bit Integer and pop the FPU stack (FPU).
+  INST_1x_(ficomp, kX86InstIdFicomp, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Divide fp0 by 32-bit or 16-bit integer (`src`) (FPU).
+  INST_1x_(fidiv, kX86InstIdFidiv, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Reverse divide fp0 by 32-bit or 16-bit integer (`src`) (FPU).
+  INST_1x_(fidivr, kX86InstIdFidivr, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+
+  //! Load 16-bit, 32-bit or 64-bit Integer and push it to the FPU stack (FPU).
+  INST_1x_(fild, kX86InstIdFild, X86Mem, o0.getSize() == 2 || o0.getSize() == 4 || o0.getSize() == 8)
+  //! Multiply fp0 by 16-bit or 32-bit integer and store it to fp0 (FPU).
+  INST_1x_(fimul, kX86InstIdFimul, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+
+  //! Increment FPU stack-top pointer (FPU).
+  INST_0x(fincstp, kX86InstIdFincstp)
+  //! Initialize FPU (FPU).
+  INST_0x(finit, kX86InstIdFinit)
+
+  //! Subtract 16-bit or 32-bit integer from fp0 and store result to fp0 (FPU).
+  INST_1x_(fisub, kX86InstIdFisub, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Reverse subtract 16-bit or 32-bit integer from fp0 and store result to fp0 (FPU).
+  INST_1x_(fisubr, kX86InstIdFisubr, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+
+  //! Initialize FPU without checking for pending unmasked exceptions (FPU).
+  INST_0x(fninit, kX86InstIdFninit)
+
+  //! Store fp0 as 16-bit or 32-bit Integer to `o0` (FPU).
+  INST_1x_(fist, kX86InstIdFist, X86Mem, o0.getSize() == 2 || o0.getSize() == 4)
+  //! Store fp0 as 16-bit, 32-bit or 64-bit Integer to `o0` and pop the FPU stack (FPU).
+  INST_1x_(fistp, kX86InstIdFistp, X86Mem, o0.getSize() == 2 || o0.getSize() == 4 || o0.getSize() == 8)
+  //! Push 32-bit, 64-bit or 80-bit floating point value on the FPU stack (FPU).
+  INST_1x_(fld, kX86InstIdFld, X86Mem, o0.getSize() == 4 || o0.getSize() == 8 || o0.getSize() == 10)
+  //! Push `o0` on the FPU stack (FPU).
+  INST_1x(fld, kX86InstIdFld, X86FpReg)
+
+  //! Push +1.0 on the FPU stack (FPU).
+  INST_0x(fld1, kX86InstIdFld1)
+  //! Push log2(10) on the FPU stack (FPU).
+  INST_0x(fldl2t, kX86InstIdFldl2t)
+  //! Push log2(e) on the FPU stack (FPU).
+  INST_0x(fldl2e, kX86InstIdFldl2e)
+  //! Push pi on the FPU stack (FPU).
+  INST_0x(fldpi, kX86InstIdFldpi)
+  //! Push log10(2) on the FPU stack (FPU).
+  INST_0x(fldlg2, kX86InstIdFldlg2)
+  //! Push ln(2) on the FPU stack (FPU).
+  INST_0x(fldln2, kX86InstIdFldln2)
+  //! Push +0.0 on the FPU stack (FPU).
+  INST_0x(fldz, kX86InstIdFldz)
+
+  //! Load x87 FPU control word (2 bytes) (FPU).
+  INST_1x(fldcw, kX86InstIdFldcw, X86Mem)
+  //! Load x87 FPU environment (14 or 28 bytes) (FPU).
+  INST_1x(fldenv, kX86InstIdFldenv, X86Mem)
+
+  //! Multiply `o0` by `o1` (one has to be `fp0`) and store result in `o0` (FPU).
+  INST_2x_(fmul, kX86InstIdFmul, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Multiply fp0 by 32-bit or 64-bit `o0` and store result in fp0 (FPU).
+  INST_1x(fmul, kX86InstIdFmul, X86Mem)
+  //! Multiply fp0 by `o0` and pop the FPU stack (FPU).
+  INST_1x(fmulp, kX86InstIdFmulp, X86FpReg)
+  //! \overload
+  INST_0x(fmulp, kX86InstIdFmulp)
+
+  //! Clear exceptions (FPU).
+  INST_0x(fnclex, kX86InstIdFnclex)
+  //! No operation (FPU).
+  INST_0x(fnop, kX86InstIdFnop)
+  //! Save FPU state (FPU).
+  INST_1x(fnsave, kX86InstIdFnsave, X86Mem)
+  //! Store x87 FPU environment (FPU).
+  INST_1x(fnstenv, kX86InstIdFnstenv, X86Mem)
+  //! Store x87 FPU control word (FPU).
+  INST_1x(fnstcw, kX86InstIdFnstcw, X86Mem)
+
+  //! Store x87 FPU status word to `o0` (AX) (FPU).
+  INST_1x_(fnstsw, kX86InstIdFnstsw, X86GpReg, o0.isRegCode(kX86RegTypeGpw, kX86RegIndexAx))
+  //! Store x87 FPU status word to `o0` (2 bytes) (FPU).
+  INST_1x(fnstsw, kX86InstIdFnstsw, X86Mem)
+
+  //! Arctan(`fp1` / `fp0`) and pop the FPU stack (FPU).
+  INST_0x(fpatan, kX86InstIdFpatan)
+  //! Fprem(`fp0`, `fp1`) and pop the FPU stack (FPU).
+  INST_0x(fprem, kX86InstIdFprem)
+  //! Fprem(`fp0`, `fp1`) and pop the FPU stack (FPU).
+  INST_0x(fprem1, kX86InstIdFprem1)
+  //! Arctan(`fp0`) and pop the FPU stack (FPU).
+  INST_0x(fptan, kX86InstIdFptan)
+  //! Round `fp0` to Integer (FPU).
+  INST_0x(frndint, kX86InstIdFrndint)
+
+  //! Restore FPU state from `o0` (94 or 108 bytes) (FPU).
+  INST_1x(frstor, kX86InstIdFrstor, X86Mem)
+  //! Save FPU state to `o0` (94 or 108 bytes) (FPU).
+  INST_1x(fsave, kX86InstIdFsave, X86Mem)
+
+  //! Scale `fp0` by `fp1` (FPU).
+  INST_0x(fscale, kX86InstIdFscale)
+  //! Sine of `fp0` and store result in `fp0` (FPU).
+  INST_0x(fsin, kX86InstIdFsin)
+  //! Sine and cosine of `fp0`, store sine in `fp0` and push cosine on the FPU stack (FPU).
+  INST_0x(fsincos, kX86InstIdFsincos)
+  //! Square root of `fp0` and store it in `fp0` (FPU).
+  INST_0x(fsqrt, kX86InstIdFsqrt)
+
+  //! Store floating point value to 32-bit or 64-bit memory location (FPU).
+  INST_1x_(fst, kX86InstIdFst, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
+  //! Store floating point value to `o0` (FPU).
+  INST_1x(fst, kX86InstIdFst, X86FpReg)
+  //! Store floating point value to 32-bit or 64-bit memory location and pop the FPU stack (FPU).
+  INST_1x_(fstp, kX86InstIdFstp, X86Mem, o0.getSize() == 4 || o0.getSize() == 8 || o0.getSize() == 10)
+  //! Store floating point value to `o0` and pop the FPU stack (FPU).
+  INST_1x(fstp, kX86InstIdFstp, X86FpReg)
+
+  //! Store x87 FPU control word to `o0` (2 bytes) (FPU).
+  INST_1x(fstcw, kX86InstIdFstcw, X86Mem)
+  //! Store x87 FPU environment to `o0` (14 or 28 bytes) (FPU).
+  INST_1x(fstenv, kX86InstIdFstenv, X86Mem)
+  //! Store x87 FPU status word to `o0` (allocated in AX) (FPU).
+  INST_1x(fstsw, kX86InstIdFstsw, X86GpVar)
+  //! Store x87 FPU status word (2 bytes) (FPU).
+  INST_1x(fstsw, kX86InstIdFstsw, X86Mem)
+
+  //! Subtract `o0` from `o0` (one has to be `fp0`) and store result in `o0` (FPU).
+  INST_2x_(fsub, kX86InstIdFsub, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Subtract 32-bit or 64-bit `o0` from fp0 and store result in fp0 (FPU).
+  INST_1x_(fsub, kX86InstIdFsub, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
+  //! Subtract fp0 from `o0` and pop FPU stack (FPU).
+  INST_1x(fsubp, kX86InstIdFsubp, X86FpReg)
+  //! \overload
+  INST_0x(fsubp, kX86InstIdFsubp)
+
+  //! Reverse subtract `o1` from `o0` (one has to be `fp0`) and store result in `o0` (FPU).
+  INST_2x_(fsubr, kX86InstIdFsubr, X86FpReg, X86FpReg, o0.getRegIndex() == 0 || o1.getRegIndex() == 0)
+  //! Reverse subtract 32-bit or 64-bit `o0` from `fp0` and store result in `fp0` (FPU).
+  INST_1x_(fsubr, kX86InstIdFsubr, X86Mem, o0.getSize() == 4 || o0.getSize() == 8)
+  //! Reverse subtract `fp0` from `o0` and pop FPU stack (FPU).
+  INST_1x(fsubrp, kX86InstIdFsubrp, X86FpReg)
+  //! \overload
+  INST_0x(fsubrp, kX86InstIdFsubrp)
+
+  //! Floating point test - Compare `fp0` with 0.0. (FPU).
+  INST_0x(ftst, kX86InstIdFtst)
+
+  //! Unordered compare `fp0` with `o0` (FPU).
+  INST_1x(fucom, kX86InstIdFucom, X86FpReg)
+  //! Unordered compare `fp0` with `fp1` (FPU).
+  INST_0x(fucom, kX86InstIdFucom)
+  //! Unordered compare `fp0` and `o0`, check for ordered values and set EFLAGS (FPU).
+  INST_1x(fucomi, kX86InstIdFucomi, X86FpReg)
+  //! Unordered compare `fp0` and `o0`, check for ordered values and set EFLAGS and pop the FPU stack (FPU).
+  INST_1x(fucomip, kX86InstIdFucomip, X86FpReg)
+  //! Unordered compare `fp0` with `o0` and pop the FPU stack (FPU).
+  INST_1x(fucomp, kX86InstIdFucomp, X86FpReg)
+  //! Unordered compare `fp0` with `fp1` and pop the FPU stack (FPU).
+  INST_0x(fucomp, kX86InstIdFucomp)
+  //! Unordered compare `fp0` with `fp1` and pop the FPU stack twice (FPU).
+  INST_0x(fucompp, kX86InstIdFucompp)
+
+  INST_0x(fwait, kX86InstIdFwait)
+
+  //! Examine fp0 (FPU).
+  INST_0x(fxam, kX86InstIdFxam)
+  //! Exchange content of fp0 with `o0` (FPU).
+  INST_1x(fxch, kX86InstIdFxch, X86FpReg)
+
+  //! Restore FP/MMX/SIMD extension states to `o0` (512 bytes) (FPU, MMX, SSE).
+  INST_1x(fxrstor, kX86InstIdFxrstor, X86Mem)
+  //! Store FP/MMX/SIMD extension states to `o0` (512 bytes) (FPU, MMX, SSE).
+  INST_1x(fxsave, kX86InstIdFxsave, X86Mem)
+  //! Extract exponent and store to `fp0` and push significand on the FPU stack (FPU).
+  INST_0x(fxtract, kX86InstIdFxtract)
+
+  //! Compute `fp1 * log2(fp0)`, pop the FPU stack and store result in `fp0` (FPU).
+  INST_0x(fyl2x, kX86InstIdFyl2x)
+  //! Compute `fp1 * log2(fp0 + 1)`, pop the FPU stack and store result in `fp0` (FPU).
+  INST_0x(fyl2xp1, kX86InstIdFyl2xp1)
+
+  // --------------------------------------------------------------------------
   // [MMX]
   // --------------------------------------------------------------------------
 
@@ -3230,6 +3550,11 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_2x(movq, kX86InstIdMovq, X86Mem, X86MmVar)
   //! \overload
   INST_2x(movq, kX86InstIdMovq, X86MmVar, X86Mem)
+
+  //! Move QWORD (X64 Only).
+  INST_2x(movq, kX86InstIdMovq, X86GpVar, X86MmVar)
+  //! \overload
+  INST_2x(movq, kX86InstIdMovq, X86MmVar, X86GpVar)
 
   //! Pack DWORDs to WORDs with signed saturation (MMX).
   INST_2x(packssdw, kX86InstIdPackssdw, X86MmVar, X86MmVar)
@@ -3720,6 +4045,11 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_2x(movq, kX86InstIdMovq, X86Mem, X86XmmVar)
   //! \overload
   INST_2x(movq, kX86InstIdMovq, X86XmmVar, X86Mem)
+
+  //! Move QWORD (X64 Only).
+  INST_2x(movq, kX86InstIdMovq, X86GpVar, X86XmmVar)
+  //! \overload
+  INST_2x(movq, kX86InstIdMovq, X86XmmVar, X86GpVar)
 
   //! Move QWORD using NT hint (SSE).
   INST_2x(movntq, kX86InstIdMovntq, X86Mem, X86MmVar)
@@ -4554,8 +4884,9 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! \overload
   INST_2x(addsubps, kX86InstIdAddsubps, X86XmmVar, X86Mem)
 
-  // //! Store integer with truncation (SSE3).
-  // INST_1x(fisttp, kX86InstIdFisttp, X86Mem)
+  //! Store truncated `fp0` as 16-bit, 32-bit or 64-bit integer to `o0` and pop
+  //! the FPU stack (FPU / SSE3).
+  INST_1x(fisttp, kX86InstIdFisttp, X86Mem)
 
   //! Packed DP-FP horizontal add (SSE3).
   INST_2x(haddpd, kX86InstIdHaddpd, X86XmmVar, X86XmmVar)
@@ -5081,65 +5412,6 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   INST_3i(pclmulqdq, kX86InstIdPclmulqdq, X86XmmVar, X86XmmVar, Imm);
   //! \overload
   INST_3i(pclmulqdq, kX86InstIdPclmulqdq, X86XmmVar, X86Mem, Imm);
-
-  // --------------------------------------------------------------------------
-  // [X86-Only Instructions]
-  // --------------------------------------------------------------------------
-
-  //! Decimal adjust AL after addition (X86 Only).
-  INST_1x(daa, kX86InstIdDaa, X86GpVar)
-  //! Decimal adjust AL after subtraction (X86 Only).
-  INST_1x(das, kX86InstIdDas, X86GpVar)
-
-  // --------------------------------------------------------------------------
-  // [X64-Only Instructions]
-  // --------------------------------------------------------------------------
-
-  //! Convert DWORD to QWORD (RAX <- Sign Extend EAX).
-  INST_1x(cdqe, kX86InstIdCdqe, X86GpVar /* eax */)
-  //! Convert QWORD to OWORD (RDX:RAX <- Sign Extend RAX).
-  INST_2x(cqo, kX86InstIdCdq, X86GpVar /* rdx */, X86GpVar /* rax */)
-
-  //! Compares the 128-bit value in RDX:RAX with the memory operand (X64).
-  ASMJIT_INLINE InstNode* cmpxchg16b(
-    const X86GpVar& cmp_edx, const X86GpVar& cmp_eax,
-    const X86GpVar& cmp_ecx, const X86GpVar& cmp_ebx,
-    const X86Mem& dst) {
-
-    return emit(kX86InstIdCmpxchg16b, cmp_edx, cmp_eax, cmp_ecx, cmp_ebx, dst);
-  }
-
-  //! Move DWORD to QWORD with sign-extension.
-  INST_2x(movsxd, kX86InstIdMovsxd, X86GpVar, X86GpVar)
-  //! \overload
-  INST_2x(movsxd, kX86InstIdMovsxd, X86GpVar, X86Mem)
-
-  //! Load ECX/RCX QWORDs from DS:[RSI] to RAX (X64 Only).
-  INST_3x_(rep_lodsq, kX86InstIdRepLodsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Move ECX/RCX QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
-  INST_3x_(rep_movsq, kX86InstIdRepMovsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Fill ECX/RCX QWORDs at ES:[RDI] with RAX (X64 Only).
-  INST_3x_(rep_stosq, kX86InstIdRepStosq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-
-  //! Repeated find nonmatching QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_3x_(repe_cmpsq, kX86InstIdRepeCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find non-RAX QWORD starting at ES:[RDI] (X64 Only).
-  INST_3x_(repe_scasq, kX86InstIdRepeScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-
-  //! Find matching QWORDs in [RDI] and [RSI] (X64 Only).
-  INST_3x_(repne_cmpsq, kX86InstIdRepneCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-  //! Find RAX, starting at ES:[RDI] (X64 Only).
-  INST_3x_(repne_scasq, kX86InstIdRepneScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
-
-  //! Move QWORD (X64 Only).
-  INST_2x(movq, kX86InstIdMovq, X86GpVar, X86MmVar)
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86MmVar, X86GpVar)
-
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86GpVar, X86XmmVar)
-  //! \overload
-  INST_2x(movq, kX86InstIdMovq, X86XmmVar, X86GpVar)
 
 #undef INST_0x
 

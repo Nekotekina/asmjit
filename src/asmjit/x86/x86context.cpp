@@ -92,131 +92,131 @@ void X86Context::reset() {
 }
 
 // ============================================================================
-// [asmjit::X86X64SpecialInst]
+// [asmjit::X86SpecialInst]
 // ============================================================================
 
-struct X86X64SpecialInst {
+struct X86SpecialInst {
   uint8_t inReg;
   uint8_t outReg;
   uint16_t flags;
 };
 
-static const X86X64SpecialInst x86SpecialInstCpuid[] = {
+static const X86SpecialInst x86SpecialInstCpuid[] = {
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
   { kInvalidReg   , kX86RegIndexBx, kVarAttrOutReg    },
   { kInvalidReg   , kX86RegIndexCx, kVarAttrOutReg    },
   { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    }
 };
 
-static const X86X64SpecialInst x86SpecialInstCbwCdqeCwde[] = {
+static const X86SpecialInst x86SpecialInstCbwCdqeCwde[] = {
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstCdqCwdCqo[] = {
+static const X86SpecialInst x86SpecialInstCdqCwdCqo[] = {
   { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstCmpxchg[] = {
+static const X86SpecialInst x86SpecialInstCmpxchg[] = {
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
   { kInvalidReg   , kInvalidReg   , kVarAttrInOutReg  },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstCmpxchg8b16b[] = {
+static const X86SpecialInst x86SpecialInstCmpxchg8b16b[] = {
   { kX86RegIndexDx, kX86RegIndexDx, kVarAttrInOutReg  },
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexBx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstDaaDas[] = {
+static const X86SpecialInst x86SpecialInstDaaDas[] = {
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstDiv[] = {
+static const X86SpecialInst x86SpecialInstDiv[] = {
   { kInvalidReg   , kX86RegIndexDx, kVarAttrInOutReg  },
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstJecxz[] = {
+static const X86SpecialInst x86SpecialInstJecxz[] = {
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstMul[] = {
+static const X86SpecialInst x86SpecialInstMul[] = {
   { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstMovPtr[] = {
+static const X86SpecialInst x86SpecialInstMovPtr[] = {
   { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstLahf[] = {
+static const X86SpecialInst x86SpecialInstLahf[] = {
   { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    }
 };
 
-static const X86X64SpecialInst x86SpecialInstSahf[] = {
+static const X86SpecialInst x86SpecialInstSahf[] = {
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstMaskmovqMaskmovdqu[] = {
+static const X86SpecialInst x86SpecialInstMaskmovqMaskmovdqu[] = {
   { kInvalidReg   , kX86RegIndexDi, kVarAttrInReg     },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstRot[] = {
+static const X86SpecialInst x86SpecialInstRot[] = {
   { kInvalidReg   , kInvalidReg   , kVarAttrInOutReg  },
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstShlrd[] = {
+static const X86SpecialInst x86SpecialInstShlrd[] = {
   { kInvalidReg   , kInvalidReg   , kVarAttrInOutReg  },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86X64SpecialInst x86SpecialInstRdtscRdtscp[] = {
+static const X86SpecialInst x86SpecialInstRdtscRdtscp[] = {
   { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
   { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
   { kInvalidReg   , kX86RegIndexCx, kVarAttrOutReg    }
 };
 
-static const X86X64SpecialInst x86SpecialInstRepLod[] = {
+static const X86SpecialInst x86SpecialInstRepLod[] = {
   { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
   { kX86RegIndexSi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstRepMovCmp[] = {
+static const X86SpecialInst x86SpecialInstRepMovCmp[] = {
   { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexSi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstRepSto[] = {
+static const X86SpecialInst x86SpecialInstRepSto[] = {
   { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstRepSca[] = {
+static const X86SpecialInst x86SpecialInstRepSca[] = {
   { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
-static const X86X64SpecialInst x86SpecialInstBlend[] = {
+static const X86SpecialInst x86SpecialInstBlend[] = {
   { kInvalidReg   , kInvalidReg   , kVarAttrOutReg    },
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     },
   { 0             , kInvalidReg   , kVarAttrInReg     }
 };
 
-static ASMJIT_INLINE const X86X64SpecialInst* X86X64SpecialInst_get(uint32_t code, const Operand* opList, uint32_t opCount) {
+static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, const Operand* opList, uint32_t opCount) {
   switch (code) {
     case kX86InstIdCpuid:
       return x86SpecialInstCpuid;
@@ -230,6 +230,9 @@ static ASMJIT_INLINE const X86X64SpecialInst* X86X64SpecialInst_get(uint32_t cod
     case kX86InstIdCwd:
     case kX86InstIdCqo:
       return x86SpecialInstCdqCwdCqo;
+
+    case kX86InstIdCmpsd:
+      return NULL;
 
     case kX86InstIdCmpxchg:
       return x86SpecialInstCmpxchg;
@@ -260,6 +263,9 @@ static ASMJIT_INLINE const X86X64SpecialInst* X86X64SpecialInst_get(uint32_t cod
 
     case kX86InstIdMovPtr:
       return x86SpecialInstMovPtr;
+
+    case kX86InstIdMovsd:
+      return NULL;
 
     case kX86InstIdLahf:
       return x86SpecialInstLahf;
@@ -2116,14 +2122,14 @@ _NextGroup:
 
         if (opCount) {
           const X86InstExtendedInfo& extendedInfo = _x86InstInfo[code].getExtendedInfo();
-          const X86X64SpecialInst* special = NULL;
+          const X86SpecialInst* special = NULL;
           VI_BEGIN();
 
           // Collect instruction flags and merge all 'VarAttr's.
           if (extendedInfo.isFp())
             flags |= kNodeFlagIsFp;
 
-          if (extendedInfo.isSpecial() && (special = X86X64SpecialInst_get(code, opList, opCount)) != NULL)
+          if (extendedInfo.isSpecial() && (special = X86SpecialInst_get(code, opList, opCount)) != NULL)
             flags |= kNodeFlagIsSpecial;
 
           uint32_t gpAllowedMask = 0xFFFFFFFF;

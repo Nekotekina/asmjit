@@ -158,8 +158,11 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdCmp,             // X86/X64
   kX86InstIdCmppd,           // SSE2
   kX86InstIdCmpps,           // SSE
-  kX86InstIdCmpsd,           // SSE2
+  kX86InstIdCmpsb,           // X86/X64
+  kX86InstIdCmpsd,           // X86/X64 or SSE2
+  kX86InstIdCmpsq,           // X64
   kX86InstIdCmpss,           // SSE
+  kX86InstIdCmpsw,           // X86/X64
   kX86InstIdCmpxchg,         // X86/X64 (i486)
   kX86InstIdCmpxchg16b,      // X64 only
   kX86InstIdCmpxchg8b,       // X86/X64 (i586)
@@ -348,6 +351,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdLea,             // X86/X64
   kX86InstIdLeave,           // X86/X64
   kX86InstIdLfence,          // SSE2
+  kX86InstIdLodsb,           // X86/X64
+  kX86InstIdLodsd,           // X86/X64
+  kX86InstIdLodsq,           // X86/X64
+  kX86InstIdLodsw,           // X86/X64
   kX86InstIdLzcnt,           // LZCNT
   kX86InstIdMaskmovdqu,      // SSE2
   kX86InstIdMaskmovq,        // MMX-Ext
@@ -387,10 +394,13 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdMovntq,          // MMX-Ext
   kX86InstIdMovq,            // MMX/SSE/SSE2
   kX86InstIdMovq2dq,         // SSE2
-  kX86InstIdMovsd,           // SSE2
+  kX86InstIdMovsb,           // X86/X64
+  kX86InstIdMovsd,           // X86/X64 or SSE2
   kX86InstIdMovshdup,        // SSE3
   kX86InstIdMovsldup,        // SSE3
+  kX86InstIdMovsq,           // X64
   kX86InstIdMovss,           // SSE
+  kX86InstIdMovsw,           // X86/X64
   kX86InstIdMovsx,           // X86/X64
   kX86InstIdMovsxd,          // X86/X64
   kX86InstIdMovupd,          // SSE2
@@ -619,6 +629,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdSar,             // X86/X64
   kX86InstIdSarx,            // BMI2
   kX86InstIdSbb,             // X86/X64
+  kX86InstIdScasb,           // X86/X64
+  kX86InstIdScasd,           // X86/X64
+  kX86InstIdScasq,           // X64
+  kX86InstIdScasw,           // X86/X64
   kX86InstIdSeta,            // X86/X64 (setcc)
   kX86InstIdSetae,           // X86/X64 (setcc)
   kX86InstIdSetb,            // X86/X64 (setcc)
@@ -665,6 +679,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdStc,             // X86/X64
   kX86InstIdStd,             // X86/X64
   kX86InstIdStmxcsr,         // SSE
+  kX86InstIdStosb,           // X86/X64
+  kX86InstIdStosd,           // X86/X64
+  kX86InstIdStosq,           // X64
+  kX86InstIdStosw,           // X86/X64
   kX86InstIdSub,             // X86/X64
   kX86InstIdSubpd,           // SSE2
   kX86InstIdSubps,           // SSE
@@ -1162,6 +1180,7 @@ ASMJIT_ENUM(kX86InstGroup) {
   kX86InstGroupNone,
 
   kX86InstGroupX86Op,
+  kX86InstGroupX86Op_66H,
   kX86InstGroupX86Rm,
   kX86InstGroupX86Rm_B,
   kX86InstGroupX86RmReg,
@@ -1219,6 +1238,11 @@ ASMJIT_ENUM(kX86InstGroup) {
   kX86InstGroupX86Xadd,
   //! Xchg.
   kX86InstGroupX86Xchg,
+
+  //! Cmpsd.
+  kX86InstGroupCmpsd,
+  //! Movsd.
+  kX86InstGroupMovsd,
 
   //! Fincstp/Finit/FldX/Fnclex/Fninit/Fnop/Fpatan/Fprem/Fprem1/Fptan/Frndint/Fscale/Fsin/Fsincos/Fsqrt/Ftst/Fucompp/Fxam/Fxtract/Fyl2x/Fyl2xp1.
   kX86InstGroupFpuOp,
@@ -1512,7 +1536,9 @@ ASMJIT_ENUM(kX86InstFlags) {
   kX86InstFlagMem4_8_10 = kX86InstFlagMem4_8 | kX86InstFlagMem10,
 
   //! Zeroes the rest of the register if the source operand is memory.
-  kX86InstFlagZeroIfMem = 0x1000,
+  //!
+  //! Special behavior related to some SIMD load instructions.
+  kX86InstFlagZ = 0x1000,
 
   //! REX.W/VEX.W by default.
   kX86InstFlagW = 0x8000
@@ -1818,7 +1844,7 @@ struct X86InstExtendedInfo {
   //!
   //! Basically flag needed only to support `movsd` and `movss` instructions.
   ASMJIT_INLINE bool isZeroIfMem() const {
-    return (getFlags() & kX86InstFlagZeroIfMem) != 0;
+    return (getFlags() & kX86InstFlagZ) != 0;
   }
 
   // --------------------------------------------------------------------------

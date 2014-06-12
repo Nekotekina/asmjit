@@ -37,9 +37,9 @@ ASMJIT_ENUM(kCodeGen) {
   //! opcode that is mostly shown by disassemblers as nop. However there are
   //! more optimized align sequences for 2-11 bytes that may execute faster.
   //! If this feature is enabled asmjit will generate specialized sequences
-  //! for alignment between 1 to 11 bytes. Also when `X86x64Compiler` is
-  //! used, it may add rex prefixes into the code to make some instructions
-  //! greater so no alignment sequences are needed.
+  //! for alignment between 1 to 11 bytes. Also when `X86Compiler` is used,
+  //! it can add REX prefixes into the code to make some instructions greater
+  //! so no alignment sequence is needed.
   kCodeGenOptimizedAlign = 0,
 
   //! Emit jump-prediction hints (false by default).

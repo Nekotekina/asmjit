@@ -1149,6 +1149,10 @@ _Prepare:
     // [X86]
     // ------------------------------------------------------------------------
 
+    case kX86InstGroupX86Op_66H:
+      ADD_66H_P(true);
+      // ... Fall through ...
+
     case kX86InstGroupX86Op:
       goto _EmitX86Op;
 
@@ -2208,6 +2212,21 @@ _GroupPop_Gp:
       }
       break;
 
+    // These groups basically decide if this is a string or SIMD instruction.
+    case kX86InstGroupCmpsd:
+      if (encoded != ENC_OPS(None, None, None))
+        goto _EmitExtRmi;
+
+      opCode = 0xA7;
+      goto _EmitX86Op;
+
+    case kX86InstGroupMovsd:
+      if (encoded != ENC_OPS(None, None, None))
+        goto _EmitExtMov;
+
+      opCode = 0xA5;
+      goto _EmitX86Op;
+
     // ------------------------------------------------------------------------
     // [Fpu]
     // ------------------------------------------------------------------------
@@ -2418,6 +2437,7 @@ _EmitFpArith_Mem:
 
     case kX86InstGroupExtMov:
     case kX86InstGroupExtMovNoRexW:
+_EmitExtMov:
       ASMJIT_ASSERT(extendedInfo._opFlags[0] != 0);
       ASMJIT_ASSERT(extendedInfo._opFlags[1] != 0);
 
@@ -2703,6 +2723,7 @@ _EmitMmMovD:
       break;
 
     case kX86InstGroupExtRmi:
+_EmitExtRmi:
       imVal = static_cast<const Imm*>(o2)->getInt64();
       imLen = 1;
 
