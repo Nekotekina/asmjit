@@ -97,9 +97,9 @@ If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   EndIf()
 EndIf()
 
-# GCC/CLang.
-If(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-  Message("-- Using GCC/Clang")
+# GCC
+If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  Message("-- Using GCC")
 
   Set(ASMJIT_CFLAGS
     -fno-exceptions)
@@ -110,6 +110,20 @@ If(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" ST
     -fomit-frame-pointer
     -fmerge-all-constants
     -fno-keep-static-consts)
+EndIf()
+
+# Clang.
+If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  Message("-- Using Clang")
+
+  Set(ASMJIT_CFLAGS
+    -fno-exceptions)
+  Set(ASMJIT_CFLAGS_DBG -DASMJIT_DEBUG -O0
+    -fno-inline-functions)
+  Set(ASMJIT_CFLAGS_REL -DASMJIT_RELEASE -O2
+    -finline-functions
+    -fomit-frame-pointer
+    -fmerge-all-constants)
 EndIf()
 
 # Use Unicode by default on Windows target.
