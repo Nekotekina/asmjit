@@ -2793,6 +2793,15 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   //! \overload
   INST_2i(cmp, kX86InstIdCmp, X86Mem, Imm)
 
+  //! Compare BYTE in ES:`o0` and DS:`o1`.
+  INST_2x(cmpsb, kX86InstIdCmpsb, X86GpVar, X86GpVar)
+  //! Compare DWORD in ES:`o0` and DS:`o1`.
+  INST_2x(cmpsd, kX86InstIdCmpsd, X86GpVar, X86GpVar)
+  //! Compare QWORD in ES:`o0` and DS:`o1` (X64 Only).
+  INST_2x(cmpsq, kX86InstIdCmpsq, X86GpVar, X86GpVar)
+  //! Compare WORD in ES:`o0` and DS:`o1`.
+  INST_2x(cmpsw, kX86InstIdCmpsw, X86GpVar, X86GpVar)
+
   //! Compare and exchange (i486).
   INST_3x(cmpxchg, kX86InstIdCmpxchg, X86GpVar /* eax */, X86GpVar, X86GpVar)
   //! \overload
@@ -2912,6 +2921,15 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   //! Load effective address
   INST_2x(lea, kX86InstIdLea, X86GpVar, X86Mem)
 
+  //! Load BYTE from DS:`o1` to `o0`.
+  INST_2x(lodsb, kX86InstIdLodsb, X86GpVar, X86GpVar)
+  //! Load DWORD from DS:`o1` to `o0`.
+  INST_2x(lodsd, kX86InstIdLodsd, X86GpVar, X86GpVar)
+  //! Load QWORD from DS:`o1` to `o0` (X64 Only).
+  INST_2x(lodsq, kX86InstIdLodsq, X86GpVar, X86GpVar)
+  //! Load WORD from DS:`o1` to `o0`.
+  INST_2x(lodsw, kX86InstIdLodsw, X86GpVar, X86GpVar)
+
   //! Move.
   INST_2x(mov, kX86InstIdMov, X86GpVar, X86GpVar)
   //! \overload
@@ -2952,6 +2970,15 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_2x_(movbe, kX86InstIdMovbe, X86GpVar, X86Mem, !o0.isGpb());
   //! \overload
   INST_2x_(movbe, kX86InstIdMovbe, X86Mem, X86GpVar, !o1.isGpb());
+
+  //! Load BYTE from DS:`o1` to ES:`o0`.
+  INST_2x(movsb, kX86InstIdMovsb, X86GpVar, X86GpVar)
+  //! Load DWORD from DS:`o1` to ES:`o0`.
+  INST_2x(movsd, kX86InstIdMovsd, X86GpVar, X86GpVar)
+  //! Load QWORD from DS:`o1` to ES:`o0` (X64 Only).
+  INST_2x(movsq, kX86InstIdMovsq, X86GpVar, X86GpVar)
+  //! Load WORD from DS:`o1` to ES:`o0`.
+  INST_2x(movsw, kX86InstIdMovsw, X86GpVar, X86GpVar)
 
   //! Move with sign-extension.
   INST_2x(movsx, kX86InstIdMovsx, X86GpVar, X86GpVar)
@@ -3169,6 +3196,15 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   //! \overload
   INST_2i(sar, kX86InstIdSar, X86Mem, Imm)
 
+  //! Find non `o1` BYTE starting at ES:`o0`.
+  INST_2x(scasb, kX86InstIdScasb, X86GpVar, X86GpVar)
+  //! Find non `o1` DWORD starting at ES:`o0`.
+  INST_2x(scasd, kX86InstIdScasd, X86GpVar, X86GpVar)
+  //! Find non `o1` QWORD starting at ES:`o0` (X64 Only).
+  INST_2x(scasq, kX86InstIdScasq, X86GpVar, X86GpVar)
+  //! Find non `o1` WORD starting at ES:`o0`.
+  INST_2x(scasw, kX86InstIdScasw, X86GpVar, X86GpVar)
+
   //! Set byte on condition.
   INST_1cc(set, kX86InstIdSet, X86Util::condToSetcc, X86GpVar)
   //! Set byte on condition.
@@ -3214,6 +3250,15 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_0x(stc, kX86InstIdStc)
   //! Set direction flag to 1.
   INST_0x(std, kX86InstIdStd)
+
+  //! Fill BYTE at ES:`o0` with `o1`.
+  INST_2x(stosb, kX86InstIdStosb, X86GpVar, X86GpVar)
+  //! Fill DWORD at ES:`o0` with `o1`.
+  INST_2x(stosd, kX86InstIdStosd, X86GpVar, X86GpVar)
+  //! Fill QWORD at ES:`o0` with `o1` (X64 Only).
+  INST_2x(stosq, kX86InstIdStosq, X86GpVar, X86GpVar)
+  //! Fill WORD at ES:`o0` with `o1`.
+  INST_2x(stosw, kX86InstIdStosw, X86GpVar, X86GpVar)
 
   //! Subtract.
   INST_2x(sub, kX86InstIdSub, X86GpVar, X86GpVar)

@@ -144,6 +144,12 @@ static const X86SpecialInst x86SpecialInstJecxz[] = {
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
 };
 
+static const X86SpecialInst x86SpecialInstLods[] = {
+  { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
+  { kX86RegIndexSi, kX86RegIndexSi, kVarAttrInOutReg  },
+  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
+};
+
 static const X86SpecialInst x86SpecialInstMul[] = {
   { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
   { kX86RegIndexAx, kX86RegIndexAx, kVarAttrInOutReg  },
@@ -153,6 +159,12 @@ static const X86SpecialInst x86SpecialInstMul[] = {
 static const X86SpecialInst x86SpecialInstMovPtr[] = {
   { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     }
+};
+
+static const X86SpecialInst x86SpecialInstMovsCmps[] = {
+  { kX86RegIndexDi, kX86RegIndexDi, kVarAttrInOutReg  },
+  { kX86RegIndexSi, kX86RegIndexSi, kVarAttrInOutReg  },
+  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
 static const X86SpecialInst x86SpecialInstLahf[] = {
@@ -169,9 +181,21 @@ static const X86SpecialInst x86SpecialInstMaskmovqMaskmovdqu[] = {
   { kInvalidReg   , kInvalidReg   , kVarAttrInReg     }
 };
 
+static const X86SpecialInst x86SpecialInstRdtscRdtscp[] = {
+  { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
+  { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
+  { kInvalidReg   , kX86RegIndexCx, kVarAttrOutReg    }
+};
+
 static const X86SpecialInst x86SpecialInstRot[] = {
   { kInvalidReg   , kInvalidReg   , kVarAttrInOutReg  },
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
+};
+
+static const X86SpecialInst x86SpecialInstScas[] = {
+  { kX86RegIndexDi, kX86RegIndexDi, kVarAttrInOutReg  },
+  { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     },
+  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
 };
 
 static const X86SpecialInst x86SpecialInstShlrd[] = {
@@ -180,31 +204,7 @@ static const X86SpecialInst x86SpecialInstShlrd[] = {
   { kX86RegIndexCx, kInvalidReg   , kVarAttrInReg     }
 };
 
-static const X86SpecialInst x86SpecialInstRdtscRdtscp[] = {
-  { kInvalidReg   , kX86RegIndexDx, kVarAttrOutReg    },
-  { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
-  { kInvalidReg   , kX86RegIndexCx, kVarAttrOutReg    }
-};
-
-static const X86SpecialInst x86SpecialInstRepLod[] = {
-  { kInvalidReg   , kX86RegIndexAx, kVarAttrOutReg    },
-  { kX86RegIndexSi, kInvalidReg   , kVarAttrInReg     },
-  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
-};
-
-static const X86SpecialInst x86SpecialInstRepMovCmp[] = {
-  { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
-  { kX86RegIndexSi, kInvalidReg   , kVarAttrInReg     },
-  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
-};
-
-static const X86SpecialInst x86SpecialInstRepSto[] = {
-  { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
-  { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     },
-  { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
-};
-
-static const X86SpecialInst x86SpecialInstRepSca[] = {
+static const X86SpecialInst x86SpecialInstStos[] = {
   { kX86RegIndexDi, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexAx, kInvalidReg   , kVarAttrInReg     },
   { kX86RegIndexCx, kX86RegIndexCx, kVarAttrInOutReg  }
@@ -231,8 +231,18 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdCqo:
       return x86SpecialInstCdqCwdCqo;
 
-    case kX86InstIdCmpsd:
-      return NULL;
+    case kX86InstIdCmpsb:
+    case kX86InstIdCmpsq:
+    case kX86InstIdCmpsw:
+    case kX86InstIdRepeCmpsb:
+    case kX86InstIdRepeCmpsd:
+    case kX86InstIdRepeCmpsq:
+    case kX86InstIdRepeCmpsw:
+    case kX86InstIdRepneCmpsb:
+    case kX86InstIdRepneCmpsd:
+    case kX86InstIdRepneCmpsq:
+    case kX86InstIdRepneCmpsw:
+      return x86SpecialInstMovsCmps;
 
     case kX86InstIdCmpxchg:
       return x86SpecialInstCmpxchg;
@@ -264,7 +274,33 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdMovPtr:
       return x86SpecialInstMovPtr;
 
+    case kX86InstIdLodsb:
+    case kX86InstIdLodsd:
+    case kX86InstIdLodsq:
+    case kX86InstIdLodsw:
+    case kX86InstIdRepLodsb:
+    case kX86InstIdRepLodsd:
+    case kX86InstIdRepLodsq:
+    case kX86InstIdRepLodsw:
+      return x86SpecialInstLods;
+
+    case kX86InstIdMovsb:
+    case kX86InstIdMovsq:
+    case kX86InstIdMovsw:
+    case kX86InstIdRepMovsb:
+    case kX86InstIdRepMovsd:
+    case kX86InstIdRepMovsq:
+    case kX86InstIdRepMovsw:
+      return x86SpecialInstMovsCmps;
+
+    case kX86InstIdCmpsd:
     case kX86InstIdMovsd:
+      if (opCount == 2 &&
+          static_cast<const X86Reg&>(opList[0]).isGpd() &&
+          static_cast<const X86Reg&>(opList[1]).isGpd())
+        return x86SpecialInstMovsCmps;
+
+      // Otherwise this is a SSE2 `cmpsd` or `movsd` instruction.
       return NULL;
 
     case kX86InstIdLahf:
@@ -333,47 +369,29 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdRdtscp:
       return x86SpecialInstRdtscRdtscp;
 
-    case kX86InstIdRepLodsb:
-    case kX86InstIdRepLodsd:
-    case kX86InstIdRepLodsq:
-    case kX86InstIdRepLodsw:
-      return x86SpecialInstRepLod;
-
-    case kX86InstIdRepMovsb:
-    case kX86InstIdRepMovsd:
-    case kX86InstIdRepMovsq:
-    case kX86InstIdRepMovsw:
-      return x86SpecialInstRepMovCmp;
-
-    case kX86InstIdRepeCmpsb:
-    case kX86InstIdRepeCmpsd:
-    case kX86InstIdRepeCmpsq:
-    case kX86InstIdRepeCmpsw:
-      return x86SpecialInstRepMovCmp;
-
-    case kX86InstIdRepneCmpsb:
-    case kX86InstIdRepneCmpsd:
-    case kX86InstIdRepneCmpsq:
-    case kX86InstIdRepneCmpsw:
-      return x86SpecialInstRepMovCmp;
-
-    case kX86InstIdRepStosb:
-    case kX86InstIdRepStosd:
-    case kX86InstIdRepStosq:
-    case kX86InstIdRepStosw:
-      return x86SpecialInstRepSto;
-
+    case kX86InstIdScasb:
+    case kX86InstIdScasd:
+    case kX86InstIdScasq:
+    case kX86InstIdScasw:
     case kX86InstIdRepeScasb:
     case kX86InstIdRepeScasd:
     case kX86InstIdRepeScasq:
     case kX86InstIdRepeScasw:
-      return x86SpecialInstRepSca;
-
     case kX86InstIdRepneScasb:
     case kX86InstIdRepneScasd:
     case kX86InstIdRepneScasq:
     case kX86InstIdRepneScasw:
-      return x86SpecialInstRepSca;
+      return x86SpecialInstScas;
+
+    case kX86InstIdStosb:
+    case kX86InstIdStosd:
+    case kX86InstIdStosq:
+    case kX86InstIdStosw:
+    case kX86InstIdRepStosb:
+    case kX86InstIdRepStosd:
+    case kX86InstIdRepStosq:
+    case kX86InstIdRepStosw:
+      return x86SpecialInstStos;
 
     case kX86InstIdBlendvpd:
     case kX86InstIdBlendvps:

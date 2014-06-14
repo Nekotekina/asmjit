@@ -918,13 +918,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   //! High level procedure exit.
   INST_0x(leave, kX86InstIdLeave)
 
-  //! Load ECX/RCX BYTE from DS:[ESI/RSI] to AL.
+  //! Load BYTE from DS:[ESI/RSI] to AL.
   INST_0x(lodsb, kX86InstIdLodsb)
-  //! Load ECX/RCX DWORD from DS:[ESI/RSI] to EAX.
+  //! Load DWORD from DS:[ESI/RSI] to EAX.
   INST_0x(lodsd, kX86InstIdLodsd)
-  //! Load ECX/RCX QWORD from DS:[RDI] to RAX (X64 Only).
+  //! Load QWORD from DS:[RDI] to RAX (X64 Only).
   INST_0x(lodsq, kX86InstIdLodsq)
-  //! Load ECX/RCX WORD from DS:[ESI/RSI] to AX.
+  //! Load WORD from DS:[ESI/RSI] to AX.
   INST_0x(lodsw, kX86InstIdLodsw)
 
   //! Move.
@@ -968,13 +968,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   //! \overload
   INST_2x_(movbe, kX86InstIdMovbe, X86Mem, X86GpReg, !o1.isGpb());
 
-  //! Move ECX/RCX BYTE from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Move BYTE from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(movsb, kX86InstIdMovsb)
-  //! Move ECX/RCX DWORD from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Move DWORD from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(movsd, kX86InstIdMovsd)
-  //! Move ECX/RCX QWORD from DS:[RSI] to ES:[RDI] (X64 Only).
+  //! Move QWORD from DS:[RSI] to ES:[RDI] (X64 Only).
   INST_0x(movsq, kX86InstIdMovsq)
-  //! Move ECX/RCX WORD from DS:[ESI/RSI] to ES:[EDI/RDI].
+  //! Move WORD from DS:[ESI/RSI] to ES:[EDI/RDI].
   INST_0x(movsw, kX86InstIdMovsw)
 
   //! Move with sign-extension.
@@ -1273,13 +1273,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   //! Set direction flag to 1.
   INST_0x(std, kX86InstIdStd)
 
-  //! Fill ECX/RCX BYTE at ES:[EDI/RDI] with AL.
+  //! Fill BYTE at ES:[EDI/RDI] with AL.
   INST_0x(stosb, kX86InstIdStosb)
-  //! Fill ECX/RCX DWORD at ES:[EDI/RDI] with EAX.
+  //! Fill DWORD at ES:[EDI/RDI] with EAX.
   INST_0x(stosd, kX86InstIdStosd)
-  //! Fill ECX/RCX QWORD at ES:[RDI] with RAX (X64 Only).
+  //! Fill QWORD at ES:[RDI] with RAX (X64 Only).
   INST_0x(stosq, kX86InstIdStosq)
-  //! Fill ECX/RCX WORD at ES:[EDI/RDI] with AX.
+  //! Fill WORD at ES:[EDI/RDI] with AX.
   INST_0x(stosw, kX86InstIdStosw)
 
   //! Subtract.
