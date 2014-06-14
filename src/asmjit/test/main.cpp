@@ -34,7 +34,7 @@ static void dumpCpu() {
   INFO("  Family                : %u", cpu->getFamily());
   INFO("  Model                 : %u", cpu->getModel());
   INFO("  Stepping              : %u", cpu->getStepping());
-  INFO("  Cores Count           : %u", cpu->getCoresCount());
+  INFO("  HW-Threads Count      : %u", cpu->getHwThreadsCount());
   INFO("");
 
   // --------------------------------------------------------------------------
@@ -144,14 +144,14 @@ static void dumpSizeOf() {
   INFO("");
 
   INFO("SizeOf Assembler:");
-  DUMP_TYPE(asmjit::BaseAssembler);
+  DUMP_TYPE(asmjit::Assembler);
   DUMP_TYPE(asmjit::LabelData);
   DUMP_TYPE(asmjit::RelocData);
   INFO("");
 
 #if !defined(ASMJIT_DISABLE_COMPILER)
   INFO("SizeOf Compiler:");
-  DUMP_TYPE(asmjit::BaseCompiler);
+  DUMP_TYPE(asmjit::Compiler);
   DUMP_TYPE(asmjit::Node);
   DUMP_TYPE(asmjit::AlignNode);
   DUMP_TYPE(asmjit::CallNode);

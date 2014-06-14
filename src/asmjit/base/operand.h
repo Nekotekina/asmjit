@@ -20,8 +20,8 @@ namespace asmjit {
 // [Forward Declarations]
 // ============================================================================
 
-struct BaseAssembler;
-struct BaseCompiler;
+struct Assembler;
+struct Compiler;
 
 //! \addtogroup asmjit_base_general
 //! \{
@@ -99,7 +99,7 @@ ASMJIT_ENUM(kMemType) {
   //! Memory operand is a combination of base register and optional index register
   //! and displacement.
   //!
-  //! The `BaseAssembler` interprets `kMemTypeBaseIndex` and `kMemTypeStackIndex`
+  //! The `Assembler` interprets `kMemTypeBaseIndex` and `kMemTypeStackIndex`
   //! types the same way, but `Compiler` interprets  `kMemTypeBaseIndex` as
   //! `[base + index]` and `kMemTypeStackIndex` as `[stack(base) + index]`.
   kMemTypeBaseIndex = 0,
@@ -107,8 +107,8 @@ ASMJIT_ENUM(kMemType) {
   //! Memory operand is a combination of variable's memory location,
   //! optional index register and displacement.
   //!
-  //! The `BaseAssembler` interprets `kMemTypeBaseIndex` and  `kMemTypeStackIndex`
-  //! types in the same way, but `BaseCompiler` interprets `kMemTypeBaseIndex` as
+  //! The `Assembler` interprets `kMemTypeBaseIndex` and  `kMemTypeStackIndex`
+  //! types in the same way, but `Compiler` interprets `kMemTypeBaseIndex` as
   //! `[base + index]` and `kMemTypeStackIndex` as `[stack(base) + index]`.
   kMemTypeStackIndex = 1,
 
@@ -144,7 +144,7 @@ struct Operand {
     //! \internal
     uint8_t reserved_3_1;
 
-    //! Operand id, identifier used by `BaseAssembler` and `BaseCompiler`.
+    //! Operand id, identifier used by `Assembler` and `Compiler`.
     //!
     //! \note Uninitialized operand has always set id to `kInvalidValue`.
     uint32_t id;
@@ -184,7 +184,7 @@ struct Operand {
       };
     };
 
-    //! Variable id, used by `BaseCompiler` to identify variables.
+    //! Variable id, used by `Compiler` to identify variables.
     uint32_t id;
 
     //! Variable type.
@@ -436,7 +436,7 @@ struct Operand {
 
   //! Get operand id.
   //!
-  //! Operand id's are used internally by `BaseAssembler` and `BaseCompiler`.
+  //! Operand id's are used internally by `Assembler` and `Compiler`.
   //!
   //! There is no way to change or remove operand id. Unneeded operands can be
   //! simply reassigned by `operator=`.
@@ -971,7 +971,7 @@ struct Imm : public Operand {
 //! Label represents a location in code typically used as jump targets, but may
 //! be also reference data or static variables. Label has to be explicitly
 //! created by a code-generator by calling `CodeGen::newLabel()` where `CodeGen`
-//! is your code generator, which derives from `BaseAssembler` or `BaseCompiler`.
+//! is your code generator, which derives from `Assembler` or `Compiler`.
 //!
 //! Example of using labels:
 //!
@@ -1008,9 +1008,9 @@ struct Label : public Operand {
   }
 
   //! Create new initialized label.
-  explicit ASMJIT_INLINE Label(BaseAssembler& a);
+  explicit ASMJIT_INLINE Label(Assembler& a);
   //! Create new initialized label.
-  explicit ASMJIT_INLINE Label(BaseCompiler& c);
+  explicit ASMJIT_INLINE Label(Compiler& c);
 
   //! Create reference to another label.
   ASMJIT_INLINE Label(const Label& other) : Operand(other) {}

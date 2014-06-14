@@ -32,7 +32,7 @@ namespace asmjit {
 // [Forward Declarations]
 // ============================================================================
 
-struct BaseCompiler;
+struct Compiler;
 
 struct VarAttr;
 struct VarData;
@@ -191,9 +191,9 @@ ASMJIT_ENUM(kVarAttrFlags) {
 // [asmjit::kVarHint]
 // ============================================================================
 
-//! Variable hint (used by `BaseCompiler)`.
+//! Variable hint (used by `Compiler)`.
 //!
-//! @sa `BaseCompiler`.
+//! \sa Compiler.
 ASMJIT_ENUM(kVarHint) {
   //! Alloc variable.
   kVarHintAlloc = 0,
@@ -355,7 +355,7 @@ ASMJIT_ENUM(kFuncFlags) {
   //! adjust the stack (like "and zsp, -Alignment").
   kFuncFlagIsStackAdjusted = 0x00000008,
 
-  //! Whether the function is finished using `BaseCompiler::endFunc()`.
+  //! Whether the function is finished using `Compiler::endFunc()`.
   kFuncFlagIsFinished = 0x80000000
 };
 
@@ -458,7 +458,7 @@ ASMJIT_ENUM(kNodeType) {
 // ============================================================================
 
 ASMJIT_ENUM(kNodeFlags) {
-  //! Whether the node was translated by `BaseContext`.
+  //! Whether the node was translated by `Context`.
   kNodeFlagIsTranslated = 0x0001,
 
   //! Whether the `InstNode` is a jump.
@@ -816,7 +816,7 @@ struct VarData {
 
   //! Home memory offset.
   int32_t _memOffset;
-  //! Home memory cell, used by `BaseContext` (initially NULL).
+  //! Home memory cell, used by `Context` (initially NULL).
   MemCell* _memCell;
 
   //! Register read access statistics.
@@ -1486,7 +1486,7 @@ struct Node {
   //! Create new `Node`.
   //!
   //! \note Always use compiler to create nodes.
-  ASMJIT_INLINE Node(BaseCompiler* compiler, uint32_t type); // Defined-Later.
+  ASMJIT_INLINE Node(Compiler* compiler, uint32_t type); // Defined-Later.
 
   //! Destroy `Node`.
   ASMJIT_INLINE ~Node() {}
@@ -1619,7 +1619,7 @@ struct AlignNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `AlignNode` instance.
-  ASMJIT_INLINE AlignNode(BaseCompiler* compiler, uint32_t mode, uint32_t offset) :
+  ASMJIT_INLINE AlignNode(Compiler* compiler, uint32_t mode, uint32_t offset) :
     Node(compiler, kNodeTypeAlign) {
 
     _mode = mode;
@@ -1685,7 +1685,7 @@ struct EmbedNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `EmbedNode` instance.
-  ASMJIT_INLINE EmbedNode(BaseCompiler* compiler, void* data, uint32_t size) : Node(compiler, kNodeTypeEmbed) {
+  ASMJIT_INLINE EmbedNode(Compiler* compiler, void* data, uint32_t size) : Node(compiler, kNodeTypeEmbed) {
     _size = size;
     if (size <= kInlineBufferSize) {
       if (data != NULL)
@@ -1740,7 +1740,7 @@ struct CommentNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `CommentNode` instance.
-  ASMJIT_INLINE CommentNode(BaseCompiler* compiler, const char* comment) : Node(compiler, kNodeTypeComment) {
+  ASMJIT_INLINE CommentNode(Compiler* compiler, const char* comment) : Node(compiler, kNodeTypeComment) {
     _comment = comment;
   }
 
@@ -1761,7 +1761,7 @@ struct HintNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `HintNode` instance.
-  ASMJIT_INLINE HintNode(BaseCompiler* compiler, VarData* vd, uint32_t hint, uint32_t value) : Node(compiler, kNodeTypeHint) {
+  ASMJIT_INLINE HintNode(Compiler* compiler, VarData* vd, uint32_t hint, uint32_t value) : Node(compiler, kNodeTypeHint) {
     _vd = vd;
     _hint = hint;
     _value = value;
@@ -1812,7 +1812,7 @@ struct TargetNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `TargetNode` instance.
-  ASMJIT_INLINE TargetNode(BaseCompiler* compiler, uint32_t labelId) : Node(compiler, kNodeTypeTarget) {
+  ASMJIT_INLINE TargetNode(Compiler* compiler, uint32_t labelId) : Node(compiler, kNodeTypeTarget) {
     _id = labelId;
     _numRefs = 0;
     _from = NULL;
@@ -1876,7 +1876,7 @@ struct InstNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `InstNode` instance.
-  ASMJIT_INLINE InstNode(BaseCompiler* compiler, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) : Node(compiler, kNodeTypeInst) {
+  ASMJIT_INLINE InstNode(Compiler* compiler, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) : Node(compiler, kNodeTypeInst) {
     _code = static_cast<uint16_t>(code);
     _options = static_cast<uint8_t>(options);
 
@@ -2023,7 +2023,7 @@ struct JumpNode : public InstNode {
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ASMJIT_INLINE JumpNode(BaseCompiler* compiler, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) :
+  ASMJIT_INLINE JumpNode(Compiler* compiler, uint32_t code, uint32_t options, Operand* opList, uint32_t opCount) :
     InstNode(compiler, code, options, opList, opCount) {}
   ASMJIT_INLINE ~JumpNode() {}
 
@@ -2066,8 +2066,8 @@ struct FuncNode : public Node {
 
   //! Create a new `FuncNode` instance.
   //!
-  //! Always use `BaseCompiler::addFunc()` to create a `FuncNode` instance.
-  ASMJIT_INLINE FuncNode(BaseCompiler* compiler) :
+  //! Always use `Compiler::addFunc()` to create a `FuncNode` instance.
+  ASMJIT_INLINE FuncNode(Compiler* compiler) :
     Node(compiler, kNodeTypeFunc),
     _entryNode(NULL),
     _exitNode(NULL),
@@ -2274,7 +2274,7 @@ struct EndNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `EndNode` instance.
-  ASMJIT_INLINE EndNode(BaseCompiler* compiler) : Node(compiler, kNodeTypeEnd) {
+  ASMJIT_INLINE EndNode(Compiler* compiler) : Node(compiler, kNodeTypeEnd) {
     _flags |= kNodeFlagIsRet;
   }
 
@@ -2295,7 +2295,7 @@ struct RetNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `RetNode` instance.
-  ASMJIT_INLINE RetNode(BaseCompiler* compiler, const Operand& o0, const Operand& o1) : Node(compiler, kNodeTypeRet) {
+  ASMJIT_INLINE RetNode(Compiler* compiler, const Operand& o0, const Operand& o1) : Node(compiler, kNodeTypeRet) {
     _flags |= kNodeFlagIsRet;
     _ret[0] = o0;
     _ret[1] = o1;
@@ -2339,7 +2339,7 @@ struct CallNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `CallNode` instance.
-  ASMJIT_INLINE CallNode(BaseCompiler* compiler, const Operand& target) :
+  ASMJIT_INLINE CallNode(Compiler* compiler, const Operand& target) :
     Node(compiler, kNodeTypeCall),
     _decl(NULL),
     _target(target),
@@ -2410,7 +2410,7 @@ struct SArgNode : public Node {
   // --------------------------------------------------------------------------
 
   //! Create a new `SArgNode` instance.
-  ASMJIT_INLINE SArgNode(BaseCompiler* compiler, CallNode* call, VarData* sVd, VarData* cVd) :
+  ASMJIT_INLINE SArgNode(Compiler* compiler, CallNode* call, VarData* sVd, VarData* cVd) :
     Node(compiler, kNodeTypeSArg),
     _call(call),
     _sVd(sVd),
@@ -2449,7 +2449,7 @@ struct SArgNode : public Node {
 //! \}
 
 // ============================================================================
-// [asmjit::BaseCompiler]
+// [asmjit::Compiler]
 // ============================================================================
 
 //! \addtogroup asmjit_base_general
@@ -2457,18 +2457,18 @@ struct SArgNode : public Node {
 
 //! Base compiler.
 //!
-//! @sa BaseAssembler.
-struct ASMJIT_VCLASS BaseCompiler : public CodeGen {
-  ASMJIT_NO_COPY(BaseCompiler)
+//! \sa Assembler.
+struct ASMJIT_VCLASS Compiler : public CodeGen {
+  ASMJIT_NO_COPY(Compiler)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! Create a new `BaseCompiler` instance.
-  ASMJIT_API BaseCompiler(Runtime* runtime);
-  //! Destroy the `BaseCompiler` instance.
-  ASMJIT_API virtual ~BaseCompiler();
+  //! Create a new `Compiler` instance.
+  ASMJIT_API Compiler(Runtime* runtime);
+  //! Destroy the `Compiler` instance.
+  ASMJIT_API virtual ~Compiler();
 
   // --------------------------------------------------------------------------
   // [LookAhead]
@@ -2754,7 +2754,7 @@ struct ASMJIT_VCLASS BaseCompiler : public CodeGen {
   // --------------------------------------------------------------------------
 
   //! Send assembled code to `assembler`.
-  virtual Error serialize(BaseAssembler& assembler) = 0;
+  virtual Error serialize(Assembler& assembler) = 0;
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -2810,11 +2810,11 @@ struct ASMJIT_VCLASS BaseCompiler : public CodeGen {
 // [Defined-Later]
 // ============================================================================
 
-ASMJIT_INLINE Label::Label(BaseCompiler& c) : Operand(NoInit) {
+ASMJIT_INLINE Label::Label(Compiler& c) : Operand(NoInit) {
   c._newLabel(this);
 }
 
-ASMJIT_INLINE Node::Node(BaseCompiler* compiler, uint32_t type) {
+ASMJIT_INLINE Node::Node(Compiler* compiler, uint32_t type) {
   _prev = NULL;
   _next = NULL;
   _type = static_cast<uint8_t>(type);

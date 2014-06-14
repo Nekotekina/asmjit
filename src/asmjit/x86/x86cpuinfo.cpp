@@ -147,7 +147,7 @@ void X86CpuUtil::detect(X86CpuInfo* cpuInfo) {
 
   // Fill safe defaults.
   ::memcpy(cpuInfo->_vendorString, "Unknown", 8);
-  cpuInfo->_coresCount = CpuInfo::detectNumberOfCores();
+  cpuInfo->_hwThreadsCount = CpuInfo::detectNumberOfCores();
 
   // Get vendor string/id.
   callCpuId(0, 0, &regs);
@@ -206,8 +206,8 @@ void X86CpuUtil::detect(X86CpuInfo* cpuInfo) {
 
   if (cpuInfo->_vendorId == kCpuVendorAmd && (regs.edx & 0x10000000U)) {
     // AMD sets Multithreading to ON if it has more cores.
-    if (cpuInfo->_coresCount == 1)
-      cpuInfo->_coresCount = 2;
+    if (cpuInfo->_hwThreadsCount == 1)
+      cpuInfo->_hwThreadsCount = 2;
   }
 
   // Detect AVX.

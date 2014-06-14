@@ -21,7 +21,7 @@ namespace asmjit {
 // [Forward Declarations]
 // ============================================================================
 
-struct BaseAssembler;
+struct Assembler;
 struct CpuInfo;
 
 //! \addtogroup asmjit_base_general
@@ -60,7 +60,7 @@ struct ASMJIT_VCLASS Runtime {
   //! The beginning of the memory allocated for the function is returned in
   //! `dst`. Returns Status code as \ref kError, on failure `dst` is set to
   //! `NULL`.
-  virtual Error add(void** dst, BaseAssembler* assembler) = 0;
+  virtual Error add(void** dst, Assembler* assembler) = 0;
 
   //! Release memory allocated by `add`.
   virtual Error release(void* p) = 0;
@@ -114,7 +114,7 @@ struct ASMJIT_VCLASS JitRuntime : public Runtime {
   ASMJIT_API virtual uint32_t getStackAlignment();
   ASMJIT_API virtual const CpuInfo* getCpuInfo();
 
-  ASMJIT_API virtual Error add(void** dst, BaseAssembler* assembler);
+  ASMJIT_API virtual Error add(void** dst, Assembler* assembler);
   ASMJIT_API virtual Error release(void* p);
 
   //! Flush instruction cache.

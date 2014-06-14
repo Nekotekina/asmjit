@@ -103,9 +103,10 @@ If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
   Set(ASMJIT_CFLAGS
     -fno-exceptions)
-  Set(ASMJIT_CFLAGS_DBG -DASMJIT_DEBUG -O0
-    -fno-inline-functions)
-  Set(ASMJIT_CFLAGS_REL -DASMJIT_RELEASE -O2
+  Set(ASMJIT_CFLAGS_DBG
+    -DASMJIT_DEBUG -O0)
+  Set(ASMJIT_CFLAGS_REL
+    -DASMJIT_RELEASE -O2
     -finline-functions
     -fomit-frame-pointer
     -fmerge-all-constants
@@ -118,9 +119,10 @@ If("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
   Set(ASMJIT_CFLAGS
     -fno-exceptions)
-  Set(ASMJIT_CFLAGS_DBG -DASMJIT_DEBUG -O0
-    -fno-inline-functions)
-  Set(ASMJIT_CFLAGS_REL -DASMJIT_RELEASE -O2
+  Set(ASMJIT_CFLAGS_DBG
+    -DASMJIT_DEBUG -O0)
+  Set(ASMJIT_CFLAGS_REL
+    -DASMJIT_RELEASE -O2
     -finline-functions
     -fomit-frame-pointer
     -fmerge-all-constants)

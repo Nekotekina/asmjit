@@ -78,8 +78,9 @@ struct CpuInfo {
   ASMJIT_INLINE uint32_t getModel() const { return _model; }
   //! Get CPU stepping.
   ASMJIT_INLINE uint32_t getStepping() const { return _stepping; }
-  //! Get CPU cores count (or sum of all cores of all procesors).
-  ASMJIT_INLINE uint32_t getCoresCount() const { return _coresCount; }
+
+  //! Get number of hardware threads available.
+  ASMJIT_INLINE uint32_t getHwThreadsCount() const { return _hwThreadsCount; }
 
   //! Get whether CPU has a `feature`.
   ASMJIT_INLINE bool hasFeature(uint32_t feature) const {
@@ -127,8 +128,9 @@ struct CpuInfo {
   uint32_t _model;
   //! Cpu stepping.
   uint32_t _stepping;
-  //! Cpu cores count (or sum of all CPU cores of all processors).
-  uint32_t _coresCount;
+
+  //! Number of hardware threads.
+  uint32_t _hwThreadsCount;
 
   //! Cpu features bitfield.
   uint32_t _features[4];

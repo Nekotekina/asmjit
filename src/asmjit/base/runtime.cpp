@@ -70,7 +70,7 @@ const CpuInfo* JitRuntime::getCpuInfo() {
 // [asmjit::JitRuntime - Add]
 // ============================================================================
 
-Error JitRuntime::add(void** dst, BaseAssembler* assembler) {
+Error JitRuntime::add(void** dst, Assembler* assembler) {
   // Disallow empty code generation.
   size_t codeSize = assembler->getCodeSize();
 

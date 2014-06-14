@@ -117,7 +117,7 @@ static ASMJIT_INLINE uint32_t x86EncodeSib(uint32_t s, uint32_t i, uint32_t b) {
 
 // Workaround for GCC & CLang.
 template<int Arch>
-static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc();
+static ASMJIT_INLINE Assembler::EmitFunc x86GetEmitFunc();
 
 // ============================================================================
 // [Macros]
@@ -211,7 +211,7 @@ static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc();
 // ============================================================================
 
 X86Assembler::X86Assembler(Runtime* runtime, uint32_t arch) :
-  BaseAssembler(runtime),
+  Assembler(runtime),
   zax(NoInit),
   zcx(NoInit),
   zdx(NoInit),
@@ -999,7 +999,7 @@ static const Operand::VRegOp x86PatchedHiRegs[4] = {
 };
 
 template<int Arch>
-static Error ASMJIT_CDECL X86Assembler_emit(BaseAssembler* self_, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
+static Error ASMJIT_CDECL X86Assembler_emit(Assembler* self_, uint32_t code, const Operand* o0, const Operand* o1, const Operand* o2, const Operand* o3) {
   X86Assembler* self = static_cast<X86Assembler*>(self_);
 
   uint8_t* cursor = self->getCursor();
@@ -4242,7 +4242,7 @@ _GrowBuffer:
 }
 
 template<int Arch>
-static ASMJIT_INLINE BaseAssembler::EmitFunc x86GetEmitFunc() {
+static ASMJIT_INLINE Assembler::EmitFunc x86GetEmitFunc() {
   return X86Assembler_emit<Arch>;
 }
 

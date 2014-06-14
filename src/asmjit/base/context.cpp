@@ -21,23 +21,23 @@
 namespace asmjit {
 
 // ============================================================================
-// [asmjit::BaseContext - Construction / Destruction]
+// [asmjit::Context - Construction / Destruction]
 // ============================================================================
 
-BaseContext::BaseContext(BaseCompiler* compiler) :
+Context::Context(Compiler* compiler) :
   _compiler(compiler),
   _baseZone(8192 - kZoneOverhead) {
 
-  BaseContext::reset();
+  Context::reset();
 }
 
-BaseContext::~BaseContext() {}
+Context::~Context() {}
 
 // ============================================================================
-// [asmjit::BaseContext - Reset]
+// [asmjit::Context - Reset]
 // ============================================================================
 
-void BaseContext::reset() {
+void Context::reset() {
   _baseZone.clear();
 
   _func = NULL;
@@ -72,7 +72,7 @@ void BaseContext::reset() {
 }
 
 // ============================================================================
-// [asmjit::BaseContext - Mem]
+// [asmjit::Context - Mem]
 // ============================================================================
 
 static ASMJIT_INLINE uint32_t BaseContext_getDefaultAlignment(uint32_t size) {
@@ -92,7 +92,7 @@ static ASMJIT_INLINE uint32_t BaseContext_getDefaultAlignment(uint32_t size) {
     return 1;
 }
 
-MemCell* BaseContext::_newVarCell(VarData* vd) {
+MemCell* Context::_newVarCell(VarData* vd) {
   ASMJIT_ASSERT(vd->_memCell == NULL);
 
   MemCell* cell;
@@ -139,7 +139,7 @@ _NoMemory:
   return NULL;
 }
 
-MemCell* BaseContext::_newStackCell(uint32_t size, uint32_t alignment) {
+MemCell* Context::_newStackCell(uint32_t size, uint32_t alignment) {
   MemCell* cell = static_cast<MemCell*>(_baseZone.alloc(sizeof(MemCell)));
   if (cell == NULL)
     goto _NoMemory;
@@ -185,7 +185,7 @@ _NoMemory:
   return NULL;
 }
 
-Error BaseContext::resolveCellOffsets() {
+Error Context::resolveCellOffsets() {
   MemCell* varCell = _memVarCells;
   MemCell* stackCell = _memStackCells;
 
@@ -265,10 +265,10 @@ Error BaseContext::resolveCellOffsets() {
 }
 
 // ============================================================================
-// [asmjit::BaseContext - RemoveUnreachableCode]
+// [asmjit::Context - RemoveUnreachableCode]
 // ============================================================================
 
-Error BaseContext::removeUnreachableCode() {
+Error Context::removeUnreachableCode() {
   PodList<Node*>::Link* link = _unreachableList.getFirst();
   Node* stop = getStop();
 
@@ -297,13 +297,13 @@ Error BaseContext::removeUnreachableCode() {
 }
 
 // ============================================================================
-// [asmjit::BaseContext - Cleanup]
+// [asmjit::Context - Cleanup]
 // ============================================================================
 
 //! \internal
 //!
 //! Translate the given function `func`.
-void BaseContext::cleanup() {
+void Context::cleanup() {
   VarData** array = _contextVd.getData();
   size_t length = _contextVd.getLength();
 
@@ -318,10 +318,10 @@ void BaseContext::cleanup() {
 }
 
 // ============================================================================
-// [asmjit::BaseContext - CompileFunc]
+// [asmjit::Context - CompileFunc]
 // ============================================================================
 
-Error BaseContext::compile(FuncNode* func) {
+Error Context::compile(FuncNode* func) {
   Node* end = func->getEnd();
   Node* stop = end->getNext();
 

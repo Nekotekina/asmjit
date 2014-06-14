@@ -86,7 +86,7 @@ ASMJIT_ENUM(kRelocMode) {
 // [asmjit::CodeGen]
 // ============================================================================
 
-//! Abstract class defining basics of \ref Assembler and \ref BaseCompiler.
+//! Abstract class defining basics of \ref Assembler and \ref Compiler.
 struct ASMJIT_VCLASS CodeGen {
   ASMJIT_NO_COPY(CodeGen)
 

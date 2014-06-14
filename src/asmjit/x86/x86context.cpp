@@ -46,7 +46,7 @@ static ASMJIT_INLINE uint32_t x86VarTypeToClass(uint32_t vType) {
 // [asmjit::X86Context - Construction / Destruction]
 // ============================================================================
 
-X86Context::X86Context(X86Compiler* compiler) : BaseContext(compiler) {
+X86Context::X86Context(X86Compiler* compiler) : Context(compiler) {
   _regCount = compiler->_regCount;
 
   _zsp = compiler->zsp;
@@ -70,7 +70,7 @@ X86Context::~X86Context() {}
 // ============================================================================
 
 void X86Context::reset() {
-  BaseContext::reset();
+  Context::reset();
 
   _x86State.reset(0);
   _clobberedRegs.reset();
@@ -5598,7 +5598,7 @@ static ASMJIT_INLINE Error X86Context_serialize(X86Context* self, X86Assembler* 
   return kErrorOk;
 }
 
-Error X86Context::serialize(BaseAssembler* assembler, Node* start, Node* stop) {
+Error X86Context::serialize(Assembler* assembler, Node* start, Node* stop) {
 #if !defined(ASMJIT_DISABLE_LOGGER)
   if (assembler->hasLogger())
     return X86Context_serialize<1>(this, static_cast<X86Assembler*>(assembler), start, stop);

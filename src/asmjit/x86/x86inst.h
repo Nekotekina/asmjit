@@ -1496,7 +1496,7 @@ ASMJIT_ENUM(kX86InstFlags) {
   //! Instruction can be prefixed by using the LOCK prefix.
   kX86InstFlagLock = 0x0020,
 
-  //! Instruction is special, this is for `BaseCompiler`.
+  //! Instruction is special, this is for `Compiler`.
   kX86InstFlagSpecial = 0x0040,
 
   //! Instruction always performs memory access.
@@ -1801,7 +1801,7 @@ struct X86InstExtendedInfo {
   //!
   //! Move instructions overwrite the first operand or at least part of it,
   //! This is a very useful hint that is used by variable liveness analysis
-  //! and `BaseCompiler` in general to know which variable is completely
+  //! and `Compiler` in general to know which variable is completely
   //! overwritten.
   //!
   //! All AVX/XOP instructions that have 3 or more operands are considered to
@@ -1828,7 +1828,7 @@ struct X86InstExtendedInfo {
   }
 
   //! Get whether the instruction is special type (this is used by
-  //! `BaseCompiler` to manage additional variables or functionality).
+  //! `Compiler` to manage additional variables or functionality).
   ASMJIT_INLINE bool isSpecial() const {
     return (getFlags() & kX86InstFlagSpecial) != 0;
   }

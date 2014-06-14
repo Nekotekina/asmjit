@@ -85,10 +85,10 @@
 //!
 //! Contains all `asmjit` classes and helper functions that are architecture
 //! independent or abstract. Abstract classes are implemented by the backend,
-//! for example `BaseAssembler` is implemented by `X86Assembler`.
+//! for example `Assembler` is implemented by `X86Assembler`.
 //!
-//! - See `BaseAssembler` for low level code generation documentation.
-//! - See `BaseCompiler` for high level code generation documentation.
+//! - See `Assembler` for low level code generation documentation.
+//! - See `Compiler` for high level code generation documentation.
 //! - See `Operand` for operand's overview.
 //!
 //! Logging and Error Handling
@@ -128,7 +128,7 @@
 //! AsmJit intermediate code-tree is a double-linked list that is made of nodes
 //! that represent assembler instructions, directives, labels and high-level
 //! constructs compiler is using to represent functions and function calls. The
-//! node list can only be used together with \ref BaseCompiler.
+//! node list can only be used together with \ref Compiler.
 //!
 //! TODO
 
@@ -249,9 +249,8 @@
 //! pointer to the target with unspecified size. Unspecified size works in all
 //! intrinsics where are used registers (this means that size is specified by
 //! register operand or by instruction itself). For example `asmjit::ptr()`
-//! can't be used with @c asmjit::Assembler::inc() instruction. In this case
-//! size must be specified and it's also reason to make difference between
-//! pointer sizes.
+//! can't be used with `Assembler::inc()` instruction. In this case size must
+//! be specified and it's also reason to make difference between pointer sizes.
 //!
 //! Supported are simple address forms `[base + displacement]` and complex
 //! address forms `[base + index * scale + displacement]`.
@@ -260,8 +259,8 @@
 //! ------------------
 //!
 //! Immediate values are constants thats passed directly after instruction
-//! opcode. To create such value use @c asmjit::imm() or @c asmjit::imm_u()
-//! methods to create signed or unsigned immediate value.
+//! opcode. To create such value use `imm()` or `imm_u()` methods to create
+//! signed or unsigned immediate value.
 //!
 //! X86/X64 CPU Information
 //! -----------------------

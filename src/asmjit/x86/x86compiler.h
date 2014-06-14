@@ -121,7 +121,7 @@ ASMJIT_ENUM(kX86VarAttr) {
 //! There is also `kFuncConvHost` that is defined to fit the host calling
 //! convention.
 //!
-//! These types are used together with `BaseCompiler::addFunc()` method.
+//! These types are used together with `Compiler::addFunc()` method.
 ASMJIT_ENUM(kX86FuncConv) {
   // --------------------------------------------------------------------------
   // [X64]
@@ -704,7 +704,7 @@ struct X86GpVar : public X86Var {
   ASMJIT_INLINE X86GpVar() : X86Var() {}
 
   //! Create a new initialized `X86GpVar` instance.
-  ASMJIT_INLINE X86GpVar(BaseCompiler& c, uint32_t type = kVarTypeIntPtr, const char* name = NULL) : X86Var(NoInit) {
+  ASMJIT_INLINE X86GpVar(Compiler& c, uint32_t type = kVarTypeIntPtr, const char* name = NULL) : X86Var(NoInit) {
     c._newVar(this, type, name);
   }
 
@@ -776,7 +776,7 @@ struct X86MmVar : public X86Var {
   //! Create a new uninitialized `X86MmVar` instance.
   ASMJIT_INLINE X86MmVar() : X86Var() {}
   //! Create a new initialized `X86MmVar` instance.
-  ASMJIT_INLINE X86MmVar(BaseCompiler& c, uint32_t type = kX86VarTypeMm, const char* name = NULL) : X86Var(NoInit) {
+  ASMJIT_INLINE X86MmVar(Compiler& c, uint32_t type = kX86VarTypeMm, const char* name = NULL) : X86Var(NoInit) {
     c._newVar(this, type, name);
   }
 
@@ -823,7 +823,7 @@ struct X86XmmVar : public X86Var {
   //! Create a new uninitialized `X86XmmVar` instance.
   ASMJIT_INLINE X86XmmVar() : X86Var() {}
   //! Create a new initialized `X86XmmVar` instance.
-  ASMJIT_INLINE X86XmmVar(BaseCompiler& c, uint32_t type = kX86VarTypeXmm, const char* name = NULL) : X86Var(NoInit) {
+  ASMJIT_INLINE X86XmmVar(Compiler& c, uint32_t type = kX86VarTypeXmm, const char* name = NULL) : X86Var(NoInit) {
     c._newVar(this, type, name);
   }
 
@@ -870,7 +870,7 @@ struct X86YmmVar : public X86Var {
   //! Create a new uninitialized `X86YmmVar` instance.
   ASMJIT_INLINE X86YmmVar() : X86Var() {}
   //! Create a new initialized `X86YmmVar` instance.
-  ASMJIT_INLINE X86YmmVar(BaseCompiler& c, uint32_t type = kX86VarTypeYmm, const char* name = NULL) : X86Var(NoInit) {
+  ASMJIT_INLINE X86YmmVar(Compiler& c, uint32_t type = kX86VarTypeYmm, const char* name = NULL) : X86Var(NoInit) {
     c._newVar(this, type, name);
   }
 
@@ -1240,7 +1240,7 @@ struct X86FuncNode : public FuncNode {
   // --------------------------------------------------------------------------
 
   //! Create a new `X86FuncNode` instance.
-  ASMJIT_INLINE X86FuncNode(BaseCompiler* compiler) : FuncNode(compiler) {
+  ASMJIT_INLINE X86FuncNode(Compiler* compiler) : FuncNode(compiler) {
     _decl = &_x86Decl;
     _saveRestoreRegs.reset();
 
@@ -1365,7 +1365,7 @@ struct X86CallNode : public CallNode {
   // --------------------------------------------------------------------------
 
   //! Create a new `X86CallNode` instance.
-  ASMJIT_INLINE X86CallNode(BaseCompiler* compiler, const Operand& target) : CallNode(compiler, target) {
+  ASMJIT_INLINE X86CallNode(Compiler* compiler, const Operand& target) : CallNode(compiler, target) {
     _decl = &_x86Decl;
     _usedArgs.reset();
   }
@@ -1506,7 +1506,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //!
 //! Another improvement is algorithm used by a register allocator. In first
 //! version the registers were allocated when creating instruction stream. In
-//! new version registers are allocated after calling @c Compiler::make(),
+//! new version registers are allocated after calling `Compiler::make()`,
 //! thus register allocator has information about scope of all variables and
 //! statistics of their usage. The algorithm to allocate registers is very
 //! simple and it's always called as a 'linear scan register allocator'. When
@@ -1520,7 +1520,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! for you.
 //!
 //! The nearly last thing I'd like to present is calling other functions from
-//! the generated code. AsmJit uses a @c FuncPrototype class to hold function
+//! the generated code. AsmJit uses a `FuncPrototype` class to hold function
 //! parameters, their position in stack (or register index) and return value.
 //! This class is used internally, but it can be used to create your own
 //! function calling-convention. All standard function calling conventions are
@@ -1702,14 +1702,14 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //!
 //! Explicit variable allocating / spilling methods:
 //!
-//! - `BaseCompiler::alloc()` - Explicit method to alloc variable into register.
+//! - `Compiler::alloc()` - Explicit method to alloc variable into register.
 //!    It can be used to force allocation a variable before a loop for example.
 //!
-//! - `BaseCompiler::spill()` - Explicit method to spill variable. If variable
+//! - `Compiler::spill()` - Explicit method to spill variable. If variable
 //!    is in register and you call this method, it's moved to its home memory
 //!    location. If variable is not in register no operation is performed.
 //!
-//! - `BaseCompiler::unuse()` - Unuse variable (you can use this to end the
+//! - `Compiler::unuse()` - Unuse variable (you can use this to end the
 //!    variable scope or sub-scope).
 //!
 //! Please see AsmJit tutorials (testcompiler.cpp and testvariables.cpp) for
@@ -1730,7 +1730,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //!
 //! This means that you can't use any `Compiler` object after destructing it,
 //! it also means that each object like `Label`, `Var` and others are created
-//! and managed by @c BaseCompiler itself. These objects contain ID which is
+//! and managed by @c Compiler itself. These objects contain ID which is
 //! used internally by Compiler to store additional information about these
 //! objects.
 //!
@@ -2017,7 +2017,7 @@ ASMJIT_TYPE_ID(X86YmmVar, kX86VarTypeYmm);
 //! Other use cases are waiting for you! Be sure that instruction you are
 //! emitting is correct and encodable, because if not, Assembler will set
 //! status code to `kErrorUnknownInst`.
-struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
+struct ASMJIT_VCLASS X86Compiler : public Compiler {
   ASMJIT_NO_COPY(X86Compiler)
 
   // --------------------------------------------------------------------------
@@ -2211,7 +2211,7 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   //! is saving the pointer and using it to specify function arguments and
   //! return value.
   //!
-  //! @sa \ref FuncBuilder0, \ref FuncBuilder1, \ref FuncBuilder2, ...
+  //! \sa FuncBuilder0, FuncBuilder1, FuncBuilder2, ...
   ASMJIT_API X86FuncNode* addFunc(uint32_t conv, const FuncPrototype& p);
 
   //! End of current function.
@@ -2413,7 +2413,7 @@ struct ASMJIT_VCLASS X86Compiler : public BaseCompiler {
   // [Serialize]
   // -------------------------------------------------------------------------
 
-  ASMJIT_API virtual Error serialize(BaseAssembler& assembler);
+  ASMJIT_API virtual Error serialize(Assembler& assembler);
 
   // -------------------------------------------------------------------------
   // [Options]

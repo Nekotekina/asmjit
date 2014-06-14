@@ -82,13 +82,13 @@ namespace asmjit {
 //!
 //! Each call to an assembler intrinsic function emits instruction directly
 //! to the binary stream. There are also runtime checks that prevent invalid
-//! code to be emitted. It will assert in debug mode and put the `BaseAssembler`
+//! code to be emitted. It will assert in debug mode and put the `Assembler`
 //! instance to an  error state in production mode.
 //!
 //! Code Generation
 //! ---------------
 //!
-//! To generate code is only needed to create instance of `BaseAssembler`
+//! To generate code is only needed to create instance of `Assembler`
 //! and to use intrinsics. See example how to do that:
 //!
 //! ~~~
@@ -126,7 +126,7 @@ namespace asmjit {
 //! information related to the operand size is needed only in rare cases, that
 //! is an instruction without having any register operands, such as `inc [mem]`.
 //!
-//! for example, `a` is `x86::BaseAssembler` instance:
+//! for example, `a` is `x86::Assembler` instance:
 //!
 //! ~~~
 //! a.mov(ptr(eax), 0);             // mov ptr [eax], 0
@@ -169,7 +169,7 @@ namespace asmjit {
 //! ----------------
 //!
 //! While you are over from emitting instructions, you can make your function
-//! by using `BaseAssembler::make()` method. This method will use memory
+//! by using `Assembler::make()` method. This method will use memory
 //! manager to allocate virtual memory and relocates generated code to it. For
 //! memory allocation is used global memory manager by default and memory is
 //! freeable, but of course this default behavior can be overridden specifying
@@ -284,13 +284,13 @@ namespace asmjit {
 //!
 //! If you need more abstraction for generating assembler code and you want
 //! to hide calling conventions between 32-bit and 64-bit operating systems,
-//! look at @c Compiler class that is designed for higher level code
+//! look at `Compiler` class that is designed for higher level code
 //! generation.
 //!
 //! Advanced Code Generation
 //! ------------------------
 //!
-//! This section describes some advanced generation features of @c Assembler
+//! This section describes some advanced generation features of `Assembler`
 //! class which can be simply overlooked. The first thing that is very likely
 //! needed is generic register support. In previous example the named registers
 //! were used. AsmJit contains functions which can convert register index into
@@ -300,7 +300,7 @@ namespace asmjit {
 //!
 //! ~~~
 //! // Simple function that generates dword copy.
-//! void genCopyDWord(BaseAssembler& a, const X86GpReg& dst, const X86GpReg& src, const X86GpReg& tmp) {
+//! void genCopyDWord(Assembler& a, const X86GpReg& dst, const X86GpReg& src, const X86GpReg& tmp) {
 //!   a.mov(tmp, dword_ptr(src));
 //!   a.mov(dword_ptr(dst), tmp);
 //! }
@@ -323,8 +323,8 @@ namespace asmjit {
 //! other types there are functions `fp()`, `mm()`, `xmm()`, `ymm()` and `zmm()`
 //! available.
 //!
-//! @sa `X86Compiler`.
-struct ASMJIT_VCLASS X86Assembler : public BaseAssembler {
+//! \sa X86Compiler.
+struct ASMJIT_VCLASS X86Assembler : public Assembler {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------

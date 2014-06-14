@@ -696,7 +696,7 @@ static Error X86Compiler_emitConstPool(X86Compiler* self,
 // ============================================================================
 
 X86Compiler::X86Compiler(Runtime* runtime, uint32_t arch) :
-  BaseCompiler(runtime),
+  Compiler(runtime),
   zax(NoInit),
   zcx(NoInit),
   zdx(NoInit),
@@ -1331,7 +1331,7 @@ void* X86Compiler::make() {
 // [asmjit::X86Compiler - Assemble]
 // ============================================================================
 
-Error X86Compiler::serialize(BaseAssembler& assembler) {
+Error X86Compiler::serialize(Assembler& assembler) {
   if (_firstNode == NULL)
     return kErrorOk;
 

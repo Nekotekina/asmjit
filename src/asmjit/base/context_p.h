@@ -24,22 +24,22 @@ namespace asmjit {
 //! \{
 
 // ============================================================================
-// [asmjit::BaseContext]
+// [asmjit::Context]
 // ============================================================================
 
 //! \internal
 //!
-//! Code generation context is the logic behind `BaseCompiler`. The context is
-//! used to compile the code stored in `BaseCompiler`.
-struct BaseContext {
-  ASMJIT_NO_COPY(BaseContext)
+//! Code generation context is the logic behind `Compiler`. The context is
+//! used to compile the code stored in `Compiler`.
+struct Context {
+  ASMJIT_NO_COPY(Context)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  BaseContext(BaseCompiler* compiler);
-  virtual ~BaseContext();
+  Context(Compiler* compiler);
+  virtual ~Context();
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -53,7 +53,7 @@ struct BaseContext {
   // --------------------------------------------------------------------------
 
   //! Get compiler.
-  ASMJIT_INLINE BaseCompiler* getCompiler() const { return _compiler; }
+  ASMJIT_INLINE Compiler* getCompiler() const { return _compiler; }
 
   //! Get function.
   ASMJIT_INLINE FuncNode* getFunc() const { return _func; }
@@ -210,14 +210,14 @@ struct BaseContext {
   // [Serialize]
   // --------------------------------------------------------------------------
 
-  virtual Error serialize(BaseAssembler* assembler, Node* start, Node* stop) = 0;
+  virtual Error serialize(Assembler* assembler, Node* start, Node* stop) = 0;
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! Compiler.
-  BaseCompiler* _compiler;
+  Compiler* _compiler;
   //! Function.
   FuncNode* _func;
 

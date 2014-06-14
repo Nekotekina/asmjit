@@ -21,10 +21,10 @@
 namespace asmjit {
 
 // ============================================================================
-// [asmjit::BaseAssembler - Construction / Destruction]
+// [asmjit::Assembler - Construction / Destruction]
 // ============================================================================
 
-BaseAssembler::BaseAssembler(Runtime* runtime) :
+Assembler::Assembler(Runtime* runtime) :
   CodeGen(runtime),
   _emit((EmitFunc)NULL),
   _buffer(NULL),
@@ -34,20 +34,20 @@ BaseAssembler::BaseAssembler(Runtime* runtime) :
   _comment(NULL),
   _unusedLinks(NULL) {}
 
-BaseAssembler::~BaseAssembler() {
+Assembler::~Assembler() {
   if (_buffer != NULL)
     ASMJIT_FREE(_buffer);
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Clear / Reset]
+// [asmjit::Assembler - Clear / Reset]
 // ============================================================================
 
-void BaseAssembler::clear() {
+void Assembler::clear() {
   _purge();
 }
 
-void BaseAssembler::reset() {
+void Assembler::reset() {
   _purge();
   _baseZone.reset();
 
@@ -63,7 +63,7 @@ void BaseAssembler::reset() {
   _relocData.reset();
 }
 
-void BaseAssembler::_purge() {
+void Assembler::_purge() {
   _baseZone.clear();
   _cursor = _buffer;
 
@@ -80,10 +80,10 @@ void BaseAssembler::_purge() {
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Buffer]
+// [asmjit::Assembler - Buffer]
 // ============================================================================
 
-Error BaseAssembler::_grow(size_t n) {
+Error Assembler::_grow(size_t n) {
   size_t capacity = getCapacity();
   size_t after = getOffset() + n;
 
@@ -118,7 +118,7 @@ Error BaseAssembler::_grow(size_t n) {
   return _reserve(capacity);
 }
 
-Error BaseAssembler::_reserve(size_t n) {
+Error Assembler::_reserve(size_t n) {
   size_t capacity = getCapacity();
   if (n <= capacity)
     return kErrorOk;
@@ -142,10 +142,10 @@ Error BaseAssembler::_reserve(size_t n) {
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Label]
+// [asmjit::Assembler - Label]
 // ============================================================================
 
-Error BaseAssembler::_registerIndexedLabels(size_t index) {
+Error Assembler::_registerIndexedLabels(size_t index) {
   size_t i = _labels.getLength();
   if (index < i)
     return kErrorOk;
@@ -164,7 +164,7 @@ Error BaseAssembler::_registerIndexedLabels(size_t index) {
   return kErrorOk;
 }
 
-Error BaseAssembler::_newLabel(Label* dst) {
+Error Assembler::_newLabel(Label* dst) {
   dst->_label.op = kOperandTypeLabel;
   dst->_label.size = 0;
   dst->_label.id = OperandUtil::makeLabelId(static_cast<uint32_t>(_labels.getLength()));
@@ -182,7 +182,7 @@ _NoMemory:
   return setError(kErrorNoHeapMemory);
 }
 
-LabelLink* BaseAssembler::_newLabelLink() {
+LabelLink* Assembler::_newLabelLink() {
   LabelLink* link = _unusedLinks;
 
   if (link) {
@@ -203,10 +203,10 @@ LabelLink* BaseAssembler::_newLabelLink() {
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Embed]
+// [asmjit::Assembler - Embed]
 // ============================================================================
 
-Error BaseAssembler::embed(const void* data, uint32_t size) {
+Error Assembler::embed(const void* data, uint32_t size) {
   if (getRemainingSpace() < size) {
     Error error = _grow(size);
     if (error != kErrorOk)
@@ -226,10 +226,10 @@ Error BaseAssembler::embed(const void* data, uint32_t size) {
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Make]
+// [asmjit::Assembler - Make]
 // ============================================================================
 
-void* BaseAssembler::make() {
+void* Assembler::make() {
   // Do nothing on error condition or if no instruction has been emitted.
   if (_error != kErrorOk || getCodeSize() == 0)
     return NULL;
@@ -244,63 +244,63 @@ void* BaseAssembler::make() {
 }
 
 // ============================================================================
-// [asmjit::BaseAssembler - Emit (Helpers)]
+// [asmjit::Assembler - Emit (Helpers)]
 // ============================================================================
 
 #define no noOperand
 
-Error BaseAssembler::emit(uint32_t code) {
+Error Assembler::emit(uint32_t code) {
   return _emit(this, code, &no, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0) {
+Error Assembler::emit(uint32_t code, const Operand& o0) {
   return _emit(this, code, &o0, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1) {
   return _emit(this, code, &o0, &o1, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
   return _emit(this, code, &o0, &o1, &o2, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, int o0) {
+Error Assembler::emit(uint32_t code, int o0) {
   Imm imm(o0);
   return _emit(this, code, &imm, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, uint64_t o0) {
+Error Assembler::emit(uint32_t code, uint64_t o0) {
   Imm imm(o0);
   return _emit(this, code, &imm, &no, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, int o1) {
+Error Assembler::emit(uint32_t code, const Operand& o0, int o1) {
   Imm imm(o1);
   return _emit(this, code, &o0, &imm, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, uint64_t o1) {
+Error Assembler::emit(uint32_t code, const Operand& o0, uint64_t o1) {
   Imm imm(o1);
   return _emit(this, code, &o0, &imm, &no, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2) {
   Imm imm(o2);
   return _emit(this, code, &o0, &o1, &imm, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2) {
   Imm imm(o2);
   return _emit(this, code, &o0, &o1, &imm, &no);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, int o3) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, int o3) {
   Imm imm(o3);
   return _emit(this, code, &o0, &o1, &o2, &imm);
 }
 
-Error BaseAssembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3) {
+Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3) {
   Imm imm(o3);
   return _emit(this, code, &o0, &o1, &o2, &imm);
 }

@@ -132,7 +132,7 @@ struct RelocData {
 };
 
 // ============================================================================
-// [asmjit::BaseAssembler]
+// [asmjit::Assembler]
 // ============================================================================
 
 //! Base assembler.
@@ -140,11 +140,11 @@ struct RelocData {
 //! This class implements the base interface to an assembler. The architecture
 //! specific API is implemented by backends.
 //!
-//! @sa BaseCompiler.
-struct ASMJIT_VCLASS BaseAssembler : public CodeGen {
-  ASMJIT_NO_COPY(BaseAssembler)
+//! \sa Compiler.
+struct ASMJIT_VCLASS Assembler : public CodeGen {
+  ASMJIT_NO_COPY(Assembler)
 
-  typedef Error (ASMJIT_CDECL *EmitFunc)(BaseAssembler* self,
+  typedef Error (ASMJIT_CDECL *EmitFunc)(Assembler* self,
     uint32_t code,
     const Operand* o0,
     const Operand* o1,
@@ -155,10 +155,10 @@ struct ASMJIT_VCLASS BaseAssembler : public CodeGen {
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! Create a new `BaseAssembler` instance.
-  ASMJIT_API BaseAssembler(Runtime* runtime);
-  //! Destroy the `BaseAssembler` instance.
-  ASMJIT_API virtual ~BaseAssembler();
+  //! Create a new `Assembler` instance.
+  ASMJIT_API Assembler(Runtime* runtime);
+  //! Destroy the `Assembler` instance.
+  ASMJIT_API virtual ~Assembler();
 
   // --------------------------------------------------------------------------
   // [Clear / Reset]
@@ -533,7 +533,7 @@ struct ASMJIT_VCLASS BaseAssembler : public CodeGen {
 // [Defined-Later]
 // ============================================================================
 
-ASMJIT_INLINE Label::Label(BaseAssembler& a) : Operand(NoInit) {
+ASMJIT_INLINE Label::Label(Assembler& a) : Operand(NoInit) {
   a._newLabel(this);
 }
 

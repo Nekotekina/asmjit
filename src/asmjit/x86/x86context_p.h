@@ -43,7 +43,7 @@ namespace asmjit {
 //! Compiler context is used during compilation and normally developer doesn't
 //! need access to it. The context is user per function (it's reset after each
 //! function is generated).
-struct X86Context : public BaseContext {
+struct X86Context : public Context {
   ASMJIT_NO_COPY(X86Context)
 
   // --------------------------------------------------------------------------
@@ -457,7 +457,7 @@ struct X86Context : public BaseContext {
   // [Serialize]
   // --------------------------------------------------------------------------
 
-  virtual Error serialize(BaseAssembler* assembler, Node* start, Node* stop);
+  virtual Error serialize(Assembler* assembler, Node* start, Node* stop);
 
   // --------------------------------------------------------------------------
   // [Members]
