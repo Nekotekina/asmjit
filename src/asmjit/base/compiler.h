@@ -551,6 +551,12 @@ struct Var : public Operand {
     return Var(*this);
   }
 
+  //! Get whether the variable has been initialized by `Compiler`.
+  ASMJIT_INLINE bool isInitialized() const {
+    return _vreg.id != kInvalidValue;
+  }
+
+  //! Get variable type.
   ASMJIT_INLINE uint32_t getVarType() const {
     return _vreg.vType;
   }

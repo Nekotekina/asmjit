@@ -1027,6 +1027,15 @@ struct Label : public Operand {
   }
 
   // --------------------------------------------------------------------------
+  // [Label Specific]
+  // --------------------------------------------------------------------------
+
+  //! Get whether the label has been initialized by `Assembler` or `Compiler`.
+  ASMJIT_INLINE bool isInitialized() const {
+    return _label.id != kInvalidValue;
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
