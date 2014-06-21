@@ -16,7 +16,6 @@
 #include <string.h>
 
 using namespace asmjit;
-using namespace asmjit::host;
 
 // ============================================================================
 // [X86Test]
@@ -538,7 +537,7 @@ struct X86Test_AllocMany1 : public X86Test {
     }
 
     // Store result to a given pointer in first argument.
-    c.mov(dword_ptr(a0), t);
+    c.mov(x86::dword_ptr(a0), t);
 
     // Clear t.
     c.xor_(t, t);
@@ -549,7 +548,7 @@ struct X86Test_AllocMany1 : public X86Test {
     }
 
     // Store result to a given pointer in second argument.
-    c.mov(dword_ptr(a1), t);
+    c.mov(x86::dword_ptr(a1), t);
 
     // End of function.
     c.endFunc();
@@ -616,7 +615,7 @@ struct X86Test_AllocMany2 : public X86Test {
     c.jnz(L);
 
     for (i = 0; i < ASMJIT_ARRAY_SIZE(var); i++) {
-      c.mov(dword_ptr(a, i * 4), var[i]);
+      c.mov(x86::dword_ptr(a, i * 4), var[i]);
     }
 
     c.endFunc();
@@ -676,8 +675,8 @@ struct X86Test_AllocImul1 : public X86Test {
 
     c.imul(vHi, vLo, src);
 
-    c.mov(dword_ptr(dstHi), vHi);
-    c.mov(dword_ptr(dstLo), vLo);
+    c.mov(x86::dword_ptr(dstHi), vHi);
+    c.mov(x86::dword_ptr(dstLo), vLo);
     c.endFunc();
   }
 
@@ -728,12 +727,12 @@ struct X86Test_AllocImul2 : public X86Test {
       X86GpVar y(c, kVarTypeInt32, "y");
       X86GpVar hi(c, kVarTypeInt32, "hi");
 
-      c.mov(x, dword_ptr(src, 0));
-      c.mov(y, dword_ptr(src, 4));
+      c.mov(x, x86::dword_ptr(src, 0));
+      c.mov(y, x86::dword_ptr(src, 4));
 
       c.imul(hi, x, y);
-      c.add(dword_ptr(dst, 0), hi);
-      c.add(dword_ptr(dst, 4), x);
+      c.add(x86::dword_ptr(dst, 0), hi);
+      c.add(x86::dword_ptr(dst, 4), x);
     }
 
     c.endFunc();
@@ -779,7 +778,7 @@ struct X86Test_AllocSetz : public X86Test {
     c.setArg(2, dst0);
 
     c.cmp(src0, src1);
-    c.setz(byte_ptr(dst0));
+    c.setz(x86::byte_ptr(dst0));
 
     c.endFunc();
   }
@@ -833,7 +832,7 @@ struct X86Test_AllocShlRor : public X86Test {
     c.shl(var, vShlParam);
     c.ror(var, vRorParam);
 
-    c.mov(dword_ptr(dst), var);
+    c.mov(x86::dword_ptr(dst), var);
     c.endFunc();
   }
 
@@ -885,7 +884,7 @@ struct X86Test_AllocGpLo : public X86Test {
 
     // Init pseudo-regs with values from our array.
     for (i = 0; i < kCount; i++) {
-      c.mov(rVar[i], dword_ptr(rPtr, i * 4));
+      c.mov(rVar[i], x86::dword_ptr(rPtr, i * 4));
     }
 
     for (i = 2; i < kCount; i++) {
@@ -1252,7 +1251,7 @@ struct X86Test_AllocArgsIntPtr : public X86Test {
     // Move some data into buffer provided by arguments so we can verify if it
     // really works without looking into assembler output.
     for (i = 0; i < 8; i++) {
-      c.add(byte_ptr(var[i]), static_cast<int>(i + 1));
+      c.add(x86::byte_ptr(var[i]), static_cast<int>(i + 1));
     }
 
     c.endFunc();
@@ -1315,7 +1314,7 @@ struct X86Test_AllocArgsFloat : public X86Test {
     c.addss(xv[0], xv[5]);
     c.addss(xv[0], xv[6]);
 
-    c.movss(ptr(p), xv[0]);
+    c.movss(x86::ptr(p), xv[0]);
     c.endFunc();
   }
 
@@ -1369,7 +1368,7 @@ struct X86Test_AllocArgsDouble : public X86Test {
     c.addsd(xv[0], xv[5]);
     c.addsd(xv[0], xv[6]);
 
-    c.movsd(ptr(p), xv[0]);
+    c.movsd(x86::ptr(p), xv[0]);
     c.endFunc();
   }
 
@@ -1566,9 +1565,9 @@ struct X86Test_AllocMemcpy : public X86Test {
 
     c.bind(L_Loop);                                // Bind the loop label here.
 
-    X86GpVar tmp(c, kVarTypeInt32);                   // Copy a single dword (4 bytes).
-    c.mov(tmp, dword_ptr(src));
-    c.mov(dword_ptr(dst), tmp);
+    X86GpVar tmp(c, kVarTypeInt32);                // Copy a single dword (4 bytes).
+    c.mov(tmp, x86::dword_ptr(src));
+    c.mov(x86::dword_ptr(dst), tmp);
 
     c.add(src, 4);                                 // Increment dst/src pointers.
     c.add(dst, 4);
@@ -2318,14 +2317,14 @@ struct X86Test_CallMisc1 : public X86Test {
     c.setArg(0, a);
     c.setArg(1, b);
 
-    c.alloc(a, eax);
-    c.alloc(b, ebx);
+    c.alloc(a, x86::eax);
+    c.alloc(b, x86::ebx);
 
     X86CallNode* call = c.call(imm_ptr((void*)dummy), kFuncConvHost, FuncBuilder2<void, int, int>());
     call->setArg(0, a);
     call->setArg(1, b);
 
-    c.lea(r, ptr(a, b));
+    c.lea(r, x86::ptr(a, b));
     c.ret(r);
 
     c.endFunc();
@@ -2405,17 +2404,17 @@ struct X86Test_Dummy : public X86Test {
     X86GpVar a(c, kVarTypeUInt32);
     X86GpVar b(c, kVarTypeUInt32);
 
-    c.alloc(r, eax);
-    c.alloc(a, ecx);
-    c.alloc(b, edx);
+    c.alloc(r, x86::eax);
+    c.alloc(a, x86::ecx);
+    c.alloc(b, x86::edx);
 
     c.mov(a, 16);
     c.mov(b, 99);
 
     c.mul(r, a, b);
-    c.alloc(a, esi);
-    c.alloc(b, ecx);
-    c.alloc(r, edi);
+    c.alloc(a, x86::esi);
+    c.alloc(b, x86::ecx);
+    c.alloc(r, x86::edi);
     c.mul(a, b, r);
 
     c.ret(b);

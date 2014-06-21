@@ -179,6 +179,7 @@ static void dumpSizeOf() {
 #if defined(ASMJIT_BUILD_X86) || defined(ASMJIT_BUILD_X64)
   INFO("SizeOf X86/X64:");
   DUMP_TYPE(asmjit::X86Assembler);
+#if !defined(ASMJIT_DISABLE_COMPILER)
   DUMP_TYPE(asmjit::X86Compiler);
   DUMP_TYPE(asmjit::X86CallNode);
   DUMP_TYPE(asmjit::X86FuncNode);
@@ -187,6 +188,7 @@ static void dumpSizeOf() {
   DUMP_TYPE(asmjit::X86VarMap);
   DUMP_TYPE(asmjit::X86VarInfo);
   DUMP_TYPE(asmjit::X86VarState);
+#endif // !ASMJIT_DISABLE_COMPILER
   INFO("");
 #endif // ASMJIT_BUILD_X86
 }
@@ -198,10 +200,14 @@ static void dumpSizeOf() {
 // ============================================================================
 
 int main(int argc, const char* argv[]) {
-  if (MiniUnit::init(argc, argv)) {
+  bool shouldRun = MiniUnit::init(argc, argv);
+
+  INFO("AsmJit Test-Suite");
+  INFO("");
+
+  if (shouldRun) {
     dumpCpu();
     dumpSizeOf();
-
     MiniUnit::run();
   }
 
