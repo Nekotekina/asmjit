@@ -10,11 +10,10 @@
 
 // [Dependencies - AsmJit]
 #include "../base/codegen.h"
+#include "../base/containers.h"
 #include "../base/error.h"
 #include "../base/logger.h"
 #include "../base/operand.h"
-#include "../base/podlist.h"
-#include "../base/podvector.h"
 #include "../base/runtime.h"
 #include "../base/zone.h"
 
@@ -161,16 +160,13 @@ struct ASMJIT_VCLASS Assembler : public CodeGen {
   ASMJIT_API virtual ~Assembler();
 
   // --------------------------------------------------------------------------
-  // [Clear / Reset]
+  // [Reset]
   // --------------------------------------------------------------------------
 
-  //! Clear everything, but not deallocate buffers.
-  ASMJIT_API void clear();
-  //! Reset everything (means also to free all buffers).
-  ASMJIT_API void reset();
-  //! Called by clear() and reset() to clear all data related to derived class
-  //! implementation.
-  ASMJIT_API virtual void _purge();
+  //! Reset the assembler.
+  //!
+  //! If `releaseMemory` is true all buffers will be released to the system.
+  ASMJIT_API void reset(bool releaseMemory = false);
 
   // --------------------------------------------------------------------------
   // [Buffer]

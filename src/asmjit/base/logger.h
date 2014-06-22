@@ -205,10 +205,14 @@ struct ASMJIT_VCLASS StringLogger : public Logger {
   //! string.
   //!
   //! The pointer is owned by `StringLogger`, it can't be modified or freed.
-  ASMJIT_INLINE const char* getString() const { return _stringBuilder.getData(); }
+  ASMJIT_INLINE const char* getString() const {
+    return _stringBuilder.getData();
+  }
 
   //! Clear the resulting string.
-  ASMJIT_INLINE void clearString() { _stringBuilder.clear(); }
+  ASMJIT_INLINE void clearString() {
+    _stringBuilder.clear();
+  }
 
   // --------------------------------------------------------------------------
   // [Logging]

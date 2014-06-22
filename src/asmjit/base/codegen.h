@@ -154,7 +154,7 @@ struct ASMJIT_VCLASS CodeGen {
   ASMJIT_API Error setError(Error error, const char* message = NULL);
 
   //! Clear the last error code.
-  ASMJIT_INLINE void clearError() {
+  ASMJIT_INLINE void resetError() {
     _error = kErrorOk;
   }
 
@@ -167,7 +167,7 @@ struct ASMJIT_VCLASS CodeGen {
   ASMJIT_API Error setErrorHandler(ErrorHandler* handler);
 
   //! Clear error handler.
-  ASMJIT_INLINE Error clearErrorHandler() {
+  ASMJIT_INLINE Error resetErrorHandler() {
     return setErrorHandler(NULL);
   }
 
@@ -194,20 +194,12 @@ struct ASMJIT_VCLASS CodeGen {
     _options = options;
   }
 
-  //! Get options of the next instruction and clear them.
-  ASMJIT_INLINE uint32_t getOptionsAndClear() {
+  //! Get options of the next instruction and reset them.
+  ASMJIT_INLINE uint32_t getOptionsAndReset() {
     uint32_t options = _options;
     _options = 0;
     return options;
   };
-
-  // --------------------------------------------------------------------------
-  // [Purge]
-  // --------------------------------------------------------------------------
-
-  //! Called by \ref clear() and \ref reset() to clear all data used by the
-  //! code generator.
-  virtual void _purge() = 0;
 
   // --------------------------------------------------------------------------
   // [Make]

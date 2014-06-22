@@ -1004,7 +1004,7 @@ static Error ASMJIT_CDECL X86Assembler_emit(Assembler* self_, uint32_t code, con
 
   uint8_t* cursor = self->getCursor();
   uint32_t encoded = o0->getOp() + (o1->getOp() << 3) + (o2->getOp() << 6);
-  uint32_t options = self->getOptionsAndClear();
+  uint32_t options = self->getOptionsAndReset();
 
   // Invalid instruction.
   if (code >= _kX86InstIdCount) {

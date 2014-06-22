@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
       void *p = a.make();
       runtime.release(p);
 
-      a.clear();
+      a.reset();
     }
     perf.end();
   }
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
       void* p = c.make();
       runtime.release(p);
 
-      c.clear();
+      c.reset();
     }
     perf.end();
   }

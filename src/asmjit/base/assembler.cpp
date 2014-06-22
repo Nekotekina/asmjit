@@ -35,48 +35,34 @@ Assembler::Assembler(Runtime* runtime) :
   _unusedLinks(NULL) {}
 
 Assembler::~Assembler() {
-  if (_buffer != NULL)
-    ASMJIT_FREE(_buffer);
+  reset(true);
 }
 
 // ============================================================================
 // [asmjit::Assembler - Clear / Reset]
 // ============================================================================
 
-void Assembler::clear() {
-  _purge();
-}
+void Assembler::reset(bool releaseMemory) {
+  // CodeGen members.
+  _error = kErrorOk;
+  _options = 0;
+  _baseZone.reset(releaseMemory);
 
-void Assembler::reset() {
-  _purge();
-  _baseZone.reset();
-
-  if (_buffer != NULL) {
+  // Assembler members.
+  if (releaseMemory && _buffer != NULL) {
     ASMJIT_FREE(_buffer);
-
     _buffer = NULL;
     _end = NULL;
-    _cursor = NULL;
   }
 
-  _labels.reset();
-  _relocData.reset();
-}
-
-void Assembler::_purge() {
-  _baseZone.clear();
   _cursor = _buffer;
-
-  _options = 0;
   _trampolineSize = 0;
 
   _comment = NULL;
   _unusedLinks = NULL;
 
-  _labels.clear();
-  _relocData.clear();
-
-  clearError();
+  _labels.reset(releaseMemory);
+  _relocData.reset(releaseMemory);
 }
 
 // ============================================================================

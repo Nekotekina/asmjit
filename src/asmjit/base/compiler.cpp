@@ -62,32 +62,15 @@ Compiler::~Compiler() {
 // [asmjit::Compiler - Clear / Reset]
 // ============================================================================
 
-void Compiler::clear() {
-  _purge();
-}
-
-void Compiler::reset() {
-  _purge();
-
-  _localConstPool.reset();
-  _globalConstPool.reset();
-
-  _targets.reset();
-  _vars.reset();
-
-  _baseZone.reset();
-  _varZone.reset();
-  _stringZone.reset();
-  _localConstZone.reset();
-}
-
-void Compiler::_purge() {
-  _baseZone.clear();
-
-  _varZone.clear();
-  _stringZone.clear();
-
+void Compiler::reset(bool releaseMemory) {
+  // CodeGen members.
+  _error = kErrorOk;
   _options = 0;
+  _baseZone.reset(releaseMemory);
+
+  // Compiler members.
+  _nodeFlowId = 0;
+  _nodeFlags = 0;
 
   _firstNode = NULL;
   _lastNode = NULL;
@@ -95,10 +78,18 @@ void Compiler::_purge() {
   _cursor = NULL;
   _func = NULL;
 
-  _targets.clear();
-  _vars.clear();
+  _localConstPool.reset();
+  _globalConstPool.reset();
 
-  clearError();
+  _localConstPoolLabel.reset();
+  _globalConstPoolLabel.reset();
+
+  _varZone.reset(releaseMemory);
+  _stringZone.reset(releaseMemory);
+  _localConstZone.reset(releaseMemory);
+
+  _targets.reset(releaseMemory);
+  _vars.reset(releaseMemory);
 }
 
 // ============================================================================

@@ -15,12 +15,10 @@
 #include "../base/assembler.h"
 #include "../base/codegen.h"
 #include "../base/constpool.h"
+#include "../base/containers.h"
 #include "../base/error.h"
 #include "../base/intutil.h"
 #include "../base/operand.h"
-#include "../base/podlist.h"
-#include "../base/podvector.h"
-#include "../base/runtime.h"
 #include "../base/zone.h"
 
 // [Api-Begin]
@@ -840,7 +838,7 @@ struct VarData {
   // --------------------------------------------------------------------------
 
   // These variables are only used during register allocation. They are
-  // initialized by init() phase and cleared by cleanup() phase.
+  // initialized by init() phase and reset by cleanup() phase.
 
   union {
     //! Temporary link to VarAttr* used by the `Context` used in
@@ -1018,7 +1016,23 @@ struct VarAttr {
 // ============================================================================
 
 //! Variables' map related to a single node (instruction / other node).
-struct VarMap {};
+struct VarMap {
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  //! Get count of variables (all).
+  ASMJIT_INLINE uint32_t getVaCount() const {
+    return _vaCount;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! Variables count.
+  uint32_t _vaCount;
+};
 
 // ============================================================================
 // [asmjit::VarState]
@@ -2489,17 +2503,10 @@ struct ASMJIT_VCLASS Compiler : public CodeGen {
   // [Clear / Reset]
   // --------------------------------------------------------------------------
 
-  //! Clear everything, but keep buffers allocated.
+  //! Reset the compiler.
   //!
-  //! \note This method will destroy your code.
-  ASMJIT_API void clear();
-  //! Clear everything and reset all buffers.
-  //!
-  //! \note This method will destroy your code.
-  ASMJIT_API void reset();
-  //! Called by clear() and reset() to clear all data related to derived
-  //! class implementation.
-  ASMJIT_API virtual void _purge();
+  //! If `releaseMemory` is true all buffers will be released to the system.
+  ASMJIT_API void reset(bool releaseMemory = false);
 
   // --------------------------------------------------------------------------
   // [Nodes]
@@ -2770,6 +2777,7 @@ struct ASMJIT_VCLASS Compiler : public CodeGen {
   uint32_t _nodeFlowId;
   //! Flags added to each node created (used only by `Context)`.
   uint32_t _nodeFlags;
+
   //! Maximum count of nodes to look ahead when allocating/spilling
   //! registers.
   uint32_t _maxLookAhead;

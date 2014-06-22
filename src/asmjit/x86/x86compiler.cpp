@@ -814,7 +814,7 @@ InstNode* X86Compiler::newInst(uint32_t code) {
   if (inst == NULL)
     goto _NoMemory;
 
-  return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), NULL, 0);
+  return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), NULL, 0);
 
 _NoMemory:
   setError(kErrorNoHeapMemory);
@@ -832,7 +832,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0) {
     Operand* opList = reinterpret_cast<Operand*>(reinterpret_cast<uint8_t*>(inst) + size);
     opList[0] = o0;
     ASMJIT_DETECT_UNINITIALIZED(o0);
-    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 1);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 1);
   }
 
 _NoMemory:
@@ -853,7 +853,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     opList[1] = o1;
     ASMJIT_DETECT_UNINITIALIZED(o0);
     ASMJIT_DETECT_UNINITIALIZED(o1);
-    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 2);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 2);
   }
 
 _NoMemory:
@@ -876,7 +876,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     ASMJIT_DETECT_UNINITIALIZED(o0);
     ASMJIT_DETECT_UNINITIALIZED(o1);
     ASMJIT_DETECT_UNINITIALIZED(o2);
-    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 3);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 3);
   }
 
 _NoMemory:
@@ -901,7 +901,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     ASMJIT_DETECT_UNINITIALIZED(o1);
     ASMJIT_DETECT_UNINITIALIZED(o2);
     ASMJIT_DETECT_UNINITIALIZED(o3);
-    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 4);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 4);
   }
 
 _NoMemory:
@@ -928,7 +928,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     ASMJIT_DETECT_UNINITIALIZED(o2);
     ASMJIT_DETECT_UNINITIALIZED(o3);
     ASMJIT_DETECT_UNINITIALIZED(o4);
-    return X86Compiler_newInst(this, inst, code, getOptionsAndClear(), opList, 5);
+    return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 5);
   }
 
 _NoMemory:

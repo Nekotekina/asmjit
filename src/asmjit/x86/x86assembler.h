@@ -179,8 +179,8 @@ namespace asmjit {
 //! You can get size of generated code by `getCodeSize()` or `getOffset()`
 //! methods. These methods returns you code size or more precisely the current
 //! code offset in bytes. The `takeCode()` function can be used to take the
-//! internal buffer and clear the code generator, but the buffer taken has to
-//! be freed manually.
+//! internal buffer and reset the code generator, but the buffer taken has to
+//! be freed manually in such case.
 //!
 //! Machine code can be executed only in memory that is marked executable. This
 //! mark is usually not set for memory returned by a C/C++ `malloc` function.

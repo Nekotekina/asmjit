@@ -26,6 +26,7 @@ namespace asmjit {
 
 Context::Context(Compiler* compiler) :
   _compiler(compiler),
+  _varMapToVaListOffset(0),
   _baseZone(8192 - kZoneOverhead) {
 
   Context::reset();
@@ -37,8 +38,8 @@ Context::~Context() {}
 // [asmjit::Context - Reset]
 // ============================================================================
 
-void Context::reset() {
-  _baseZone.clear();
+void Context::reset(bool releaseMemory) {
+  _baseZone.reset(releaseMemory);
 
   _func = NULL;
   _start = NULL;
@@ -48,7 +49,7 @@ void Context::reset() {
 
   _unreachableList.reset();
   _jccList.reset();
-  _contextVd.clear();
+  _contextVd.reset(releaseMemory);
 
   _memVarCells = NULL;
   _memStackCells = NULL;
@@ -297,12 +298,210 @@ Error Context::removeUnreachableCode() {
 }
 
 // ============================================================================
-// [asmjit::Context - Cleanup]
+// [asmjit::Context - Liveness Analysis]
 // ============================================================================
 
 //! \internal
-//!
-//! Translate the given function `func`.
+struct LivenessTarget {
+  //! Previous target.
+  LivenessTarget* prev;
+
+  //! Target node.
+  TargetNode* node;
+  //! Jumped from.
+  JumpNode* from;
+};
+
+Error Context::livenessAnalysis() {
+  FuncNode* func = getFunc();
+  JumpNode* from = NULL;
+
+  Node* node = func->getEnd();
+  uint32_t bLen = static_cast<uint32_t>(
+    ((_contextVd.getLength() + VarBits::kEntityBits - 1) / VarBits::kEntityBits));
+
+  LivenessTarget* ltCur = NULL;
+  LivenessTarget* ltUnused = NULL;
+
+  size_t varMapToVaListOffset = _varMapToVaListOffset;
+
+  // No variables.
+  if (bLen == 0)
+    return kErrorOk;
+
+  VarBits* bCur = newBits(bLen);
+  if (bCur == NULL)
+    goto _NoMemory;
+
+  // Allocate bits for code visited first time.
+_OnVisit:
+  for (;;) {
+    if (node->hasLiveness()) {
+      if (bCur->_addBitsDelSource(node->getLiveness(), bCur, bLen))
+        goto _OnPatch;
+      else
+        goto _OnDone;
+    }
+
+    VarBits* bTmp = copyBits(bCur, bLen);
+    if (bTmp == NULL)
+      goto _NoMemory;
+
+    node->setLiveness(bTmp);
+    VarMap* map = node->getMap();
+
+    if (map != NULL) {
+      uint32_t vaCount = map->getVaCount();
+      VarAttr* vaList = reinterpret_cast<VarAttr*>(((uint8_t*)map) + varMapToVaListOffset);
+
+      for (uint32_t i = 0; i < vaCount; i++) {
+        VarAttr* va = &vaList[i];
+        VarData* vd = va->getVd();
+
+        uint32_t flags = va->getFlags();
+        uint32_t ctxId = vd->getContextId();
+
+        if ((flags & kVarAttrOutAll) && !(flags & kVarAttrInAll)) {
+          // Write-Only.
+          bTmp->setBit(ctxId);
+          bCur->delBit(ctxId);
+        }
+        else {
+          // Read-Only or Read/Write.
+          bTmp->setBit(ctxId);
+          bCur->setBit(ctxId);
+        }
+      }
+    }
+
+    if (node->getType() == kNodeTypeTarget)
+      goto _OnTarget;
+
+    if (node == func)
+      goto _OnDone;
+
+    ASMJIT_ASSERT(node->getPrev());
+    node = node->getPrev();
+  }
+
+  // Patch already generated liveness bits.
+_OnPatch:
+  for (;;) {
+    ASMJIT_ASSERT(node->hasLiveness());
+    VarBits* bNode = node->getLiveness();
+
+    if (!bNode->_addBitsDelSource(bCur, bLen))
+      goto _OnDone;
+
+    if (node->getType() == kNodeTypeTarget)
+      goto _OnTarget;
+
+    if (node == func)
+      goto _OnDone;
+
+    node = node->getPrev();
+  }
+
+_OnTarget:
+  if (static_cast<TargetNode*>(node)->getNumRefs() != 0) {
+    // Push a new LivenessTarget onto the stack if needed.
+    if (ltCur == NULL || ltCur->node != node) {
+      // Allocate a new LivenessTarget object (from pool or zone).
+      LivenessTarget* ltTmp = ltUnused;
+
+      if (ltTmp != NULL) {
+        ltUnused = ltUnused->prev;
+      }
+      else {
+        ltTmp = _baseZone.allocT<LivenessTarget>(
+          sizeof(LivenessTarget) - sizeof(VarBits) + bLen * sizeof(uintptr_t));
+
+        if (ltTmp == NULL)
+          goto _NoMemory;
+      }
+
+      // Initialize and make current - ltTmp->from will be set later on.
+      ltTmp->prev = ltCur;
+      ltTmp->node = static_cast<TargetNode*>(node);
+      ltCur = ltTmp;
+
+      from = static_cast<TargetNode*>(node)->getFrom();
+      ASMJIT_ASSERT(from != NULL);
+    }
+    else {
+      from = ltCur->from;
+      goto _OnJumpNext;
+    }
+
+    // Visit/Patch.
+    do {
+      ltCur->from = from;
+      bCur->copyBits(node->getLiveness(), bLen);
+
+      if (!from->hasLiveness()) {
+        node = from;
+        goto _OnVisit;
+      }
+
+      // Issue #25: Moved '_OnJumpNext' here since it's important to patch
+      // code again if there are more live variables than before.
+_OnJumpNext:
+      if (bCur->delBits(from->getLiveness(), bLen)) {
+        node = from;
+        goto _OnPatch;
+      }
+
+      from = from->getJumpNext();
+    } while (from != NULL);
+
+    // Pop the current LivenessTarget from the stack.
+    {
+      LivenessTarget* ltTmp = ltCur;
+
+      ltCur = ltCur->prev;
+      ltTmp->prev = ltUnused;
+      ltUnused = ltTmp;
+    }
+  }
+
+  bCur->copyBits(node->getLiveness(), bLen);
+  node = node->getPrev();
+
+  if (node->isJmp() || !node->isFetched())
+    goto _OnDone;
+
+  if (!node->hasLiveness())
+    goto _OnVisit;
+
+  if (bCur->delBits(node->getLiveness(), bLen))
+    goto _OnPatch;
+
+_OnDone:
+  if (ltCur != NULL) {
+    node = ltCur->node;
+    from = ltCur->from;
+
+    goto _OnJumpNext;
+  }
+  return kErrorOk;
+
+_NoMemory:
+  return setError(kErrorNoHeapMemory);
+}
+
+// ============================================================================
+// [asmjit::Context - Schedule]
+// ============================================================================
+
+Error Context::schedule() {
+  // By default there is no instruction scheduler implemented.
+  return kErrorOk;
+}
+
+// ============================================================================
+// [asmjit::Context - Cleanup]
+// ============================================================================
+
 void Context::cleanup() {
   VarData** array = _contextVd.getData();
   size_t length = _contextVd.getLength();
@@ -313,7 +512,7 @@ void Context::cleanup() {
     vd->resetRegIndex();
   }
 
-  _contextVd.clear();
+  _contextVd.reset(false);
   _extraBlock = NULL;
 }
 
@@ -331,7 +530,7 @@ Error Context::compile(FuncNode* func) {
 
   ASMJIT_PROPAGATE_ERROR(fetch());
   ASMJIT_PROPAGATE_ERROR(removeUnreachableCode());
-  ASMJIT_PROPAGATE_ERROR(analyze());
+  ASMJIT_PROPAGATE_ERROR(livenessAnalysis());
 
 #if !defined(ASMJIT_DISABLE_LOGGER)
   if (_compiler->hasLogger())

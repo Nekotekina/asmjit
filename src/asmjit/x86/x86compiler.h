@@ -928,11 +928,6 @@ struct X86VarMap : public VarMap {
     return _start.get(c);
   }
 
-  //! Get count of variables (all).
-  ASMJIT_INLINE uint32_t getVaCount() const {
-    return _vaCount;
-  }
-
   //! Get count of variables (by class).
   ASMJIT_INLINE uint32_t getVaCountByClass(uint32_t c) const {
     return _count.get(c);
@@ -981,9 +976,6 @@ struct X86VarMap : public VarMap {
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-
-  //! Variables count.
-  uint32_t _vaCount;
 
   //! Special registers on input.
   //!

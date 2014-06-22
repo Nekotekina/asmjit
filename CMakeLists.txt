@@ -239,6 +239,8 @@ AsmJit_AddSource(ASMJIT_SRC asmjit/base
   compiler.h
   constpool.cpp
   constpool.h
+  containers.cpp
+  containers.h
   context.cpp
   context_p.h
   cpuinfo.cpp
@@ -256,9 +258,6 @@ AsmJit_AddSource(ASMJIT_SRC asmjit/base
   logger.h
   operand.cpp
   operand.h
-  podlist.h
-  podvector.cpp
-  podvector.h
   runtime.cpp
   runtime.h
   string.cpp
@@ -284,6 +283,8 @@ AsmJit_AddSource(ASMJIT_SRC asmjit/x86
   x86operand.cpp
   x86operand_regs.cpp
   x86operand.h
+  x86scheduler.cpp
+  x86scheduler_p.h
 )
 
 If(ASMJIT_BUILD_CONTRIB)
