@@ -145,6 +145,25 @@ var Database = (function() {
 // [Generate]
 // ----------------------------------------------------------------------------
 
+var decToHex = function(n, nPad) {
+  var hex = Number(n < 0 ? 0x100000000 + n : n).toString(16);
+  while (nPad > hex.length)
+    hex = "0" + hex;
+  return "0x" + hex.toUpperCase();
+};
+
+var getEFlagsMask = function(eflags, passing) {
+  var msk = 0x0;
+  var bit = 0x1;
+
+  for (var i = 0; i < 8; i++, bit <<= 1) {
+    if (passing.indexOf(eflags[i]) !== -1)
+      msk |= bit;
+  }
+
+  return msk;
+};
+
 var generate = function(fileName, arch) {
   var Arch = upFirst(arch);
   var oldData = fs.readFileSync(fileName, "utf8").replace(/\r\n/g, "\n");
@@ -165,8 +184,9 @@ var generate = function(fileName, arch) {
     "([^,]+)," +                          // [07] Operand-Flags[1].
     "([^,]+)," +                          // [08] Operand-Flags[2].
     "([^,]+)," +                          // [09] Operand-Flags[3].
-    "(.{17}[^,]*)," +                     // [10] OpCode[0].
-    "(.{17}[^\\)]*)\\)",                  // [11] OpCode[1].
+    "\\s*E\\(([A-Z_]+)\\)\\s*," +         // [10] EFLAGS.
+    "(.{17}[^,]*)," +                     // [11] OpCode[0].
+    "(.{17}[^\\)]*)\\)",                  // [12] OpCode[1].
     "g");
 
   while (m = re.exec(data)) {
@@ -175,21 +195,28 @@ var generate = function(fileName, arch) {
     var name = m[2];
 
     // Extract data that goes to the secondary table (ExtendedInfo).
-    var group = trimLeft(m[3]);
-    var flags = trimLeft(m[4]);
+    var instGroup = trimLeft(m[3]);
+    var instFlags = trimLeft(m[4]);
     var moveSize = trimLeft(m[5]);
     
     var opFlags0 = trimLeft(m[6]);
     var opFlags1 = trimLeft(m[7]);
     var opFlags2 = trimLeft(m[8]);
     var opFlags3 = trimLeft(m[9]);
-    var opCode1 = trimLeft(m[11]);
+    var eflags = m[10];
+    var opCode1 = trimLeft(m[12]);
+
+    // Generate EFlags-In and EFlags-Out.
+    var eflagsIn = decToHex(getEFlagsMask(eflags, "RX"), 2);
+    var eflagsOut = decToHex(getEFlagsMask(eflags, "WXU"), 2);
 
     var extData = "" +
-      group    + ", " +
-      moveSize + ", " +
-      flags    + ", " + 
-      "{ " + opFlags0 + ", " + opFlags1 + ", " + opFlags2 + ", " + opFlags3 + "}, " +
+      instGroup + ", " +
+      moveSize  + ", " +
+      eflagsIn  + ", " +
+      eflagsOut + ", " +
+      instFlags + ", " + 
+      "{ " + opFlags0 + ", " + opFlags1 + ", " + opFlags2 + ", " + opFlags3 + ", U }, " +
       opCode1;
 
     db.add(name, id, extData);
@@ -243,7 +270,7 @@ var generate = function(fileName, arch) {
 
   // Generate ExtendedInfo.
   code += disclaimer;
-  code += "const X86InstExtendedInfo _x86InstExtendedInfo[] = {\n";
+  code += "const " + Arch + "InstExtendedInfo _" + arch + "InstExtendedInfo[] = {\n";
   for (var i = 0; i < db.extendedData.length; i++) {
     code += "  { " + db.extendedData[i] + " }";
     if (i !== db.extendedData.length - 1)

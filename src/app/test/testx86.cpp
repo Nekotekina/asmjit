@@ -949,7 +949,7 @@ struct X86Test_AllocGpLo : public X86Test {
 // ============================================================================
 
 struct X86Test_AllocRepMovsb : public X86Test {
-  X86Test_AllocRepMovsb() : X86Test("[Alloc] Rep Movsb") {}
+  X86Test_AllocRepMovsb() : X86Test("[Alloc] Rep MovsB") {}
 
   static void add(PodVector<X86Test*>& tests) {
     tests.append(new X86Test_AllocSetz());

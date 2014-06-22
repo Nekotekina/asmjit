@@ -98,10 +98,6 @@ struct VMemUtil {
 //! Reference implementation of memory manager that uses `VMemUtil` to allocate
 //! chunks of virtual memory and bit arrays to manage it.
 struct VMemMgr {
-  struct RbNode;
-  struct MemNode;
-  struct PermanentNode;
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
@@ -217,13 +213,16 @@ struct VMemMgr {
   //! \internal
   //! \{
 
+  struct RbNode;
+  struct MemNode;
+  struct PermanentNode;
+
   // Memory nodes root.
   MemNode* _root;
   // Memory nodes list.
   MemNode* _first;
   MemNode* _last;
   MemNode* _optimal;
-
   // Permanent memory.
   PermanentNode* _permanent;
 

@@ -231,17 +231,18 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdCqo:
       return x86SpecialInstCdqCwdCqo;
 
-    case kX86InstIdCmpsb:
-    case kX86InstIdCmpsq:
-    case kX86InstIdCmpsw:
-    case kX86InstIdRepeCmpsb:
-    case kX86InstIdRepeCmpsd:
-    case kX86InstIdRepeCmpsq:
-    case kX86InstIdRepeCmpsw:
-    case kX86InstIdRepneCmpsb:
-    case kX86InstIdRepneCmpsd:
-    case kX86InstIdRepneCmpsq:
-    case kX86InstIdRepneCmpsw:
+    case kX86InstIdCmpsB:
+    case kX86InstIdCmpsD:
+    case kX86InstIdCmpsQ:
+    case kX86InstIdCmpsW:
+    case kX86InstIdRepeCmpsB:
+    case kX86InstIdRepeCmpsD:
+    case kX86InstIdRepeCmpsQ:
+    case kX86InstIdRepeCmpsW:
+    case kX86InstIdRepneCmpsB:
+    case kX86InstIdRepneCmpsD:
+    case kX86InstIdRepneCmpsQ:
+    case kX86InstIdRepneCmpsW:
       return x86SpecialInstMovsCmps;
 
     case kX86InstIdCmpxchg:
@@ -274,34 +275,25 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdMovPtr:
       return x86SpecialInstMovPtr;
 
-    case kX86InstIdLodsb:
-    case kX86InstIdLodsd:
-    case kX86InstIdLodsq:
-    case kX86InstIdLodsw:
-    case kX86InstIdRepLodsb:
-    case kX86InstIdRepLodsd:
-    case kX86InstIdRepLodsq:
-    case kX86InstIdRepLodsw:
+    case kX86InstIdLodsB:
+    case kX86InstIdLodsD:
+    case kX86InstIdLodsQ:
+    case kX86InstIdLodsW:
+    case kX86InstIdRepLodsB:
+    case kX86InstIdRepLodsD:
+    case kX86InstIdRepLodsQ:
+    case kX86InstIdRepLodsW:
       return x86SpecialInstLods;
 
-    case kX86InstIdMovsb:
-    case kX86InstIdMovsq:
-    case kX86InstIdMovsw:
-    case kX86InstIdRepMovsb:
-    case kX86InstIdRepMovsd:
-    case kX86InstIdRepMovsq:
-    case kX86InstIdRepMovsw:
+    case kX86InstIdMovsB:
+    case kX86InstIdMovsD:
+    case kX86InstIdMovsQ:
+    case kX86InstIdMovsW:
+    case kX86InstIdRepMovsB:
+    case kX86InstIdRepMovsD:
+    case kX86InstIdRepMovsQ:
+    case kX86InstIdRepMovsW:
       return x86SpecialInstMovsCmps;
-
-    case kX86InstIdCmpsd:
-    case kX86InstIdMovsd:
-      if (opCount == 2 &&
-          static_cast<const X86Reg&>(opList[0]).isGpd() &&
-          static_cast<const X86Reg&>(opList[1]).isGpd())
-        return x86SpecialInstMovsCmps;
-
-      // Otherwise this is a SSE2 `cmpsd` or `movsd` instruction.
-      return NULL;
 
     case kX86InstIdLahf:
       return x86SpecialInstLahf;
@@ -369,28 +361,28 @@ static ASMJIT_INLINE const X86SpecialInst* X86SpecialInst_get(uint32_t code, con
     case kX86InstIdRdtscp:
       return x86SpecialInstRdtscRdtscp;
 
-    case kX86InstIdScasb:
-    case kX86InstIdScasd:
-    case kX86InstIdScasq:
-    case kX86InstIdScasw:
-    case kX86InstIdRepeScasb:
-    case kX86InstIdRepeScasd:
-    case kX86InstIdRepeScasq:
-    case kX86InstIdRepeScasw:
-    case kX86InstIdRepneScasb:
-    case kX86InstIdRepneScasd:
-    case kX86InstIdRepneScasq:
-    case kX86InstIdRepneScasw:
+    case kX86InstIdScasB:
+    case kX86InstIdScasD:
+    case kX86InstIdScasQ:
+    case kX86InstIdScasW:
+    case kX86InstIdRepeScasB:
+    case kX86InstIdRepeScasD:
+    case kX86InstIdRepeScasQ:
+    case kX86InstIdRepeScasW:
+    case kX86InstIdRepneScasB:
+    case kX86InstIdRepneScasD:
+    case kX86InstIdRepneScasQ:
+    case kX86InstIdRepneScasW:
       return x86SpecialInstScas;
 
-    case kX86InstIdStosb:
-    case kX86InstIdStosd:
-    case kX86InstIdStosq:
-    case kX86InstIdStosw:
-    case kX86InstIdRepStosb:
-    case kX86InstIdRepStosd:
-    case kX86InstIdRepStosq:
-    case kX86InstIdRepStosw:
+    case kX86InstIdStosB:
+    case kX86InstIdStosD:
+    case kX86InstIdStosQ:
+    case kX86InstIdStosW:
+    case kX86InstIdRepStosB:
+    case kX86InstIdRepStosD:
+    case kX86InstIdRepStosQ:
+    case kX86InstIdRepStosW:
       return x86SpecialInstStos;
 
     case kX86InstIdBlendvpd:
@@ -2928,7 +2920,7 @@ static void X86Context_annotateOperand(X86Context* self,
 static bool X86Context_annotateInstruction(X86Context* self,
   StringBuilder& sb, uint32_t code, const Operand* opList, uint32_t opCount) {
 
-  sb.appendString(_x86InstInfo[code].getName());
+  sb.appendString(_x86InstInfo[code].getInstName());
   for (uint32_t i = 0; i < opCount; i++) {
     if (i == 0)
       sb.appendChar(' ');
@@ -5566,13 +5558,13 @@ static ASMJIT_INLINE Error X86Context_serialize(X86Context* self, X86Assembler* 
             case kX86InstIdRdtscp:
               break;
 
-            case kX86InstIdRepLodsb  : case kX86InstIdRepLodsd  : case kX86InstIdRepLodsq  : case kX86InstIdRepLodsw  :
-            case kX86InstIdRepMovsb  : case kX86InstIdRepMovsd  : case kX86InstIdRepMovsq  : case kX86InstIdRepMovsw  :
-            case kX86InstIdRepStosb  : case kX86InstIdRepStosd  : case kX86InstIdRepStosq  : case kX86InstIdRepStosw  :
-            case kX86InstIdRepeCmpsb : case kX86InstIdRepeCmpsd : case kX86InstIdRepeCmpsq : case kX86InstIdRepeCmpsw :
-            case kX86InstIdRepeScasb : case kX86InstIdRepeScasd : case kX86InstIdRepeScasq : case kX86InstIdRepeScasw :
-            case kX86InstIdRepneCmpsb: case kX86InstIdRepneCmpsd: case kX86InstIdRepneCmpsq: case kX86InstIdRepneCmpsw:
-            case kX86InstIdRepneScasb: case kX86InstIdRepneScasd: case kX86InstIdRepneScasq: case kX86InstIdRepneScasw:
+            case kX86InstIdRepLodsB  : case kX86InstIdRepLodsD  : case kX86InstIdRepLodsQ  : case kX86InstIdRepLodsW  :
+            case kX86InstIdRepMovsB  : case kX86InstIdRepMovsD  : case kX86InstIdRepMovsQ  : case kX86InstIdRepMovsW  :
+            case kX86InstIdRepStosB  : case kX86InstIdRepStosD  : case kX86InstIdRepStosQ  : case kX86InstIdRepStosW  :
+            case kX86InstIdRepeCmpsB : case kX86InstIdRepeCmpsD : case kX86InstIdRepeCmpsQ : case kX86InstIdRepeCmpsW :
+            case kX86InstIdRepeScasB : case kX86InstIdRepeScasD : case kX86InstIdRepeScasQ : case kX86InstIdRepeScasW :
+            case kX86InstIdRepneCmpsB: case kX86InstIdRepneCmpsD: case kX86InstIdRepneCmpsQ: case kX86InstIdRepneCmpsW:
+            case kX86InstIdRepneScasB: case kX86InstIdRepneScasD: case kX86InstIdRepneScasQ: case kX86InstIdRepneScasW:
               break;
 
             default:

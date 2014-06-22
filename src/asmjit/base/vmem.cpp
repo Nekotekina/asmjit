@@ -293,6 +293,9 @@ static ASMJIT_INLINE bool rbIsRed(RbNode* node) {
   return node != NULL && node->red;
 }
 
+//! \internal
+//!
+//! Check whether the RB tree is valid.
 static int rbAssert(RbNode* root) {
   if (root == NULL)
     return 1;
@@ -320,6 +323,9 @@ static int rbAssert(RbNode* root) {
     return 0;
 }
 
+//! \internal
+//!
+//! Single rotation.
 static ASMJIT_INLINE RbNode* rbRotateSingle(RbNode* root, int dir) {
   RbNode* save = root->node[!dir];
 
@@ -332,6 +338,9 @@ static ASMJIT_INLINE RbNode* rbRotateSingle(RbNode* root, int dir) {
   return save;
 }
 
+//! \internal
+//!
+//! Double rotation.
 static ASMJIT_INLINE RbNode* rbRotateDouble(RbNode* root, int dir) {
   root->node[!dir] = rbRotateSingle(root->node[!dir], !dir);
   return rbRotateSingle(root, dir);
@@ -878,6 +887,11 @@ _Found:
   return result;
 }
 
+//! \internal
+//!
+//! Reset the whole `VMemMgr` instance, freeing all heap memory allocated an
+//! virtual memory allocated unless `keepVirtualMemory` is true (and this is
+//! only used when writing data to a remote process).
 static void vMemMgrReset(VMemMgr* self, bool keepVirtualMemory) {
   MemNode* node = self->_first;
 

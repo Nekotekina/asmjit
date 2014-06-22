@@ -816,13 +816,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_2i(cmp, kX86InstIdCmp, X86Mem, Imm)
 
   //! Compare BYTE in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(cmpsb, kX86InstIdCmpsb)
+  INST_0x(cmpsb, kX86InstIdCmpsB)
   //! Compare DWORD in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(cmpsd, kX86InstIdCmpsd)
+  INST_0x(cmpsd, kX86InstIdCmpsD)
   //! Compare QWORD in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_0x(cmpsq, kX86InstIdCmpsq)
+  INST_0x(cmpsq, kX86InstIdCmpsQ)
   //! Compare WORD in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(cmpsw, kX86InstIdCmpsw)
+  INST_0x(cmpsw, kX86InstIdCmpsW)
 
   //! Compare and exchange (i486).
   INST_2x(cmpxchg, kX86InstIdCmpxchg, X86GpReg, X86GpReg)
@@ -919,13 +919,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_0x(leave, kX86InstIdLeave)
 
   //! Load BYTE from DS:[ESI/RSI] to AL.
-  INST_0x(lodsb, kX86InstIdLodsb)
+  INST_0x(lodsb, kX86InstIdLodsB)
   //! Load DWORD from DS:[ESI/RSI] to EAX.
-  INST_0x(lodsd, kX86InstIdLodsd)
+  INST_0x(lodsd, kX86InstIdLodsD)
   //! Load QWORD from DS:[RDI] to RAX (X64 Only).
-  INST_0x(lodsq, kX86InstIdLodsq)
+  INST_0x(lodsq, kX86InstIdLodsQ)
   //! Load WORD from DS:[ESI/RSI] to AX.
-  INST_0x(lodsw, kX86InstIdLodsw)
+  INST_0x(lodsw, kX86InstIdLodsW)
 
   //! Move.
   INST_2x(mov, kX86InstIdMov, X86GpReg, X86GpReg)
@@ -969,13 +969,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_2x_(movbe, kX86InstIdMovbe, X86Mem, X86GpReg, !o1.isGpb());
 
   //! Move BYTE from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(movsb, kX86InstIdMovsb)
+  INST_0x(movsb, kX86InstIdMovsB)
   //! Move DWORD from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(movsd, kX86InstIdMovsd)
+  INST_0x(movsd, kX86InstIdMovsD)
   //! Move QWORD from DS:[RSI] to ES:[RDI] (X64 Only).
-  INST_0x(movsq, kX86InstIdMovsq)
+  INST_0x(movsq, kX86InstIdMovsQ)
   //! Move WORD from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(movsw, kX86InstIdMovsw)
+  INST_0x(movsw, kX86InstIdMovsW)
 
   //! Move with sign-extension.
   INST_2x(movsx, kX86InstIdMovsx, X86GpReg, X86GpReg)
@@ -1085,67 +1085,67 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_0x(rdtscp, kX86InstIdRdtscp)
 
   //! Repeated load ECX/RCX BYTEs from DS:[ESI/RSI] to AL.
-  INST_0x(rep_lodsb, kX86InstIdRepLodsb)
+  INST_0x(rep_lodsb, kX86InstIdRepLodsB)
   //! Repeated load ECX/RCX DWORDs from DS:[ESI/RSI] to EAX.
-  INST_0x(rep_lodsd, kX86InstIdRepLodsd)
+  INST_0x(rep_lodsd, kX86InstIdRepLodsD)
   //! Repeated load ECX/RCX QWORDs from DS:[RDI] to RAX (X64 Only).
-  INST_0x(rep_lodsq, kX86InstIdRepLodsq)
+  INST_0x(rep_lodsq, kX86InstIdRepLodsQ)
   //! Repeated load ECX/RCX WORDs from DS:[ESI/RSI] to AX.
-  INST_0x(rep_lodsw, kX86InstIdRepLodsw)
+  INST_0x(rep_lodsw, kX86InstIdRepLodsW)
 
   //! Repeated move ECX/RCX BYTEs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(rep_movsb, kX86InstIdRepMovsb)
+  INST_0x(rep_movsb, kX86InstIdRepMovsB)
   //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(rep_movsd, kX86InstIdRepMovsd)
+  INST_0x(rep_movsd, kX86InstIdRepMovsD)
   //! Repeated move ECX/RCX QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
-  INST_0x(rep_movsq, kX86InstIdRepMovsq)
+  INST_0x(rep_movsq, kX86InstIdRepMovsQ)
   //! Repeated move ECX/RCX WORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_0x(rep_movsw, kX86InstIdRepMovsw)
+  INST_0x(rep_movsw, kX86InstIdRepMovsW)
 
   //! Repeated fill ECX/RCX BYTEs at ES:[EDI/RDI] with AL.
-  INST_0x(rep_stosb, kX86InstIdRepStosb)
+  INST_0x(rep_stosb, kX86InstIdRepStosB)
   //! Repeated fill ECX/RCX DWORDs at ES:[EDI/RDI] with EAX.
-  INST_0x(rep_stosd, kX86InstIdRepStosd)
+  INST_0x(rep_stosd, kX86InstIdRepStosD)
   //! Repeated fill ECX/RCX QWORDs at ES:[RDI] with RAX (X64 Only).
-  INST_0x(rep_stosq, kX86InstIdRepStosq)
+  INST_0x(rep_stosq, kX86InstIdRepStosQ)
   //! Repeated fill ECX/RCX WORDs at ES:[EDI/RDI] with AX.
-  INST_0x(rep_stosw, kX86InstIdRepStosw)
+  INST_0x(rep_stosw, kX86InstIdRepStosW)
 
   //! Repeated find non-AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repe_cmpsb, kX86InstIdRepeCmpsb)
+  INST_0x(repe_cmpsb, kX86InstIdRepeCmpsB)
   //! Repeated find non-EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repe_cmpsd, kX86InstIdRepeCmpsd)
+  INST_0x(repe_cmpsd, kX86InstIdRepeCmpsD)
   //! Repeated find non-RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_0x(repe_cmpsq, kX86InstIdRepeCmpsq)
+  INST_0x(repe_cmpsq, kX86InstIdRepeCmpsQ)
   //! Repeated find non-AX WORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repe_cmpsw, kX86InstIdRepeCmpsw)
+  INST_0x(repe_cmpsw, kX86InstIdRepeCmpsW)
 
   //! Repeated find non-AL BYTE starting at ES:[EDI/RDI].
-  INST_0x(repe_scasb, kX86InstIdRepeScasb)
+  INST_0x(repe_scasb, kX86InstIdRepeScasB)
   //! Repeated find non-EAX DWORD starting at ES:[EDI/RDI].
-  INST_0x(repe_scasd, kX86InstIdRepeScasd)
+  INST_0x(repe_scasd, kX86InstIdRepeScasD)
   //! Repeated find non-RAX QWORD starting at ES:[RDI] (X64 Only).
-  INST_0x(repe_scasq, kX86InstIdRepeScasq)
+  INST_0x(repe_scasq, kX86InstIdRepeScasQ)
   //! Repeated find non-AX WORD starting at ES:[EDI/RDI].
-  INST_0x(repe_scasw, kX86InstIdRepeScasw)
+  INST_0x(repe_scasw, kX86InstIdRepeScasW)
 
   //! Repeated find AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repne_cmpsb, kX86InstIdRepneCmpsb)
+  INST_0x(repne_cmpsb, kX86InstIdRepneCmpsB)
   //! Repeated find EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repne_cmpsd, kX86InstIdRepneCmpsd)
+  INST_0x(repne_cmpsd, kX86InstIdRepneCmpsD)
   //! Repeated find RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_0x(repne_cmpsq, kX86InstIdRepneCmpsq)
+  INST_0x(repne_cmpsq, kX86InstIdRepneCmpsQ)
   //! Repeated find AX WORDs in ES:[EDI/RDI] and DS:[ESI/RSI].
-  INST_0x(repne_cmpsw, kX86InstIdRepneCmpsw)
+  INST_0x(repne_cmpsw, kX86InstIdRepneCmpsW)
 
   //! Repeated find AL BYTEs starting at ES:[EDI/RDI].
-  INST_0x(repne_scasb, kX86InstIdRepneScasb)
+  INST_0x(repne_scasb, kX86InstIdRepneScasB)
   //! Repeated find EAX DWORDs starting at ES:[EDI/RDI].
-  INST_0x(repne_scasd, kX86InstIdRepneScasd)
+  INST_0x(repne_scasd, kX86InstIdRepneScasD)
   //! Repeated find RAX QWORDs starting at ES:[RDI] (X64 Only).
-  INST_0x(repne_scasq, kX86InstIdRepneScasq)
+  INST_0x(repne_scasq, kX86InstIdRepneScasQ)
   //! Repeated find AX WORDs starting at ES:[EDI/RDI].
-  INST_0x(repne_scasw, kX86InstIdRepneScasw)
+  INST_0x(repne_scasw, kX86InstIdRepneScasW)
 
   //! Return.
   INST_0x(ret, kX86InstIdRet)
@@ -1211,13 +1211,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_2i(sar, kX86InstIdSar, X86Mem, Imm)
 
   //! Find non-AL BYTE starting at ES:[EDI/RDI].
-  INST_0x(scasb, kX86InstIdScasb)
+  INST_0x(scasb, kX86InstIdScasB)
   //! Find non-EAX DWORD starting at ES:[EDI/RDI].
-  INST_0x(scasd, kX86InstIdScasd)
+  INST_0x(scasd, kX86InstIdScasD)
   //! Find non-rax QWORD starting at ES:[RDI] (X64 Only).
-  INST_0x(scasq, kX86InstIdScasq)
+  INST_0x(scasq, kX86InstIdScasQ)
   //! Find non-AX WORD starting at ES:[EDI/RDI].
-  INST_0x(scasw, kX86InstIdScasw)
+  INST_0x(scasw, kX86InstIdScasW)
 
   //! Set byte on condition.
   INST_1cc(set, kX86InstIdSet, X86Util::condToSetcc, X86GpReg)
@@ -1274,13 +1274,13 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
   INST_0x(std, kX86InstIdStd)
 
   //! Fill BYTE at ES:[EDI/RDI] with AL.
-  INST_0x(stosb, kX86InstIdStosb)
+  INST_0x(stosb, kX86InstIdStosB)
   //! Fill DWORD at ES:[EDI/RDI] with EAX.
-  INST_0x(stosd, kX86InstIdStosd)
+  INST_0x(stosd, kX86InstIdStosD)
   //! Fill QWORD at ES:[RDI] with RAX (X64 Only).
-  INST_0x(stosq, kX86InstIdStosq)
+  INST_0x(stosq, kX86InstIdStosQ)
   //! Fill WORD at ES:[EDI/RDI] with AX.
-  INST_0x(stosw, kX86InstIdStosw)
+  INST_0x(stosw, kX86InstIdStosW)
 
   //! Subtract.
   INST_2x(sub, kX86InstIdSub, X86GpReg, X86GpReg)

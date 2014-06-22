@@ -158,11 +158,12 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdCmp,             // X86/X64
   kX86InstIdCmppd,           // SSE2
   kX86InstIdCmpps,           // SSE
-  kX86InstIdCmpsb,           // X86/X64
-  kX86InstIdCmpsd,           // X86/X64 or SSE2
-  kX86InstIdCmpsq,           // X64
+  kX86InstIdCmpsB,           // CMPS - X86/X64
+  kX86InstIdCmpsD,           // CMPS - X86/X64
+  kX86InstIdCmpsQ,           // CMPS - X64
+  kX86InstIdCmpsW,           // CMPS - X86/X64
+  kX86InstIdCmpsd,           // SSE2
   kX86InstIdCmpss,           // SSE
-  kX86InstIdCmpsw,           // X86/X64
   kX86InstIdCmpxchg,         // X86/X64 (i486)
   kX86InstIdCmpxchg16b,      // X64 only
   kX86InstIdCmpxchg8b,       // X86/X64 (i586)
@@ -351,10 +352,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdLea,             // X86/X64
   kX86InstIdLeave,           // X86/X64
   kX86InstIdLfence,          // SSE2
-  kX86InstIdLodsb,           // X86/X64
-  kX86InstIdLodsd,           // X86/X64
-  kX86InstIdLodsq,           // X86/X64
-  kX86InstIdLodsw,           // X86/X64
+  kX86InstIdLodsB,           // LODS - X86/X64
+  kX86InstIdLodsD,           // LODS - X86/X64
+  kX86InstIdLodsQ,           // LODS - X86/X64
+  kX86InstIdLodsW,           // LODS - X86/X64
   kX86InstIdLzcnt,           // LZCNT
   kX86InstIdMaskmovdqu,      // SSE2
   kX86InstIdMaskmovq,        // MMX-Ext
@@ -394,13 +395,14 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdMovntq,          // MMX-Ext
   kX86InstIdMovq,            // MMX/SSE/SSE2
   kX86InstIdMovq2dq,         // SSE2
-  kX86InstIdMovsb,           // X86/X64
-  kX86InstIdMovsd,           // X86/X64 or SSE2
+  kX86InstIdMovsB,           // MOVS - X86/X64
+  kX86InstIdMovsD,           // MOVS - X86/X64
+  kX86InstIdMovsQ,           // MOVS - X64
+  kX86InstIdMovsW,           // MOVS - X86/X64
+  kX86InstIdMovsd,           // SSE2
   kX86InstIdMovshdup,        // SSE3
   kX86InstIdMovsldup,        // SSE3
-  kX86InstIdMovsq,           // X64
   kX86InstIdMovss,           // SSE
-  kX86InstIdMovsw,           // X86/X64
   kX86InstIdMovsx,           // X86/X64
   kX86InstIdMovsxd,          // X86/X64
   kX86InstIdMovupd,          // SSE2
@@ -586,34 +588,34 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdRdrand,          // RDRAND
   kX86InstIdRdtsc,           // X86/X64
   kX86InstIdRdtscp,          // X86/X64
-  kX86InstIdRepLodsb,        // X86/X64 (REP)
-  kX86InstIdRepLodsd,        // X86/X64 (REP)
-  kX86InstIdRepLodsq,        // X64 only (REP)
-  kX86InstIdRepLodsw,        // X86/X64 (REP)
-  kX86InstIdRepMovsb,        // X86/X64 (REP)
-  kX86InstIdRepMovsd,        // X86/X64 (REP)
-  kX86InstIdRepMovsq,        // X64 only (REP)
-  kX86InstIdRepMovsw,        // X86/X64 (REP)
-  kX86InstIdRepStosb,        // X86/X64 (REP)
-  kX86InstIdRepStosd,        // X86/X64 (REP)
-  kX86InstIdRepStosq,        // X64 only (REP)
-  kX86InstIdRepStosw,        // X86/X64 (REP)
-  kX86InstIdRepeCmpsb,       // X86/X64 (REP)
-  kX86InstIdRepeCmpsd,       // X86/X64 (REP)
-  kX86InstIdRepeCmpsq,       // X64 only (REP)
-  kX86InstIdRepeCmpsw,       // X86/X64 (REP)
-  kX86InstIdRepeScasb,       // X86/X64 (REP)
-  kX86InstIdRepeScasd,       // X86/X64 (REP)
-  kX86InstIdRepeScasq,       // X64 only (REP)
-  kX86InstIdRepeScasw,       // X86/X64 (REP)
-  kX86InstIdRepneCmpsb,      // X86/X64 (REP)
-  kX86InstIdRepneCmpsd,      // X86/X64 (REP)
-  kX86InstIdRepneCmpsq,      // X64 only (REP)
-  kX86InstIdRepneCmpsw,      // X86/X64 (REP)
-  kX86InstIdRepneScasb,      // X86/X64 (REP)
-  kX86InstIdRepneScasd,      // X86/X64 (REP)
-  kX86InstIdRepneScasq,      // X64 only (REP)
-  kX86InstIdRepneScasw,      // X86/X64 (REP)
+  kX86InstIdRepLodsB,        // X86/X64 (REP)
+  kX86InstIdRepLodsD,        // X86/X64 (REP)
+  kX86InstIdRepLodsQ,        // X64 only (REP)
+  kX86InstIdRepLodsW,        // X86/X64 (REP)
+  kX86InstIdRepMovsB,        // X86/X64 (REP)
+  kX86InstIdRepMovsD,        // X86/X64 (REP)
+  kX86InstIdRepMovsQ,        // X64 only (REP)
+  kX86InstIdRepMovsW,        // X86/X64 (REP)
+  kX86InstIdRepStosB,        // X86/X64 (REP)
+  kX86InstIdRepStosD,        // X86/X64 (REP)
+  kX86InstIdRepStosQ,        // X64 only (REP)
+  kX86InstIdRepStosW,        // X86/X64 (REP)
+  kX86InstIdRepeCmpsB,       // X86/X64 (REP)
+  kX86InstIdRepeCmpsD,       // X86/X64 (REP)
+  kX86InstIdRepeCmpsQ,       // X64 only (REP)
+  kX86InstIdRepeCmpsW,       // X86/X64 (REP)
+  kX86InstIdRepeScasB,       // X86/X64 (REP)
+  kX86InstIdRepeScasD,       // X86/X64 (REP)
+  kX86InstIdRepeScasQ,       // X64 only (REP)
+  kX86InstIdRepeScasW,       // X86/X64 (REP)
+  kX86InstIdRepneCmpsB,      // X86/X64 (REP)
+  kX86InstIdRepneCmpsD,      // X86/X64 (REP)
+  kX86InstIdRepneCmpsQ,      // X64 only (REP)
+  kX86InstIdRepneCmpsW,      // X86/X64 (REP)
+  kX86InstIdRepneScasB,      // X86/X64 (REP)
+  kX86InstIdRepneScasD,      // X86/X64 (REP)
+  kX86InstIdRepneScasQ,      // X64 only (REP)
+  kX86InstIdRepneScasW,      // X86/X64 (REP)
   kX86InstIdRet,             // X86/X64
   kX86InstIdRol,             // X86/X64
   kX86InstIdRor,             // X86/X64
@@ -629,10 +631,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdSar,             // X86/X64
   kX86InstIdSarx,            // BMI2
   kX86InstIdSbb,             // X86/X64
-  kX86InstIdScasb,           // X86/X64
-  kX86InstIdScasd,           // X86/X64
-  kX86InstIdScasq,           // X64
-  kX86InstIdScasw,           // X86/X64
+  kX86InstIdScasB,           // SCAS - X86/X64
+  kX86InstIdScasD,           // SCAS - X86/X64
+  kX86InstIdScasQ,           // SCAS - X64
+  kX86InstIdScasW,           // SCAS - X86/X64
   kX86InstIdSeta,            // X86/X64 (setcc)
   kX86InstIdSetae,           // X86/X64 (setcc)
   kX86InstIdSetb,            // X86/X64 (setcc)
@@ -679,10 +681,10 @@ ASMJIT_ENUM(kX86InstId) {
   kX86InstIdStc,             // X86/X64
   kX86InstIdStd,             // X86/X64
   kX86InstIdStmxcsr,         // SSE
-  kX86InstIdStosb,           // X86/X64
-  kX86InstIdStosd,           // X86/X64
-  kX86InstIdStosq,           // X64
-  kX86InstIdStosw,           // X86/X64
+  kX86InstIdStosB,           // STOS - X86/X64
+  kX86InstIdStosD,           // STOS - X86/X64
+  kX86InstIdStosQ,           // STOS - X64
+  kX86InstIdStosW,           // STOS - X86/X64
   kX86InstIdSub,             // X86/X64
   kX86InstIdSubpd,           // SSE2
   kX86InstIdSubps,           // SSE
@@ -1239,11 +1241,6 @@ ASMJIT_ENUM(kX86InstGroup) {
   //! Xchg.
   kX86InstGroupX86Xchg,
 
-  //! Cmpsd.
-  kX86InstGroupCmpsd,
-  //! Movsd.
-  kX86InstGroupMovsd,
-
   //! Fincstp/Finit/FldX/Fnclex/Fninit/Fnop/Fpatan/Fprem/Fprem1/Fptan/Frndint/Fscale/Fsin/Fsincos/Fsqrt/Ftst/Fucompp/Fxam/Fxtract/Fyl2x/Fyl2xp1.
   kX86InstGroupFpuOp,
   //! Fadd/Fdiv/Fdivr/Fmul/Fsub/Fsubr.
@@ -1682,19 +1679,72 @@ ASMJIT_ENUM(kX86Cond) {
 };
 
 // ============================================================================
-// [asmjit::kX86Prefetch]
+// [asmjit::kX86EFlags]
 // ============================================================================
 
-//! X86/X64 Prefetch hints.
-ASMJIT_ENUM(kX86Prefetch) {
-  //! Prefetch using NT hint.
-  kX86PrefetchNta = 0,
-  //! Prefetch to L0 cache.
-  kX86PrefetchT0 = 1,
-  //! Prefetch to L1 cache.
-  kX86PrefetchT1 = 2,
-  //! Prefetch to L2 cache.
-  kX86PrefetchT2 = 3
+//! X86/X64 EFLAGs bits (AsmJit specific).
+//!
+//! Each instruction stored in AsmJit database contains flags that instruction
+//! uses (reads) and flags that instruction modifies (writes). This is used by
+//! instruction reordering, but can be used by third parties as the API and
+//! definitions are public.
+//!
+//! \note Flags defined here doesn't correspond to real flags used by X86/X64
+//! architecture defined in Intel's Manual Section `3.4.3 - EFLAGS Register`.
+//!
+//! \note Flags are designed to fit in 8-bit integer.
+ASMJIT_ENUM(kX86EFlags) {
+  // --------------------------------------------------------------------------
+  // src-gendefs.js relies on the values of these masks, to modify them the
+  // tool has to be changed as well.
+  // --------------------------------------------------------------------------
+
+  //! Overflow flag (OF).
+  //!
+  //! Set if the integer result is too large a positive number or too small a
+  //! negative number (excluding the sign-bit) to fit in the destination
+  //! operand; cleared otherwise. This flag indicates an overflow condition for
+  //! signed-integer arithmetic.
+  kX86EFlagO = 0x01,
+
+  //! Sign flag (SF).
+  //!
+  //! Set equal to the most-significant bit of the result, which is the sign
+  //! bit of a signed integer (0 == positive value, 1 == negative value).
+  kX86EFlagS = 0x02,
+
+  //! Zero flag (ZF).
+  //!
+  //! Set if the result is zero; cleared otherwise.
+  kX86EFlagZ = 0x04,
+
+  //! Adjust flag (AF).
+  //!
+  //! Set if an arithmetic operation generates a carry or a borrow out of bit
+  //! 3 of the result; cleared otherwise. This flag is used in binary-coded
+  //! decimal (BCD) arithmetic.
+  kX86EFlagA = 0x08,
+
+  //! Parity flag (PF).
+  //!
+  //! Set if the least-significant byte of the result contains an even number
+  //! of 1 bits; cleared otherwise.
+  kX86EFlagP = 0x10,
+
+  //! Carry flag (CF).
+  //!
+  //! Set if an arithmetic operation generates a carry or a borrow out of the
+  //! mostsignificant bit of the result; cleared otherwise.
+  kX86EFlagC = 0x20,
+
+  //! Direction flag (DF).
+  //!
+  //! The direction flag controls string instructions `movs`, `cmps`, `scas,
+  //! `lods` and `stos`.
+  kX86EFlagD = 0x40,
+
+  //! Any other flag that AsmJit doesn't use to keep track of it.
+  kX86EFlagX = 0x80
 };
 
 // ============================================================================
@@ -1751,6 +1801,22 @@ ASMJIT_ENUM(kX86FpCw) {
 };
 
 // ============================================================================
+// [asmjit::kX86Prefetch]
+// ============================================================================
+
+//! X86/X64 Prefetch hints.
+ASMJIT_ENUM(kX86Prefetch) {
+  //! Prefetch using NT hint.
+  kX86PrefetchNta = 0,
+  //! Prefetch to L0 cache.
+  kX86PrefetchT0 = 1,
+  //! Prefetch to L1 cache.
+  kX86PrefetchT1 = 2,
+  //! Prefetch to L2 cache.
+  kX86PrefetchT2 = 3
+};
+
+// ============================================================================
 // [asmjit::X86InstExtendedInfo]
 // ============================================================================
 
@@ -1762,26 +1828,26 @@ ASMJIT_ENUM(kX86FpCw) {
 //! used by few instructions.
 struct X86InstExtendedInfo {
   // --------------------------------------------------------------------------
-  // [Accessors - Group]
+  // [Accessors - InstGroup]
   // --------------------------------------------------------------------------
 
   //! Get instruction group, see \ref kX86InstGroup.
-  ASMJIT_INLINE uint32_t getGroup() const {
-    return _group;
+  ASMJIT_INLINE uint32_t getInstGroup() const {
+    return _instGroup;
   }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Flags]
+  // [Accessors - InstFlags]
   // --------------------------------------------------------------------------
 
   //! Get whether the instruction has flag `flag`, see `kX86InstFlags`.
-  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
-    return (_flags & flag) != 0;
+  ASMJIT_INLINE bool hasInstFlag(uint32_t flag) const {
+    return (_instFlags & flag) != 0;
   }
 
   //! Get instruction flags, see `kX86InstFlags`.
-  ASMJIT_INLINE uint32_t getFlags() const {
-    return _flags;
+  ASMJIT_INLINE uint32_t getInstFlags() const {
+    return _instFlags;
   }
 
   //! Get whether the instruction is a control-flow intruction.
@@ -1789,12 +1855,12 @@ struct X86InstExtendedInfo {
   //! Control flow instruction is instruction that modifies instruction pointer,
   //! typically jmp, jcc, call, or ret.
   ASMJIT_INLINE bool isFlow() const {
-    return (getFlags() & kX86InstFlagFlow) != 0;
+    return (getInstFlags() & kX86InstFlagFlow) != 0;
   }
 
   //! Get whether the instruction is a compare/test like intruction.
   ASMJIT_INLINE bool isTest() const {
-    return (getFlags() & kX86InstFlagTest) != 0;
+    return (getInstFlags() & kX86InstFlagTest) != 0;
   }
 
   //! Get whether the instruction is a typical move instruction.
@@ -1807,36 +1873,36 @@ struct X86InstExtendedInfo {
   //! All AVX/XOP instructions that have 3 or more operands are considered to
   //! have move semantics move by default.
   ASMJIT_INLINE bool isMove() const {
-    return (getFlags() & kX86InstFlagMove) != 0;
+    return (getInstFlags() & kX86InstFlagMove) != 0;
   }
 
   //! Get whether the instruction is a typical Exchange instruction.
   //!
   //! Exchange instructios are 'xchg' and 'xadd'.
   ASMJIT_INLINE bool isXchg() const {
-    return (getFlags() & kX86InstFlagXchg) != 0;
+    return (getInstFlags() & kX86InstFlagXchg) != 0;
   }
 
   //! Get whether the instruction accesses Fp register(s).
   ASMJIT_INLINE bool isFp() const {
-    return (getFlags() & kX86InstFlagFp) != 0;
+    return (getInstFlags() & kX86InstFlagFp) != 0;
   }
 
   //! Get whether the instruction can be prefixed by LOCK prefix.
   ASMJIT_INLINE bool isLockable() const {
-    return (getFlags() & kX86InstFlagLock) != 0;
+    return (getInstFlags() & kX86InstFlagLock) != 0;
   }
 
   //! Get whether the instruction is special type (this is used by
   //! `Compiler` to manage additional variables or functionality).
   ASMJIT_INLINE bool isSpecial() const {
-    return (getFlags() & kX86InstFlagSpecial) != 0;
+    return (getInstFlags() & kX86InstFlagSpecial) != 0;
   }
 
   //! Get whether the instruction is special type and it performs
   //! memory access.
   ASMJIT_INLINE bool isSpecialMem() const {
-    return (getFlags() & kX86InstFlagSpecialMem) != 0;
+    return (getInstFlags() & kX86InstFlagSpecialMem) != 0;
   }
 
   //! Get whether the move instruction zeroes the rest of the register
@@ -1844,7 +1910,21 @@ struct X86InstExtendedInfo {
   //!
   //! Basically flag needed only to support `movsd` and `movss` instructions.
   ASMJIT_INLINE bool isZeroIfMem() const {
-    return (getFlags() & kX86InstFlagZ) != 0;
+    return (getInstFlags() & kX86InstFlagZ) != 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - EFlags]
+  // --------------------------------------------------------------------------
+
+  //! Get EFLAGS that the instruction reads.
+  ASMJIT_INLINE uint32_t getEFlagsIn() const {
+    return _eflagsIn;
+  }
+
+  //! Get EFLAGS that the instruction writes.
+  ASMJIT_INLINE uint32_t getEFlagsOut() const {
+    return _eflagsOut;
   }
 
   // --------------------------------------------------------------------------
@@ -1886,7 +1966,7 @@ struct X86InstExtendedInfo {
   // --------------------------------------------------------------------------
 
   //! Instruction group.
-  uint8_t _group;
+  uint8_t _instGroup;
 
   //! Count of bytes overwritten by a move instruction.
   //!
@@ -1894,11 +1974,16 @@ struct X86InstExtendedInfo {
   //! on size of the destination register.
   uint8_t _moveSize;
 
+  //! EFlags read by the instruction.
+  uint8_t _eflagsIn;
+  //! EFlags modified by the instruction.
+  uint8_t _eflagsOut;
+
   //! Instruction flags.
-  uint16_t _flags;
+  uint16_t _instFlags;
 
   //! Operands' flags.
-  uint16_t _opFlags[4];
+  uint16_t _opFlags[5];
 
   //! Secondary opcode.
   uint32_t _secondaryOpCode;
@@ -1916,7 +2001,7 @@ struct X86InstInfo {
 
 #if !defined(ASMJIT_DISABLE_INST_NAMES)
   //! Get instruction name string (null terminated).
-  ASMJIT_INLINE const char* getName() const {
+  ASMJIT_INLINE const char* getInstName() const {
     return _x86InstName + static_cast<uint32_t>(_nameIndex);
   }
 
@@ -1945,8 +2030,8 @@ struct X86InstInfo {
   // --------------------------------------------------------------------------
 
   //! Get instruction group, see \ref kX86InstGroup.
-  ASMJIT_INLINE uint32_t getGroup() const {
-    return getExtendedInfo().getGroup();
+  ASMJIT_INLINE uint32_t getInstGroup() const {
+    return getExtendedInfo().getInstGroup();
   }
 
   // --------------------------------------------------------------------------
@@ -1954,13 +2039,13 @@ struct X86InstInfo {
   // --------------------------------------------------------------------------
 
   //! Get instruction flags, see `kX86InstFlags`.
-  ASMJIT_INLINE uint32_t getFlags() const {
-    return getExtendedInfo().getFlags();
+  ASMJIT_INLINE uint32_t getInstFlags() const {
+    return getExtendedInfo().getInstFlags();
   }
 
   //! Get whether the instruction has flag `flag`, see `kX86InstFlags`.
-  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
-    return (getFlags() & flag) != 0;
+  ASMJIT_INLINE bool hasInstFlag(uint32_t flag) const {
+    return (getInstFlags() & flag) != 0;
   }
 
   // --------------------------------------------------------------------------

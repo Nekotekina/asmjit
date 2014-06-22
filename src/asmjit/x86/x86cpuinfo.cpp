@@ -38,7 +38,6 @@ struct X86CpuVendor {
 static const X86CpuVendor x86CpuVendorList[] = {
   { kCpuVendorIntel    , { 'G', 'e', 'n', 'u', 'i', 'n', 'e', 'I', 'n', 't', 'e', 'l' } },
   { kCpuVendorAmd      , { 'A', 'u', 't', 'h', 'e', 'n', 't', 'i', 'c', 'A', 'M', 'D' } },
-  { kCpuVendorAmd      , { 'A', 'M', 'D', 'i', 's', 'b', 'e', 't', 't', 'e', 'r', '!' } },
   { kCpuVendorVia      , { 'V', 'I', 'A',  0 , 'V', 'I', 'A',  0 , 'V', 'I', 'A',  0  } },
   { kCpuVendorVia      , { 'C', 'e', 'n', 't', 'a', 'u', 'r', 'H', 'a', 'u', 'l', 's' } }
 };
@@ -146,13 +145,17 @@ void X86CpuUtil::detect(X86CpuInfo* cpuInfo) {
     0, sizeof(CpuInfo) - sizeof(uint32_t));
 
   // Fill safe defaults.
-  ::memcpy(cpuInfo->_vendorString, "Unknown", 8);
-  cpuInfo->_hwThreadsCount = CpuInfo::detectNumberOfCores();
+  cpuInfo->_hwThreadsCount = CpuInfo::detectHwThreadsCount();
+
+  // --------------------------------------------------------------------------
+  // [CPUID EAX=0x00000000]
+  // --------------------------------------------------------------------------
 
   // Get vendor string/id.
   callCpuId(0, 0, &regs);
 
   maxId = regs.eax;
+
   ::memcpy(cpuInfo->_vendorString, &regs.ebx, 4);
   ::memcpy(cpuInfo->_vendorString + 4, &regs.edx, 4);
   ::memcpy(cpuInfo->_vendorString + 8, &regs.ecx, 4);
@@ -163,6 +166,10 @@ void X86CpuUtil::detect(X86CpuInfo* cpuInfo) {
       break;
     }
   }
+
+  // --------------------------------------------------------------------------
+  // [CPUID EAX=0x00000001]
+  // --------------------------------------------------------------------------
 
   // Get feature flags in ecx/edx and family/model in eax.
   callCpuId(1, 0, &regs);
@@ -236,6 +243,10 @@ void X86CpuUtil::detect(X86CpuInfo* cpuInfo) {
       if (regs.ebx & 0x00000020) cpuInfo->addFeature(kX86CpuFeatureAvx2);
     }
   }
+
+  // --------------------------------------------------------------------------
+  // [CPUID EAX=0x80000000]
+  // --------------------------------------------------------------------------
 
   // Calling cpuid with 0x80000000 as the in argument gets the number of valid
   // extended IDs.

@@ -33,7 +33,7 @@ namespace asmjit {
 // [asmjit::CpuInfo - DetectNumberOfCores]
 // ============================================================================
 
-uint32_t CpuInfo::detectNumberOfCores() {
+uint32_t CpuInfo::detectHwThreadsCount() {
 #if defined(ASMJIT_OS_WINDOWS)
   SYSTEM_INFO info;
   ::GetSystemInfo(&info);

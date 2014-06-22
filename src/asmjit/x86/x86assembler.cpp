@@ -908,7 +908,7 @@ static bool X86Assembler_dumpInstruction(StringBuilder& sb,
     sb._appendString("short ", 6);
 
   // Dump instruction name.
-  sb._appendString(_x86InstInfo[code].getName());
+  sb._appendString(_x86InstInfo[code].getInstName());
 
   // Dump operands.
   if (!o0->isNone()) {
@@ -1076,7 +1076,7 @@ static Error ASMJIT_CDECL X86Assembler_emit(Assembler* self_, uint32_t code, con
 _Prepare:
   opCode = info.getPrimaryOpCode();
   opReg  = opCode >> kX86InstOpCode_O_Shift;
-  opX    = extendedInfo.getFlags() >> (15 - 3);
+  opX    = extendedInfo.getInstFlags() >> (15 - 3);
 
   if (Arch == kArchX86) {
     // AVX.W prefix.
@@ -1137,7 +1137,7 @@ _Prepare:
   // [Group]
   // --------------------------------------------------------------------------
 
-  switch (info.getGroup()) {
+  switch (info.getInstGroup()) {
     // ------------------------------------------------------------------------
     // [None]
     // ------------------------------------------------------------------------
@@ -2212,21 +2212,6 @@ _GroupPop_Gp:
       }
       break;
 
-    // These groups basically decide if this is a string or SIMD instruction.
-    case kX86InstGroupCmpsd:
-      if (encoded != ENC_OPS(None, None, None))
-        goto _EmitExtRmi;
-
-      opCode = 0xA7;
-      goto _EmitX86Op;
-
-    case kX86InstGroupMovsd:
-      if (encoded != ENC_OPS(None, None, None))
-        goto _EmitExtMov;
-
-      opCode = 0xA5;
-      goto _EmitX86Op;
-
     // ------------------------------------------------------------------------
     // [Fpu]
     // ------------------------------------------------------------------------
@@ -2282,16 +2267,16 @@ _EmitFpArith_Mem:
       if (encoded == ENC_OPS(Mem, None, None)) {
         rmMem = static_cast<const X86Mem*>(o0);
 
-        if (o0->getSize() == 4 && info.hasFlag(kX86InstFlagMem4)) {
+        if (o0->getSize() == 4 && info.hasInstFlag(kX86InstFlagMem4)) {
           goto _EmitX86M;
         }
 
-        if (o0->getSize() == 8 && info.hasFlag(kX86InstFlagMem8)) {
+        if (o0->getSize() == 8 && info.hasInstFlag(kX86InstFlagMem8)) {
           opCode += 4;
           goto _EmitX86M;
         }
 
-        if (o0->getSize() == 10 && info.hasFlag(kX86InstFlagMem10)) {
+        if (o0->getSize() == 10 && info.hasInstFlag(kX86InstFlagMem10)) {
           opCode = extendedInfo.getSecondaryOpCode();
           opReg = opCode >> kX86InstOpCode_O_Shift;
           goto _EmitX86M;
@@ -2321,16 +2306,16 @@ _EmitFpArith_Mem:
       if (encoded == ENC_OPS(Mem, None, None)) {
         rmMem = static_cast<const X86Mem*>(o0);
 
-        if (o0->getSize() == 2 && info.hasFlag(kX86InstFlagMem2)) {
+        if (o0->getSize() == 2 && info.hasInstFlag(kX86InstFlagMem2)) {
           opCode += 4;
           goto _EmitX86M;
         }
 
-        if (o0->getSize() == 4 && info.hasFlag(kX86InstFlagMem4)) {
+        if (o0->getSize() == 4 && info.hasInstFlag(kX86InstFlagMem4)) {
           goto _EmitX86M;
         }
 
-        if (o0->getSize() == 8 && info.hasFlag(kX86InstFlagMem8)) {
+        if (o0->getSize() == 8 && info.hasInstFlag(kX86InstFlagMem8)) {
           opCode = extendedInfo.getSecondaryOpCode();
           opReg = opCode >> kX86InstOpCode_O_Shift;
           goto _EmitX86M;
@@ -2437,7 +2422,6 @@ _EmitFpArith_Mem:
 
     case kX86InstGroupExtMov:
     case kX86InstGroupExtMovNoRexW:
-_EmitExtMov:
       ASMJIT_ASSERT(extendedInfo._opFlags[0] != 0);
       ASMJIT_ASSERT(extendedInfo._opFlags[1] != 0);
 
@@ -2455,8 +2439,8 @@ _EmitExtMov:
 
       // Gp|Mm|Xmm <- Gp|Mm|Xmm
       if (encoded == ENC_OPS(Reg, Reg, None)) {
-        ADD_REX_W(static_cast<const X86Reg*>(o0)->isGpq() && (info.getGroup() != kX86InstGroupExtMovNoRexW));
-        ADD_REX_W(static_cast<const X86Reg*>(o1)->isGpq() && (info.getGroup() != kX86InstGroupExtMovNoRexW));
+        ADD_REX_W(static_cast<const X86Reg*>(o0)->isGpq() && (info.getInstGroup() != kX86InstGroupExtMovNoRexW));
+        ADD_REX_W(static_cast<const X86Reg*>(o1)->isGpq() && (info.getInstGroup() != kX86InstGroupExtMovNoRexW));
 
         opReg = static_cast<const X86Reg*>(o0)->getRegIndex();
         rmReg = static_cast<const X86Reg*>(o1)->getRegIndex();
@@ -2465,7 +2449,7 @@ _EmitExtMov:
 
       // Gp|Mm|Xmm <- Mem
       if (encoded == ENC_OPS(Reg, Mem, None)) {
-        ADD_REX_W(static_cast<const X86Reg*>(o0)->isGpq() && (info.getGroup() != kX86InstGroupExtMovNoRexW));
+        ADD_REX_W(static_cast<const X86Reg*>(o0)->isGpq() && (info.getInstGroup() != kX86InstGroupExtMovNoRexW));
 
         opReg = static_cast<const X86Reg*>(o0)->getRegIndex();
         rmMem = static_cast<const X86Mem*>(o1);
@@ -2477,7 +2461,7 @@ _EmitExtMov:
 
       // X86Mem <- Gp|Mm|Xmm
       if (encoded == ENC_OPS(Mem, Reg, None)) {
-        ADD_REX_W(static_cast<const X86Reg*>(o1)->isGpq() && (info.getGroup() != kX86InstGroupExtMovNoRexW));
+        ADD_REX_W(static_cast<const X86Reg*>(o1)->isGpq() && (info.getInstGroup() != kX86InstGroupExtMovNoRexW));
 
         opReg = static_cast<const X86Reg*>(o1)->getRegIndex();
         rmMem = static_cast<const X86Mem*>(o0);
@@ -2723,7 +2707,6 @@ _EmitMmMovD:
       break;
 
     case kX86InstGroupExtRmi:
-_EmitExtRmi:
       imVal = static_cast<const Imm*>(o2)->getInt64();
       imLen = 1;
 

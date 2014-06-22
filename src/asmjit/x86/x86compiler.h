@@ -2794,13 +2794,13 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_2i(cmp, kX86InstIdCmp, X86Mem, Imm)
 
   //! Compare BYTE in ES:`o0` and DS:`o1`.
-  INST_2x(cmpsb, kX86InstIdCmpsb, X86GpVar, X86GpVar)
+  INST_2x(cmpsb, kX86InstIdCmpsB, X86GpVar, X86GpVar)
   //! Compare DWORD in ES:`o0` and DS:`o1`.
-  INST_2x(cmpsd, kX86InstIdCmpsd, X86GpVar, X86GpVar)
+  INST_2x(cmpsd, kX86InstIdCmpsD, X86GpVar, X86GpVar)
   //! Compare QWORD in ES:`o0` and DS:`o1` (X64 Only).
-  INST_2x(cmpsq, kX86InstIdCmpsq, X86GpVar, X86GpVar)
+  INST_2x(cmpsq, kX86InstIdCmpsQ, X86GpVar, X86GpVar)
   //! Compare WORD in ES:`o0` and DS:`o1`.
-  INST_2x(cmpsw, kX86InstIdCmpsw, X86GpVar, X86GpVar)
+  INST_2x(cmpsw, kX86InstIdCmpsW, X86GpVar, X86GpVar)
 
   //! Compare and exchange (i486).
   INST_3x(cmpxchg, kX86InstIdCmpxchg, X86GpVar /* eax */, X86GpVar, X86GpVar)
@@ -2922,13 +2922,13 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_2x(lea, kX86InstIdLea, X86GpVar, X86Mem)
 
   //! Load BYTE from DS:`o1` to `o0`.
-  INST_2x(lodsb, kX86InstIdLodsb, X86GpVar, X86GpVar)
+  INST_2x(lodsb, kX86InstIdLodsB, X86GpVar, X86GpVar)
   //! Load DWORD from DS:`o1` to `o0`.
-  INST_2x(lodsd, kX86InstIdLodsd, X86GpVar, X86GpVar)
+  INST_2x(lodsd, kX86InstIdLodsD, X86GpVar, X86GpVar)
   //! Load QWORD from DS:`o1` to `o0` (X64 Only).
-  INST_2x(lodsq, kX86InstIdLodsq, X86GpVar, X86GpVar)
+  INST_2x(lodsq, kX86InstIdLodsQ, X86GpVar, X86GpVar)
   //! Load WORD from DS:`o1` to `o0`.
-  INST_2x(lodsw, kX86InstIdLodsw, X86GpVar, X86GpVar)
+  INST_2x(lodsw, kX86InstIdLodsW, X86GpVar, X86GpVar)
 
   //! Move.
   INST_2x(mov, kX86InstIdMov, X86GpVar, X86GpVar)
@@ -2972,13 +2972,13 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_2x_(movbe, kX86InstIdMovbe, X86Mem, X86GpVar, !o1.isGpb());
 
   //! Load BYTE from DS:`o1` to ES:`o0`.
-  INST_2x(movsb, kX86InstIdMovsb, X86GpVar, X86GpVar)
+  INST_2x(movsb, kX86InstIdMovsB, X86GpVar, X86GpVar)
   //! Load DWORD from DS:`o1` to ES:`o0`.
-  INST_2x(movsd, kX86InstIdMovsd, X86GpVar, X86GpVar)
+  INST_2x(movsd, kX86InstIdMovsD, X86GpVar, X86GpVar)
   //! Load QWORD from DS:`o1` to ES:`o0` (X64 Only).
-  INST_2x(movsq, kX86InstIdMovsq, X86GpVar, X86GpVar)
+  INST_2x(movsq, kX86InstIdMovsQ, X86GpVar, X86GpVar)
   //! Load WORD from DS:`o1` to ES:`o0`.
-  INST_2x(movsw, kX86InstIdMovsw, X86GpVar, X86GpVar)
+  INST_2x(movsw, kX86InstIdMovsW, X86GpVar, X86GpVar)
 
   //! Move with sign-extension.
   INST_2x(movsx, kX86InstIdMovsx, X86GpVar, X86GpVar)
@@ -3073,67 +3073,67 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_3x_(rdtscp, kX86InstIdRdtscp, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated load ECX/RCX BYTEs from DS:[ESI/RSI] to AL.
-  INST_3x_(rep_lodsb, kX86InstIdRepLodsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_lodsb, kX86InstIdRepLodsB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated load ECX/RCX DWORDs from DS:[ESI/RSI] to AL.
-  INST_3x_(rep_lodsd, kX86InstIdRepLodsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_lodsd, kX86InstIdRepLodsD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated load ECX/RCX QWORDs from DS:[RSI] to RAX (X64 Only).
-  INST_3x_(rep_lodsq, kX86InstIdRepLodsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_lodsq, kX86InstIdRepLodsQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated load ECX/RCX WORDs from DS:[ESI/RSI] to AX.
-  INST_3x_(rep_lodsw, kX86InstIdRepLodsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_lodsw, kX86InstIdRepLodsW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated move ECX/RCX BYTEs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_3x_(rep_movsb, kX86InstIdRepMovsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_movsb, kX86InstIdRepMovsB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_3x_(rep_movsd, kX86InstIdRepMovsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_movsd, kX86InstIdRepMovsD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated move ECX/RCX QWORDs from DS:[RSI] to ES:[RDI] (X64 Only).
-  INST_3x_(rep_movsq, kX86InstIdRepMovsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_movsq, kX86InstIdRepMovsQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated move ECX/RCX DWORDs from DS:[ESI/RSI] to ES:[EDI/RDI].
-  INST_3x_(rep_movsw, kX86InstIdRepMovsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_movsw, kX86InstIdRepMovsW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated fill ECX/RCX BYTEs at ES:[EDI/RDI] with AL.
-  INST_3x_(rep_stosb, kX86InstIdRepStosb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_stosb, kX86InstIdRepStosB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated fill ECX/RCX DWORDs at ES:[EDI/RDI] with EAX.
-  INST_3x_(rep_stosd, kX86InstIdRepStosd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_stosd, kX86InstIdRepStosD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated fill ECX/RCX QWORDs at ES:[RDI] with RAX (X64 Only).
-  INST_3x_(rep_stosq, kX86InstIdRepStosq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_stosq, kX86InstIdRepStosQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated fill ECX/RCX WORDs at ES:[EDI/RDI] with AX.
-  INST_3x_(rep_stosw, kX86InstIdRepStosw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(rep_stosw, kX86InstIdRepStosW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated find non-AL BYTEs in ES:[EDI/RDI] and DS:[ESI/RDI].
-  INST_3x_(repe_cmpsb, kX86InstIdRepeCmpsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_cmpsb, kX86InstIdRepeCmpsB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-EAX DWORDs in ES:[EDI/RDI] and DS:[ESI/RDI].
-  INST_3x_(repe_cmpsd, kX86InstIdRepeCmpsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_cmpsd, kX86InstIdRepeCmpsD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-RAX QWORDs in ES:[RDI] and DS:[RDI] (X64 Only).
-  INST_3x_(repe_cmpsq, kX86InstIdRepeCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_cmpsq, kX86InstIdRepeCmpsQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-AX WORDs in ES:[EDI/RDI] and DS:[ESI/RDI].
-  INST_3x_(repe_cmpsw, kX86InstIdRepeCmpsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_cmpsw, kX86InstIdRepeCmpsW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated find non-AL BYTE starting at ES:[EDI/RDI].
-  INST_3x_(repe_scasb, kX86InstIdRepeScasb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_scasb, kX86InstIdRepeScasB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-EAX DWORD starting at ES:[EDI/RDI].
-  INST_3x_(repe_scasd, kX86InstIdRepeScasd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_scasd, kX86InstIdRepeScasD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-RAX QWORD starting at ES:[RDI] (X64 Only).
-  INST_3x_(repe_scasq, kX86InstIdRepeScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_scasq, kX86InstIdRepeScasQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find non-AX WORD starting at ES:[EDI/RDI].
-  INST_3x_(repe_scasw, kX86InstIdRepeScasw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repe_scasw, kX86InstIdRepeScasW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated find AL BYTEs in [RDI] and [RSI].
-  INST_3x_(repne_cmpsb, kX86InstIdRepneCmpsb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_cmpsb, kX86InstIdRepneCmpsB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find EAX DWORDs in [RDI] and [RSI].
-  INST_3x_(repne_cmpsd, kX86InstIdRepneCmpsd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_cmpsd, kX86InstIdRepneCmpsD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find RAX QWORDs in [RDI] and [RSI] (X64 Only).
-  INST_3x_(repne_cmpsq, kX86InstIdRepneCmpsq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_cmpsq, kX86InstIdRepneCmpsQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find AX WORDs in [RDI] and [RSI].
-  INST_3x_(repne_cmpsw, kX86InstIdRepneCmpsw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_cmpsw, kX86InstIdRepneCmpsW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Repeated Find AL BYTEs, starting at ES:[EDI/RDI].
-  INST_3x_(repne_scasb, kX86InstIdRepneScasb, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_scasb, kX86InstIdRepneScasB, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find EAX DWORDs, starting at ES:[EDI/RDI].
-  INST_3x_(repne_scasd, kX86InstIdRepneScasd, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_scasd, kX86InstIdRepneScasD, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find RAX QWORDs, starting at ES:[RDI] (X64 Only).
-  INST_3x_(repne_scasq, kX86InstIdRepneScasq, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_scasq, kX86InstIdRepneScasQ, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
   //! Repeated find AX WORDs, starting at ES:[EDI/RDI].
-  INST_3x_(repne_scasw, kX86InstIdRepneScasw, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
+  INST_3x_(repne_scasw, kX86InstIdRepneScasW, X86GpVar, X86GpVar, X86GpVar, o0.getId() != o1.getId() && o1.getId() != o2.getId())
 
   //! Return.
   ASMJIT_INLINE RetNode* ret() { return addRet(noOperand, noOperand); }
@@ -3197,13 +3197,13 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_2i(sar, kX86InstIdSar, X86Mem, Imm)
 
   //! Find non `o1` BYTE starting at ES:`o0`.
-  INST_2x(scasb, kX86InstIdScasb, X86GpVar, X86GpVar)
+  INST_2x(scasb, kX86InstIdScasB, X86GpVar, X86GpVar)
   //! Find non `o1` DWORD starting at ES:`o0`.
-  INST_2x(scasd, kX86InstIdScasd, X86GpVar, X86GpVar)
+  INST_2x(scasd, kX86InstIdScasD, X86GpVar, X86GpVar)
   //! Find non `o1` QWORD starting at ES:`o0` (X64 Only).
-  INST_2x(scasq, kX86InstIdScasq, X86GpVar, X86GpVar)
+  INST_2x(scasq, kX86InstIdScasQ, X86GpVar, X86GpVar)
   //! Find non `o1` WORD starting at ES:`o0`.
-  INST_2x(scasw, kX86InstIdScasw, X86GpVar, X86GpVar)
+  INST_2x(scasw, kX86InstIdScasW, X86GpVar, X86GpVar)
 
   //! Set byte on condition.
   INST_1cc(set, kX86InstIdSet, X86Util::condToSetcc, X86GpVar)
@@ -3252,13 +3252,13 @@ struct ASMJIT_VCLASS X86Compiler : public Compiler {
   INST_0x(std, kX86InstIdStd)
 
   //! Fill BYTE at ES:`o0` with `o1`.
-  INST_2x(stosb, kX86InstIdStosb, X86GpVar, X86GpVar)
+  INST_2x(stosb, kX86InstIdStosB, X86GpVar, X86GpVar)
   //! Fill DWORD at ES:`o0` with `o1`.
-  INST_2x(stosd, kX86InstIdStosd, X86GpVar, X86GpVar)
+  INST_2x(stosd, kX86InstIdStosD, X86GpVar, X86GpVar)
   //! Fill QWORD at ES:`o0` with `o1` (X64 Only).
-  INST_2x(stosq, kX86InstIdStosq, X86GpVar, X86GpVar)
+  INST_2x(stosq, kX86InstIdStosQ, X86GpVar, X86GpVar)
   //! Fill WORD at ES:`o0` with `o1`.
-  INST_2x(stosw, kX86InstIdStosw, X86GpVar, X86GpVar)
+  INST_2x(stosw, kX86InstIdStosW, X86GpVar, X86GpVar)
 
   //! Subtract.
   INST_2x(sub, kX86InstIdSub, X86GpVar, X86GpVar)
