@@ -332,10 +332,7 @@ EndIf()
 # AsmJit library is always embedded into the tests executable. This way it's
 # much easier to test private functions compared to just linking to AsmJit.
 If(ASMJIT_BUILD_TEST)
-  AsmJit_AddSource(ASMJIT_TEST_SRC asmjit/test
-    main.cpp
-    test.cpp
-    test.h)
+  AsmJit_AddSource(ASMJIT_TEST_SRC asmjit/test broken.cpp broken.h main.cpp)
 
   Set(ASMJIT_TEST_CFLAGS
     ${ASMJIT_CFLAGS}

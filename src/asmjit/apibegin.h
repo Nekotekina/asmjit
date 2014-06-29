@@ -43,11 +43,6 @@
 // ============================================================================
 
 #if defined(__GNUC__) && !defined(__clang__)
-// GCC warnings fix: I can't understand why GCC has no interface to push/pop
-// specific warnings.
-// # if (__GNUC__ * 10000  + __GNUC_MINOR__ * 100  + __GNUC_PATCHLEVEL__) >= 402001
-// #  pragma GCC diagnostic ignored "-w"
-// # endif
 # if __GNUC__ >= 4 && !defined(__MINGW32__)
 #  pragma GCC visibility push(hidden)
 # endif // __GNUC__ >= 4

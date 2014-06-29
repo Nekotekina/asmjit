@@ -48,7 +48,7 @@ struct X86Test_AlignBase : public X86Test {
     _name.setFormat("[Align] Args=%u Vars=%u Naked=%c PushPop=%c",
       argCount,
       varCount,
-      naked ? 'Y' : 'N',
+      naked   ? 'Y' : 'N',
       pushPop ? 'Y' : 'N');
   }
 
@@ -1651,10 +1651,20 @@ struct X86Test_AllocBlend : public X86Test {
     typedef void (*Func)(void*, const void*, size_t);
     Func func = asmjit_cast<Func>(_func);
 
-    uint32_t i;
+    static const uint32_t dstConstData[] = { 0x00000000, 0x10101010, 0x20100804, 0x30200003, 0x40204040, 0x5000004D, 0x60302E2C, 0x706F6E6D, 0x807F4F2F, 0x90349001, 0xA0010203, 0xB03204AB, 0xC023AFBD, 0xD0D0D0C0, 0xE0AABBCC, 0xFFFFFFFF, 0xF8F4F2F1 };
+    static const uint32_t srcConstData[] = { 0xE0E0E0E0, 0xA0008080, 0x341F1E1A, 0xFEFEFEFE, 0x80302010, 0x49490A0B, 0x998F7798, 0x00000000, 0x01010101, 0xA0264733, 0xBAB0B1B9, 0xFF000000, 0xDAB0A0C1, 0xE0BACFDA, 0x99887766, 0xFFFFFF80, 0xEE0A5FEC };
 
-    uint32_t dstBuffer[kCount] = { 0x00000000, 0x10101010, 0x20100804, 0x30200003, 0x40204040, 0x5000004D, 0x60302E2C, 0x706F6E6D, 0x807F4F2F, 0x90349001, 0xA0010203, 0xB03204AB, 0xC023AFBD, 0xD0D0D0C0, 0xE0AABBCC, 0xFFFFFFFF, 0xF8F4F2F1 };
-    uint32_t srcBuffer[kCount] = { 0xE0E0E0E0, 0xA0008080, 0x341F1E1A, 0xFEFEFEFE, 0x80302010, 0x49490A0B, 0x998F7798, 0x00000000, 0x01010101, 0xA0264733, 0xBAB0B1B9, 0xFF000000, 0xDAB0A0C1, 0xE0BACFDA, 0x99887766, 0xFFFFFF80, 0xEE0A5FEC };
+    uint32_t _dstBuffer[kCount + 3];
+    uint32_t _srcBuffer[kCount + 3];
+
+    // Has to be aligned.
+    uint32_t* dstBuffer = (uint32_t*)IntUtil::alignTo<intptr_t>((intptr_t)_dstBuffer, 16);
+    uint32_t* srcBuffer = (uint32_t*)IntUtil::alignTo<intptr_t>((intptr_t)_srcBuffer, 16);
+    
+    ::memcpy(dstBuffer, dstConstData, sizeof(dstConstData));
+    ::memcpy(srcBuffer, srcConstData, sizeof(srcConstData));
+
+    uint32_t i;
     uint32_t expBuffer[kCount];
 
     for (i = 0; i < kCount; i++) {
@@ -2387,49 +2397,6 @@ struct X86Test_ConstPoolBase : public X86Test {
 };
 
 // ============================================================================
-// [X86Test_Dummy]
-// ============================================================================
-
-struct X86Test_Dummy : public X86Test {
-  X86Test_Dummy() : X86Test("[Dummy] Dummy") {}
-
-  static void add(PodVector<X86Test*>& tests) {
-    tests.append(new X86Test_Dummy());
-  }
-
-  virtual void compile(X86Compiler& c) {
-    c.addFunc(kFuncConvHost, FuncBuilder0<uint32_t>());
-
-    X86GpVar r(c, kVarTypeUInt32);
-    X86GpVar a(c, kVarTypeUInt32);
-    X86GpVar b(c, kVarTypeUInt32);
-
-    c.alloc(r, x86::eax);
-    c.alloc(a, x86::ecx);
-    c.alloc(b, x86::edx);
-
-    c.mov(a, 16);
-    c.mov(b, 99);
-
-    c.mul(r, a, b);
-    c.alloc(a, x86::esi);
-    c.alloc(b, x86::ecx);
-    c.alloc(r, x86::edi);
-    c.mul(a, b, r);
-
-    c.ret(b);
-    c.endFunc();
-  }
-
-  virtual bool run(void* _func, StringBuilder& result, StringBuilder& expect) {
-    typedef uint32_t (*Func)(void);
-    Func func = asmjit_cast<Func>(_func);
-
-    return func() == 0;
-  }
-};
-
-// ============================================================================
 // [X86TestSuite]
 // ============================================================================
 
@@ -2513,9 +2480,6 @@ X86TestSuite::X86TestSuite() :
   ADD_TEST(X86Test_CallRecursive);
   ADD_TEST(X86Test_CallMisc1);
   ADD_TEST(X86Test_ConstPoolBase);
-
-  // Dummy.
-  // ADD_TEST(X86Test_Dummy);
 }
 
 X86TestSuite::~X86TestSuite() {

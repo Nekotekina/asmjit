@@ -25,6 +25,7 @@
 
 // #define ASMJIT_DEBUG              // Define to enable debug-mode.
 // #define ASMJIT_RELEASE            // Define to enable release-mode.
+// #define ASMJIT_TRACE              // Define to enable tracing.
 
 // ============================================================================
 // [AsmJit - Library]

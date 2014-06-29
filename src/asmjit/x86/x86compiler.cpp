@@ -28,10 +28,10 @@ namespace asmjit {
 // ============================================================================
 
 #if !defined(ASMJIT_DEBUG)
-#define ASMJIT_DETECT_UNINITIALIZED(op) \
+#define ASMJIT_ASSERT_UNINITIALIZED(op) \
   do {} while(0)
 #else
-#define ASMJIT_DETECT_UNINITIALIZED(op) \
+#define ASMJIT_ASSERT_UNINITIALIZED(op) \
   do { \
     if (op.isVar() || op.isLabel()) { \
       ASMJIT_ASSERT(op.getId() != kInvalidValue); \
@@ -83,8 +83,8 @@ const uint8_t _x86VarMapping[kX86VarTypeCount] = {
   /* 05: kVarTypeUInt32   */ kVarTypeUInt32,
   /* 06: kVarTypeInt64    */ kInvalidVar,     // Invalid in 32-bit mode.
   /* 07: kVarTypeUInt64   */ kInvalidVar,     // Invalid in 32-bit mode.
-  /* 08: kVarTypeIntPtr   */ kVarTypeInt32,   // Remapped.
-  /* 09: kVarTypeUIntPtr  */ kVarTypeUInt32,  // Remapped.
+  /* 08: kVarTypeIntPtr   */ kVarTypeInt32,   // Remapped to Int32.
+  /* 09: kVarTypeUIntPtr  */ kVarTypeUInt32,  // Remapped to UInt32.
   /* 10: kVarTypeFp32     */ kVarTypeFp32,
   /* 11: kVarTypeFp64     */ kVarTypeFp64,
   /* 12: kX86VarTypeMm    */ kX86VarTypeMm,
@@ -109,8 +109,8 @@ const uint8_t _x64VarMapping[kX86VarTypeCount] = {
   /* 05: kVarTypeUInt32   */ kVarTypeUInt32,
   /* 06: kVarTypeInt64    */ kVarTypeInt64,
   /* 07: kVarTypeUInt64   */ kVarTypeUInt64,
-  /* 08: kVarTypeIntPtr   */ kVarTypeInt64,   // Remapped.
-  /* 09: kVarTypeUIntPtr  */ kVarTypeUInt64,  // Remapped.
+  /* 08: kVarTypeIntPtr   */ kVarTypeInt64,   // Remapped to Int64.
+  /* 09: kVarTypeUIntPtr  */ kVarTypeUInt64,  // Remapped to UInt64.
   /* 10: kVarTypeFp32     */ kVarTypeFp32,
   /* 11: kVarTypeFp64     */ kVarTypeFp64,
   /* 12: kX86VarTypeMm    */ kX86VarTypeMm,
@@ -831,7 +831,7 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0) {
   {
     Operand* opList = reinterpret_cast<Operand*>(reinterpret_cast<uint8_t*>(inst) + size);
     opList[0] = o0;
-    ASMJIT_DETECT_UNINITIALIZED(o0);
+    ASMJIT_ASSERT_UNINITIALIZED(o0);
     return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 1);
   }
 
@@ -851,8 +851,8 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     Operand* opList = reinterpret_cast<Operand*>(reinterpret_cast<uint8_t*>(inst) + size);
     opList[0] = o0;
     opList[1] = o1;
-    ASMJIT_DETECT_UNINITIALIZED(o0);
-    ASMJIT_DETECT_UNINITIALIZED(o1);
+    ASMJIT_ASSERT_UNINITIALIZED(o0);
+    ASMJIT_ASSERT_UNINITIALIZED(o1);
     return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 2);
   }
 
@@ -873,9 +873,9 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     opList[0] = o0;
     opList[1] = o1;
     opList[2] = o2;
-    ASMJIT_DETECT_UNINITIALIZED(o0);
-    ASMJIT_DETECT_UNINITIALIZED(o1);
-    ASMJIT_DETECT_UNINITIALIZED(o2);
+    ASMJIT_ASSERT_UNINITIALIZED(o0);
+    ASMJIT_ASSERT_UNINITIALIZED(o1);
+    ASMJIT_ASSERT_UNINITIALIZED(o2);
     return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 3);
   }
 
@@ -897,10 +897,10 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     opList[1] = o1;
     opList[2] = o2;
     opList[3] = o3;
-    ASMJIT_DETECT_UNINITIALIZED(o0);
-    ASMJIT_DETECT_UNINITIALIZED(o1);
-    ASMJIT_DETECT_UNINITIALIZED(o2);
-    ASMJIT_DETECT_UNINITIALIZED(o3);
+    ASMJIT_ASSERT_UNINITIALIZED(o0);
+    ASMJIT_ASSERT_UNINITIALIZED(o1);
+    ASMJIT_ASSERT_UNINITIALIZED(o2);
+    ASMJIT_ASSERT_UNINITIALIZED(o3);
     return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 4);
   }
 
@@ -923,11 +923,11 @@ InstNode* X86Compiler::newInst(uint32_t code, const Operand& o0, const Operand& 
     opList[2] = o2;
     opList[3] = o3;
     opList[4] = o4;
-    ASMJIT_DETECT_UNINITIALIZED(o0);
-    ASMJIT_DETECT_UNINITIALIZED(o1);
-    ASMJIT_DETECT_UNINITIALIZED(o2);
-    ASMJIT_DETECT_UNINITIALIZED(o3);
-    ASMJIT_DETECT_UNINITIALIZED(o4);
+    ASMJIT_ASSERT_UNINITIALIZED(o0);
+    ASMJIT_ASSERT_UNINITIALIZED(o1);
+    ASMJIT_ASSERT_UNINITIALIZED(o2);
+    ASMJIT_ASSERT_UNINITIALIZED(o3);
+    ASMJIT_ASSERT_UNINITIALIZED(o4);
     return X86Compiler_newInst(this, inst, code, getOptionsAndReset(), opList, 5);
   }
 

@@ -146,6 +146,7 @@ struct X86Context : public Context {
 
     vd->setState(kVarStateReg);
     vd->setRegIndex(regIndex);
+    vd->addHomeIndex(regIndex);
     vd->setModified(modified);
 
     _x86State.getListByClass(C)[regIndex] = vd;
@@ -306,7 +307,7 @@ struct X86Context : public Context {
   // [Alloc / Spill]
   // --------------------------------------------------------------------------
 
-  //! Alloc
+  //! Alloc.
   template<int C>
   ASMJIT_INLINE void alloc(VarData* vd, uint32_t regIndex) {
     ASMJIT_ASSERT(vd->getClass() == C);
@@ -451,6 +452,12 @@ struct X86Context : public Context {
   // --------------------------------------------------------------------------
 
   virtual Error translate();
+
+  // --------------------------------------------------------------------------
+  // [Schedule]
+  // --------------------------------------------------------------------------
+
+  virtual Error schedule();
 
   // --------------------------------------------------------------------------
   // [Serialize]

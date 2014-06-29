@@ -532,17 +532,22 @@ Error Context::compile(FuncNode* func) {
   ASMJIT_PROPAGATE_ERROR(removeUnreachableCode());
   ASMJIT_PROPAGATE_ERROR(livenessAnalysis());
 
+  Compiler* compiler = getCompiler();
+
 #if !defined(ASMJIT_DISABLE_LOGGER)
-  if (_compiler->hasLogger())
+  if (compiler->hasLogger())
     ASMJIT_PROPAGATE_ERROR(annotate());
 #endif // !ASMJIT_DISABLE_LOGGER
 
   ASMJIT_PROPAGATE_ERROR(translate());
 
+  if (compiler->hasFeature(kCodeGenEnableScheduler))
+    ASMJIT_PROPAGATE_ERROR(schedule());
+
   // We alter the compiler cursor, because it doesn't make sense to reference
   // it after compilation - some nodes may disappear and it's forbidden to add
   // new code after the compilation is done.
-  _compiler->_setCursor(NULL);
+  compiler->_setCursor(NULL);
 
   return kErrorOk;
 }

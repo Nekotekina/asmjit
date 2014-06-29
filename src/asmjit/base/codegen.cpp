@@ -63,6 +63,8 @@ Error CodeGen::setError(Error error, const char* message) {
   // Error handler is called before logger so logging can be skipped if error
   // has been handled.
   ErrorHandler* handler = _errorHandler;
+  ASMJIT_TLOG("[ERROR] %s %s\n", message, !handler ? "(Possibly Unhandled?)" : "");
+
   if (handler != NULL && handler->handleError(error, message))
     return error;
 

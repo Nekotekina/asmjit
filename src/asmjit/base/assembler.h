@@ -143,13 +143,6 @@ struct RelocData {
 struct ASMJIT_VCLASS Assembler : public CodeGen {
   ASMJIT_NO_COPY(Assembler)
 
-  typedef Error (ASMJIT_CDECL *EmitFunc)(Assembler* self,
-    uint32_t code,
-    const Operand* o0,
-    const Operand* o1,
-    const Operand* o2,
-    const Operand* o3);
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
@@ -469,7 +462,7 @@ struct ASMJIT_VCLASS Assembler : public CodeGen {
   ASMJIT_API Error emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2);
   //! \overload
   ASMJIT_INLINE Error emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3) {
-    return _emit(this, code, &o0, &o1, &o2, &o3);
+    return _emit(code, o0, o1, o2, o3);
   }
 
   //! Emit an instruction with integer immediate operand.
@@ -489,12 +482,12 @@ struct ASMJIT_VCLASS Assembler : public CodeGen {
   //! \overload
   ASMJIT_API Error emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3);
 
+  //! Emit an instruction (virtual).
+  virtual Error _emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3) = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-
-  //! Emit callback (changed depending on architecture and other parameters).
-  EmitFunc _emit;
 
   //! Buffer where the code is emitted (either live or temporary).
   //!

@@ -4,8 +4,7 @@
 // [License]
 // Zlib - See LICENSE.md file in the package.
 
-// [Dependencies - MiniUnit]
-#include "./test.h"
+// [Dependencies - AsmJit]
 #include "../asmjit.h"
 
 using namespace asmjit;
@@ -25,7 +24,7 @@ static void dumpCpuFeatures(const CpuInfo* cpuInfo, const DumpCpuFeature* data, 
       INFO("  %s", data[i].name);
 }
 
-static void dumpCpu() {
+static void dumpCpu(void) {
   const CpuInfo* cpu = CpuInfo::getHost();
 
   INFO("Host CPU Info:");
@@ -110,7 +109,7 @@ static void dumpCpu() {
 #define DUMP_TYPE(_Type_) \
   INFO("  %-31s: %u", #_Type_, static_cast<uint32_t>(sizeof(_Type_)))
 
-static void dumpSizeOf() {
+static void dumpSizeOf(void) {
   INFO("SizeOf Types:");
   DUMP_TYPE(int8_t);
   DUMP_TYPE(int16_t);
@@ -199,17 +198,12 @@ static void dumpSizeOf() {
 // [Main]
 // ============================================================================
 
+static void onBeforeRun(void) {
+  dumpCpu();
+  dumpSizeOf();
+}
+
 int main(int argc, const char* argv[]) {
-  bool shouldRun = MiniUnit::init(argc, argv);
-
-  INFO("AsmJit Test-Suite");
-  INFO("");
-
-  if (shouldRun) {
-    dumpCpu();
-    dumpSizeOf();
-    MiniUnit::run();
-  }
-
-  return 0;
+  INFO("AsmJit Unit-Test\n\n");
+  return BrokenAPI::run(argc, argv, onBeforeRun);
 }

@@ -26,7 +26,6 @@ namespace asmjit {
 
 Assembler::Assembler(Runtime* runtime) :
   CodeGen(runtime),
-  _emit((EmitFunc)NULL),
   _buffer(NULL),
   _end(NULL),
   _cursor(NULL),
@@ -236,59 +235,59 @@ void* Assembler::make() {
 #define no noOperand
 
 Error Assembler::emit(uint32_t code) {
-  return _emit(this, code, &no, &no, &no, &no);
+  return _emit(code, no, no, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0) {
-  return _emit(this, code, &o0, &no, &no, &no);
+  return _emit(code, o0, no, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1) {
-  return _emit(this, code, &o0, &o1, &no, &no);
+  return _emit(code, o0, o1, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2) {
-  return _emit(this, code, &o0, &o1, &o2, &no);
+  return _emit(code, o0, o1, o2, no);
 }
 
 Error Assembler::emit(uint32_t code, int o0) {
   Imm imm(o0);
-  return _emit(this, code, &imm, &no, &no, &no);
+  return _emit(code, imm, no, no, no);
 }
 
 Error Assembler::emit(uint32_t code, uint64_t o0) {
   Imm imm(o0);
-  return _emit(this, code, &imm, &no, &no, &no);
+  return _emit(code, imm, no, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, int o1) {
   Imm imm(o1);
-  return _emit(this, code, &o0, &imm, &no, &no);
+  return _emit(code, o0, imm, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, uint64_t o1) {
   Imm imm(o1);
-  return _emit(this, code, &o0, &imm, &no, &no);
+  return _emit(code, o0, imm, no, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, int o2) {
   Imm imm(o2);
-  return _emit(this, code, &o0, &o1, &imm, &no);
+  return _emit(code, o0, o1, imm, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, uint64_t o2) {
   Imm imm(o2);
-  return _emit(this, code, &o0, &o1, &imm, &no);
+  return _emit(code, o0, o1, imm, no);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, int o3) {
   Imm imm(o3);
-  return _emit(this, code, &o0, &o1, &o2, &imm);
+  return _emit(code, o0, o1, o2, imm);
 }
 
 Error Assembler::emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, uint64_t o3) {
   Imm imm(o3);
-  return _emit(this, code, &o0, &o1, &o2, &imm);
+  return _emit(code, o0, o1, o2, imm);
 }
 
 #undef no

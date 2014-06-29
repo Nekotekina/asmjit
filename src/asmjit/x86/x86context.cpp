@@ -18,6 +18,7 @@
 #include "../x86/x86compiler.h"
 #include "../x86/x86context_p.h"
 #include "../x86/x86cpuinfo.h"
+#include "../x86/x86scheduler_p.h"
 
 // [Api-Begin]
 #include "../apibegin.h"
@@ -41,6 +42,214 @@ static ASMJIT_INLINE uint32_t x86VarTypeToClass(uint32_t vType) {
   ASMJIT_ASSERT(vType < kX86VarTypeCount);
   return _x86VarInfo[vType].getClass();
 }
+
+// ============================================================================
+// [asmjit::X86Context - Annotate]
+// ============================================================================
+
+// Annotation is also used by ASMJIT_TRACE.
+#if !defined(ASMJIT_DISABLE_LOGGER)
+static void X86Context_annotateVariable(X86Context* self,
+  StringBuilder& sb, const VarData* vd) {
+
+  const char* name = vd->getName();
+  if (name != NULL && name[0] != '\0') {
+    sb.appendString(name);
+  }
+  else {
+    sb.appendChar('v');
+    sb.appendUInt(vd->getId() & kOperandIdNum);
+  }
+}
+
+static void X86Context_annotateOperand(X86Context* self,
+  StringBuilder& sb, const Operand* op) {
+
+  if (op->isVar()) {
+    X86Context_annotateVariable(self, sb, self->_compiler->getVdById(op->getId()));
+  }
+  else if (op->isMem()) {
+    const X86Mem* m = static_cast<const X86Mem*>(op);
+    bool isAbsolute = false;
+
+    sb.appendChar('[');
+    switch (m->getMemType()) {
+      case kMemTypeBaseIndex:
+      case kMemTypeStackIndex:
+        // [base + index << shift + displacement]
+        X86Context_annotateVariable(self, sb, self->_compiler->getVdById(m->getBase()));
+        break;
+
+      case kMemTypeLabel:
+        // [label + index << shift + displacement]
+        sb.appendFormat("L%u", m->getBase());
+        break;
+
+      case kMemTypeAbsolute:
+        // [absolute]
+        isAbsolute = true;
+        sb.appendUInt(static_cast<uint32_t>(m->getDisplacement()), 16);
+        break;
+    }
+
+    if (m->hasIndex()) {
+      sb.appendChar('+');
+      X86Context_annotateVariable(self, sb, self->_compiler->getVdById(m->getIndex()));
+
+      if (m->getShift()) {
+        sb.appendChar('*');
+        sb.appendChar("1248"[m->getShift() & 3]);
+      }
+    }
+
+    if (m->getDisplacement() && !isAbsolute) {
+      uint32_t base = 10;
+      int32_t dispOffset = m->getDisplacement();
+
+      char prefix = '+';
+      if (dispOffset < 0) {
+        dispOffset = -dispOffset;
+        prefix = '-';
+      }
+
+      sb.appendChar(prefix);
+      /*
+      if ((loggerOptions & (1 << kLoggerOptionHexDisplacement)) != 0 && dispOffset > 9) {
+        sb.appendString("0x", 2);
+        base = 16;
+      }
+      */
+      sb.appendUInt(static_cast<uint32_t>(dispOffset), base);
+    }
+
+    sb.appendChar(']');
+  }
+  else if (op->isImm()) {
+    const Imm* i = static_cast<const Imm*>(op);
+    int64_t val = i->getInt64();
+
+    /*
+    if ((loggerOptions & (1 << kLoggerOptionHexImmediate)) && static_cast<uint64_t>(val) > 9)
+      sb.appendUInt(static_cast<uint64_t>(val), 16);
+    else*/
+      sb.appendInt(val, 10);
+  }
+  else if (op->isLabel()) {
+    sb.appendFormat("L%u", op->getId());
+  }
+  else {
+    sb.appendString("None", 4);
+  }
+}
+
+static bool X86Context_annotateInstruction(X86Context* self,
+  StringBuilder& sb, uint32_t code, const Operand* opList, uint32_t opCount) {
+
+  sb.appendString(_x86InstInfo[code].getInstName());
+  for (uint32_t i = 0; i < opCount; i++) {
+    if (i == 0)
+      sb.appendChar(' ');
+    else
+      sb.appendString(", ", 2);
+    X86Context_annotateOperand(self, sb, &opList[i]);
+  }
+  return true;
+}
+#endif // !ASMJIT_DISABLE_LOGGER
+
+#if defined(ASMJIT_TRACE)
+static void X86Context_traceNode(X86Context* self, Node* node_) {
+  StringBuilderT<256> sb;
+
+  switch (node_->getType()) {
+    case kNodeTypeAlign: {
+      AlignNode* node = static_cast<AlignNode*>(node_);
+      sb.appendFormat(".align %u (%s)",
+        node->getOffset(),
+        node->getMode() == kAlignCode ? "code" : "data");
+      break;
+    }
+
+    case kNodeTypeEmbed: {
+      EmbedNode* node = static_cast<EmbedNode*>(node_);
+      sb.appendFormat(".embed (%u bytes)", node->getSize());
+      break;
+    }
+
+    case kNodeTypeComment: {
+      CommentNode* node = static_cast<CommentNode*>(node_);
+      sb.appendFormat("; %s", node->getComment());
+      break;
+    }
+
+    case kNodeTypeHint: {
+      HintNode* node = static_cast<HintNode*>(node_);
+      static const char* hint[16] = {
+        "alloc",
+        "spill",
+        "save",
+        "save-unuse",
+        "unuse"
+      };
+      sb.appendFormat("[%s] %s",
+        hint[node->getHint()], node->getVd()->getName());
+      break;
+    }
+
+    case kNodeTypeTarget: {
+      TargetNode* node = static_cast<TargetNode*>(node_);
+      sb.appendFormat("L%u: (NumRefs=%u)",
+        node->getLabelId(),
+        node->getNumRefs());
+      break;
+    }
+
+    case kNodeTypeInst: {
+      InstNode* node = static_cast<InstNode*>(node_);
+      X86Context_annotateInstruction(self, sb,
+        node->getCode(), node->getOpList(), node->getOpCount());
+      break;
+    }
+
+    case kNodeTypeFunc: {
+      FuncNode* node = static_cast<FuncNode*>(node_);
+      sb.appendFormat("[func]");
+      break;
+    }
+
+    case kNodeTypeEnd: {
+      EndNode* node = static_cast<EndNode*>(node_);
+      sb.appendFormat("[end]");
+      break;
+    }
+
+    case kNodeTypeRet: {
+      RetNode* node = static_cast<RetNode*>(node_);
+      sb.appendFormat("[ret]");
+      break;
+    }
+
+    case kNodeTypeCall: {
+      CallNode* node = static_cast<CallNode*>(node_);
+      sb.appendFormat("[call]");
+      break;
+    }
+
+    case kNodeTypeSArg: {
+      SArgNode* node = static_cast<SArgNode*>(node_);
+      sb.appendFormat("[sarg]");
+      break;
+    }
+
+    default: {
+      sb.appendFormat("[unknown]");
+      break;
+    }
+  }
+
+  ASMJIT_TLOG("[%05u] %s\n", node_->getFlowId(), sb.getData());
+}
+#endif // ASMJIT_TRACE
 
 // ============================================================================
 // [asmjit::X86Context - Construction / Destruction]
@@ -1845,6 +2054,8 @@ static ASMJIT_INLINE Error X86Context_insertSArgNode(
 //! - Create and assign groupId and flowId.
 //! - Collect all variables and merge them to vaList.
 Error X86Context::fetch() {
+  ASMJIT_TLOG("[Fetch] === Begin ===\n");
+
   X86Compiler* compiler = getCompiler();
   X86FuncNode* func = getFunc();
 
@@ -1870,8 +2081,8 @@ Error X86Context::fetch() {
     kX86FuncFlagSFence  |
     kX86FuncFlagLFence  );
 
-  if (func->getHint(kFuncHintNaked  ) != 0) func->addFuncFlags(kFuncFlagIsNaked);
-  if (func->getHint(kFuncHintCompact) != 0) func->addFuncFlags(kX86FuncFlagPushPop | kX86FuncFlagEnter | kX86FuncFlagLeave);
+  if (func->getHint(kFuncHintNaked     ) != 0) func->addFuncFlags(kFuncFlagIsNaked   );
+  if (func->getHint(kFuncHintCompact   ) != 0) func->addFuncFlags(kX86FuncFlagPushPop | kX86FuncFlagEnter | kX86FuncFlagLeave);
   if (func->getHint(kX86FuncHintPushPop) != 0) func->addFuncFlags(kX86FuncFlagPushPop);
   if (func->getHint(kX86FuncHintEmms   ) != 0) func->addFuncFlags(kX86FuncFlagEmms   );
   if (func->getHint(kX86FuncHintSFence ) != 0) func->addFuncFlags(kX86FuncFlagSFence );
@@ -2004,6 +2215,10 @@ _NextGroup:
     next = node_->getNext();
     node_->setFlowId(flowId);
 
+    ASMJIT_TSEC({
+      X86Context_traceNode(this, node_);
+    });
+
     switch (node_->getType()) {
       // ----------------------------------------------------------------------
       // [Align/Embed]
@@ -2090,7 +2305,7 @@ _NextGroup:
 
           switch (node->getHint()) {
             case kVarHintSpill:
-              flags = kVarAttrInMem;
+              flags = kVarAttrInMem | kVarAttrSpill;
               break;
             case kVarHintSave:
               flags = kVarAttrInMem;
@@ -2621,6 +2836,7 @@ _NextGroup:
   } while (node_ != stop);
 
 _Done:
+  ASMJIT_TLOG("[Fetch] === Done ===\n\n");
   return kErrorOk;
 
   // --------------------------------------------------------------------------
@@ -2628,121 +2844,13 @@ _Done:
   // --------------------------------------------------------------------------
 
 _NoMemory:
+  ASMJIT_TLOG("[Fetch] === Out of Memory ===\n");
   return compiler->setError(kErrorNoHeapMemory);
 }
 
 // ============================================================================
 // [asmjit::X86Context - Annotate]
 // ============================================================================
-
-#if !defined(ASMJIT_DISABLE_LOGGER)
-static void X86Context_annotateVariable(X86Context* self,
-  StringBuilder& sb, const VarData* vd) {
-
-  const char* name = vd->getName();
-  if (name != NULL && name[0] != '\0') {
-    sb.appendString(name);
-  }
-  else {
-    sb.appendChar('v');
-    sb.appendUInt(vd->getId() & kOperandIdNum);
-  }
-}
-
-static void X86Context_annotateOperand(X86Context* self,
-  StringBuilder& sb, const Operand* op) {
-
-  if (op->isVar()) {
-    X86Context_annotateVariable(self, sb, self->_compiler->getVdById(op->getId()));
-  }
-  else if (op->isMem()) {
-    const X86Mem* m = static_cast<const X86Mem*>(op);
-    bool isAbsolute = false;
-
-    sb.appendChar('[');
-    switch (m->getMemType()) {
-      case kMemTypeBaseIndex:
-      case kMemTypeStackIndex:
-        // [base + index << shift + displacement]
-        X86Context_annotateVariable(self, sb, self->_compiler->getVdById(m->getBase()));
-        break;
-
-      case kMemTypeLabel:
-        // [label + index << shift + displacement]
-        sb.appendFormat("L%u", m->getBase());
-        break;
-
-      case kMemTypeAbsolute:
-        // [absolute]
-        isAbsolute = true;
-        sb.appendUInt(static_cast<uint32_t>(m->getDisplacement()), 16);
-        break;
-    }
-
-    if (m->hasIndex()) {
-      sb.appendChar('+');
-      X86Context_annotateVariable(self, sb, self->_compiler->getVdById(m->getIndex()));
-
-      if (m->getShift()) {
-        sb.appendChar('*');
-        sb.appendChar("1248"[m->getShift() & 3]);
-      }
-    }
-
-    if (m->getDisplacement() && !isAbsolute) {
-      uint32_t base = 10;
-      int32_t dispOffset = m->getDisplacement();
-
-      char prefix = '+';
-      if (dispOffset < 0) {
-        dispOffset = -dispOffset;
-        prefix = '-';
-      }
-
-      sb.appendChar(prefix);
-      /*
-      if ((loggerOptions & (1 << kLoggerOptionHexDisplacement)) != 0 && dispOffset > 9) {
-        sb.appendString("0x", 2);
-        base = 16;
-      }
-      */
-      sb.appendUInt(static_cast<uint32_t>(dispOffset), base);
-    }
-
-    sb.appendChar(']');
-  }
-  else if (op->isImm()) {
-    const Imm* i = static_cast<const Imm*>(op);
-    int64_t val = i->getInt64();
-
-    /*
-    if ((loggerOptions & (1 << kLoggerOptionHexImmediate)) && static_cast<uint64_t>(val) > 9)
-      sb.appendUInt(static_cast<uint64_t>(val), 16);
-    else*/
-      sb.appendInt(val, 10);
-  }
-  else if (op->isLabel()) {
-    sb.appendFormat("L%u", op->getId());
-  }
-  else {
-    sb.appendString("None", 4);
-  }
-}
-
-static bool X86Context_annotateInstruction(X86Context* self,
-  StringBuilder& sb, uint32_t code, const Operand* opList, uint32_t opCount) {
-
-  sb.appendString(_x86InstInfo[code].getInstName());
-  for (uint32_t i = 0; i < opCount; i++) {
-    if (i == 0)
-      sb.appendChar(' ');
-    else
-      sb.appendString(", ", 2);
-    X86Context_annotateOperand(self, sb, &opList[i]);
-  }
-  return true;
-}
-#endif // !ASMJIT_DISABLE_LOGGER
 
 Error X86Context::annotate() {
 #if !defined(ASMJIT_DISABLE_LOGGER)
@@ -3192,6 +3300,13 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
       uint32_t mandatoryRegs = va->getInRegs();
       uint32_t allocableRegs = va->getAllocableRegs();
 
+      ASMJIT_TLOG("[RA-PLAN ] %s (%s)\n",
+        vd->getName(),
+        (vaFlags & kVarAttrInOutReg) == kVarAttrOutReg ? "Out Reg" : "In/Out Reg");
+
+      ASMJIT_TLOG("[RA-PLAN ] RegMask=%08X Mandatory=%08X Allocable=%08X\n",
+        regMask, mandatoryRegs, allocableRegs);
+
       if (regMask != 0) {
         // Special path for planning output-only registers.
         if ((vaFlags & kVarAttrInOutReg) == kVarAttrOutReg) {
@@ -3212,7 +3327,9 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
               willAlloc |= regMask;
             }
 
+            ASMJIT_TLOG("[RA-PLAN ] WillAlloc\n");
             addVaDone(C);
+
             continue;
           }
         }
@@ -3231,21 +3348,26 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
               willAlloc |= regMask;
             }
 
+            ASMJIT_TLOG("[RA-PLAN ] WillAlloc\n");
             addVaDone(C);
+
             continue;
           }
         }
+
+        // Trace it here so we don't pollute log by `WillFree` of zero regMask.
+        ASMJIT_TLOG("[RA-PLAN ] WillFree\n");
       }
 
       // Variable is not allocated or allocated in register that doesn't
       // match inRegs or allocableRegs. The next step is to pick the best
-      // register for this variable. If inRegs contains any register the
+      // register for this variable. If `inRegs` contains any register the
       // decision is simple - we have to follow, in other case will use
-      // the advantage of guessAlloc() to find a register (or registers)
+      // the advantage of `guessAlloc()` to find a register (or registers)
       // by looking ahead. But the best way to find a good register is not
       // here since now we have no information about the registers that
       // will be freed. So instead of finding register here, we just mark
-      // the current register (if variable is allocated) as 'willFree' so
+      // the current register (if variable is allocated) as `willFree` so
       // the planner can use this information in second step to plan other
       // allocation of other variables.
       willFree |= regMask;
@@ -3253,11 +3375,15 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
     }
     else {
       // Memory access - if variable is allocated it has to be freed.
+      ASMJIT_TLOG("[RA-PLAN ] %s (Memory)\n", vd->getName());
+
       if (regMask != 0) {
+        ASMJIT_TLOG("[RA-PLAN ] WillFree\n");
         willFree |= regMask;
         continue;
       }
       else {
+        ASMJIT_TLOG("[RA-PLAN ] Done\n");
         va->addFlags(kVarAttrAllocInDone);
         addVaDone(C);
         continue;
@@ -3283,8 +3409,7 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
         if (vaFlags & kVarAttrAllocOutDone)
           continue;
 
-        // We skip all registers that have assigned outRegIndex. The only
-        // important thing is to not forget to spill it if occupied.
+        // Skip all registers that have assigned outRegIndex. Spill if occupied.
         if (va->hasOutRegIndex()) {
           uint32_t outRegs = IntUtil::mask(va->getOutRegIndex());
           willSpill |= occupied & outRegs;
@@ -3295,8 +3420,8 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
         if (vaFlags & kVarAttrAllocInDone)
           continue;
 
-        // We skip all registers that have assigned inRegIndex (it indicates that
-        // the register to allocate into is known).
+        // We skip all registers that have assigned inRegIndex, indicates that
+        // the register to allocate in is known.
         if (va->hasInRegIndex()) {
           uint32_t inRegs = va->getInRegs();
           willSpill |= occupied & inRegs;
@@ -3313,6 +3438,8 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
       ASMJIT_ASSERT(m != 0);
 
       uint32_t candidateRegs = m & ~occupied;
+      uint32_t homeMask = vd->getHomeMask();
+
       uint32_t regIndex;
       uint32_t regMask;
 
@@ -3321,6 +3448,9 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
         if (candidateRegs == 0)
           candidateRegs = m;
       }
+
+      if (candidateRegs & homeMask)
+        candidateRegs &= homeMask;
 
       regIndex = IntUtil::findFirstBit(candidateRegs);
       regMask = IntUtil::mask(regIndex);
@@ -3335,8 +3465,9 @@ ASMJIT_INLINE void X86VarAlloc::plan() {
 
       willAlloc |= regMask;
       willSpill |= regMask & occupied;
-      willFree &= ~regMask;
-      occupied |= regMask;
+      willFree  &=~regMask;
+      occupied  |= regMask;
+
       continue;
     }
     else if ((vaFlags & kVarAttrInOutMem) != 0) {
@@ -3375,18 +3506,23 @@ ASMJIT_INLINE void X86VarAlloc::spill() {
 
     VarData* vd = sVars[i];
     ASMJIT_ASSERT(vd != NULL);
-    ASMJIT_ASSERT(vd->getVa() == NULL || (vd->getVa()->getFlags() & kVarAttrInOutReg) == 0);
+
+    VarAttr* va = vd->getVa();
+    ASMJIT_ASSERT(va == NULL || !va->hasFlag(kVarAttrInOutReg));
 
     if (vd->isModified() && availableRegs) {
-      uint32_t m = guessSpill<C>(vd, availableRegs);
+      // Don't check for alternatives if the variable has to be spilled.
+      if (va == NULL || !va->hasFlag(kVarAttrSpill)) {
+        uint32_t altRegs = guessSpill<C>(vd, availableRegs);
 
-      if (m != 0) {
-        uint32_t regIndex = IntUtil::findFirstBit(m);
-        uint32_t regMask = IntUtil::mask(regIndex);
+        if (altRegs != 0) {
+          uint32_t regIndex = IntUtil::findFirstBit(altRegs);
+          uint32_t regMask = IntUtil::mask(regIndex);
 
-        _context->move<C>(vd, regIndex);
-        availableRegs ^= regMask;
-        continue;
+          _context->move<C>(vd, regIndex);
+          availableRegs ^= regMask;
+          continue;
+        }
       }
     }
 
@@ -3497,17 +3633,25 @@ template<int C>
 ASMJIT_INLINE uint32_t X86VarAlloc::guessAlloc(VarData* vd, uint32_t allocableRegs) {
   ASMJIT_ASSERT(allocableRegs != 0);
 
-  // Stop now if there is only one bit (register) set in 'allocableRegs' mask.
+  // Stop now if there is only one bit (register) set in `allocableRegs` mask.
   if (IntUtil::isPowerOf2(allocableRegs))
     return allocableRegs;
 
-  uint32_t i;
+  uint32_t cId = vd->getContextId();
   uint32_t safeRegs = allocableRegs;
+
+  uint32_t i;
   uint32_t maxLookAhead = _compiler->getMaxLookAhead();
 
   // Look ahead and calculate mask of special registers on both - input/output.
   Node* node = _node;
   for (i = 0; i < maxLookAhead; i++) {
+    VarBits* liveness = node->getLiveness();
+
+    // If the variable becomes dead it doesn't make sense to continue.
+    if (liveness != NULL && !liveness->getBit(cId))
+      break;
+
     // Stop on 'RetNode' and 'EndNode.
     if (node->hasFlag(kNodeFlagIsRet))
       break;
@@ -3526,28 +3670,44 @@ ASMJIT_INLINE uint32_t X86VarAlloc::guessAlloc(VarData* vd, uint32_t allocableRe
     X86VarMap* map = node->getMap<X86VarMap>();
     if (map != NULL) {
       VarAttr* va = map->findVaByClass(C, vd);
-      if (va != NULL) {
-        uint32_t inRegs = va->getInRegs();
-        if (inRegs != 0) {
-          safeRegs = allocableRegs;
-          allocableRegs &= inRegs;
+      uint32_t mask;
 
+      if (va != NULL) {
+        // If the variable is overwritten it doesn't mase sense to continue.
+        if (!(va->getFlags() & kVarAttrInAll))
+          break;
+
+        mask = va->getAllocableRegs();
+        if (mask != 0) {
+          allocableRegs &= mask;
           if (allocableRegs == 0)
-            goto _UseSafeRegs;
-          else
-            return allocableRegs;
+            break;
+          safeRegs = allocableRegs;
         }
+
+        mask = va->getInRegs();
+        if (mask != 0) {
+          allocableRegs &= mask;
+          if (allocableRegs == 0)
+            break;
+          safeRegs = allocableRegs;
+          break;
+        }
+
+        allocableRegs &= ~(map->_outRegs.get(C) | map->_clobberedRegs.get(C));
+        if (allocableRegs == 0)
+          break;
+      }
+      else {
+        allocableRegs &= ~(map->_inRegs.get(C) | map->_outRegs.get(C) | map->_clobberedRegs.get(C));
+        if (allocableRegs == 0)
+          break;
       }
 
       safeRegs = allocableRegs;
-      allocableRegs &= ~(map->_inRegs.get(C) | map->_outRegs.get(C) | map->_clobberedRegs.get(C));
-
-      if (allocableRegs == 0)
-        break;
     }
   }
 
-_UseSafeRegs:
   return safeRegs;
 }
 
@@ -4490,7 +4650,8 @@ static Error X86Context_initFunc(X86Context* self, X86FuncNode* func) {
   }
   else {
     self->_argBaseReg = kX86RegIndexBp;
-    self->_argBaseOffset = regSize; // Caused by "push zbp".
+    // Caused by "push zbp".
+    self->_argBaseOffset = regSize;
   }
 
   self->_varBaseReg = kX86RegIndexSp;
@@ -4593,11 +4754,6 @@ static Error X86Context_translatePrologEpilog(X86Context* self, X86FuncNode* fun
   // --------------------------------------------------------------------------
 
   compiler->_setCursor(func->getEntryNode());
-
-#if !defined(ASMJIT_DISABLE_LOGGER)
-  if (compiler->hasLogger())
-    compiler->comment("Prolog");
-#endif // !ASMJIT_DISABLE_LOGGER
 
   // Entry.
   if (func->isNaked()) {
@@ -4711,21 +4867,11 @@ static Error X86Context_translatePrologEpilog(X86Context* self, X86FuncNode* fun
     }
   }
 
-#if !defined(ASMJIT_DISABLE_LOGGER)
-  if (compiler->hasLogger())
-    compiler->comment("Body");
-#endif // !ASMJIT_DISABLE_LOGGER
-
   // --------------------------------------------------------------------------
   // [Epilog]
   // --------------------------------------------------------------------------
 
   compiler->_setCursor(func->getExitNode());
-
-#if !defined(ASMJIT_DISABLE_LOGGER)
-  if (compiler->hasLogger())
-    compiler->comment("Epilog");
-#endif // !ASMJIT_DISABLE_LOGGER
 
   // Restore Xmm/Mm/Gp (Mov).
   stackPtr = stackBase;
@@ -4902,6 +5048,8 @@ _EmitRet:
 // ============================================================================
 
 Error X86Context::translate() {
+  ASMJIT_TLOG("[Translate] === Begin ===\n");
+
   X86Compiler* compiler = getCompiler();
   X86FuncNode* func = getFunc();
 
@@ -4955,6 +5103,10 @@ _NextGroup:
 
     next = node_->getNext();
     node_->addFlags(kNodeFlagIsTranslated);
+
+    ASMJIT_TSEC({
+      X86Context_traceNode(this, node_);
+    });
 
     switch (node_->getType()) {
       // ----------------------------------------------------------------------
@@ -5135,6 +5287,113 @@ _Done:
   ASMJIT_PROPAGATE_ERROR(X86Context_patchFuncMem(this, func, stop));
   ASMJIT_PROPAGATE_ERROR(X86Context_translatePrologEpilog(this, func));
 
+  ASMJIT_TLOG("[Translate] === Done ===\n\n");
+  return kErrorOk;
+}
+
+// ============================================================================
+// [asmjit::X86Context - Schedule]
+// ============================================================================
+
+Error X86Context::schedule() {
+  X86Compiler* compiler = getCompiler();
+  X86Scheduler scheduler(compiler,
+    static_cast<const X86CpuInfo*>(compiler->getRuntime()->getCpuInfo()));
+
+  Node* node_ = getFunc();
+  Node* stop = getStop();
+
+  PodList<Node*>::Link* jLink = _jccList.getFirst();
+
+  // --------------------------------------------------------------------------
+  // [Loop]
+  // --------------------------------------------------------------------------
+
+_Advance:
+  while (node_->isScheduled()) {
+_NextGroup:
+    if (jLink == NULL)
+      goto _Done;
+
+    // We always go to the next instruction in the main loop so we have to
+    // jump to the `jcc` target here.
+    node_ = static_cast<JumpNode*>(jLink->getValue())->getTarget();
+    jLink = jLink->getNext();
+  }
+
+  // Find interval that can be passed to scheduler.
+  for (;;) {
+    Node* schedStart = node_;
+
+    for (;;) {
+      Node* next = node_->getNext();
+      node_->addFlags(kNodeFlagIsScheduled);
+
+      // Shouldn't happen here, investigate if hit.
+      ASMJIT_ASSERT(node_ != stop);
+
+      uint32_t nodeType = node_->getType();
+      if (nodeType != kNodeTypeInst) {
+        // If we didn't reach any instruction node we simply advance. In this
+        // case no informative nodes will be removed and everything else just
+        // skipped.
+        if (schedStart == node_) {
+          node_ = next;
+          if (nodeType == kNodeTypeEnd || nodeType == kNodeTypeRet)
+            goto _NextGroup;
+          else
+            goto _Advance;
+        }
+
+        // Remove informative nodes if we are in a middle of instruction
+        // stream.
+        //
+        // TODO: Shouldn't be there an option for this? Maybe it can be useful
+        // to stop if there is a comment or something. I'm not sure if it's
+        // good to always remove.
+        if (node_->isInformative()) {
+          compiler->removeNode(node_);
+          node_ = next;
+          continue;
+        }
+
+        break;
+      }
+
+      // Stop if `node_` is `jmp` or `jcc`.
+      if (node_->isJmpOrJcc())
+        break;
+
+      node_ = next;
+    }
+
+    // If the stream is less than 3 instructions it will not be passed to
+    // scheduler.
+    if (schedStart != node_ &&
+        schedStart->getNext() != node_ &&
+        schedStart->getNext() != node_->getPrev()) {
+
+      scheduler.run(schedStart, node_);
+    }
+
+    // If node is `jmp` we follow it as well.
+    if (node_->isJmp()) {
+      node_ = static_cast<JumpNode*>(node_)->getTarget();
+      goto _Advance;
+    }
+
+    // Handle stop nodes.
+    {
+      uint32_t nodeType = node_->getType();
+      if (nodeType == kNodeTypeEnd || nodeType == kNodeTypeRet)
+        goto _NextGroup;
+    }
+
+    node_ = node_->getNext();
+    goto _Advance;
+  }
+
+_Done:
   return kErrorOk;
 }
 

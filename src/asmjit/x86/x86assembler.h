@@ -447,6 +447,12 @@ struct ASMJIT_VCLASS X86Assembler : public Assembler {
 
   ASMJIT_API virtual size_t _relocCode(void* dst, Ptr base) const;
 
+  // --------------------------------------------------------------------------
+  // [Emit]
+  // --------------------------------------------------------------------------
+
+  ASMJIT_API virtual Error _emit(uint32_t code, const Operand& o0, const Operand& o1, const Operand& o2, const Operand& o3);
+
   // -------------------------------------------------------------------------
   // [Options]
   // -------------------------------------------------------------------------

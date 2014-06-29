@@ -483,6 +483,7 @@ VarData* Compiler::_newVd(uint32_t type, uint32_t size, uint32_t c, const char* 
   vd->_alignment = static_cast<uint8_t>(IntUtil::iMin<uint32_t>(size, 64));
 
   vd->_size = size;
+  vd->_homeMask = 0;
 
   vd->_memOffset = 0;
   vd->_memCell = NULL;

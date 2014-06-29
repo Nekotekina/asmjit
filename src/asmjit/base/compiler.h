@@ -157,8 +157,10 @@ ASMJIT_ENUM(kVarAttrFlags) {
 
   //! Variable is a function return value passed in register.
   kVarAttrOutRet = 0x00000400,
+  //! Variable should be spilled.
+  kVarAttrSpill = 0x00000800,
   //! Variable should be unused at the end of the instruction/node.
-  kVarAttrUnuse = 0x00000800,
+  kVarAttrUnuse = 0x00001000,
 
   //! \internal
   //!
@@ -456,28 +458,35 @@ ASMJIT_ENUM(kNodeType) {
 // ============================================================================
 
 ASMJIT_ENUM(kNodeFlags) {
-  //! Whether the node was translated by `Context`.
+  //! Whether the node has been translated, thus contains only registers.
   kNodeFlagIsTranslated = 0x0001,
 
+  //! Whether the node was scheduled - possibly reordered, but basically this
+  //! is a mark that is set by scheduler after the node has been visited.
+  kNodeFlagIsScheduled = 0x0002,
+
+  //! Whether the node is informative only and can be safely removed.
+  kNodeFlagIsInformative = 0x0004,
+
   //! Whether the `InstNode` is a jump.
-  kNodeFlagIsJmp = 0x0002,
+  kNodeFlagIsJmp = 0x0008,
   //! Whether the `InstNode` is a conditional jump.
-  kNodeFlagIsJcc = 0x0004,
+  kNodeFlagIsJcc = 0x0010,
 
   //! Whether the `InstNode` is an unconditinal jump or conditional
   //! jump that is likely to be taken.
-  kNodeFlagIsTaken = 0x0008,
+  kNodeFlagIsTaken = 0x0020,
 
   //! Whether the `Node` will return from a function.
   //!
   //! This flag is used by both `EndNode` and `RetNode`.
-  kNodeFlagIsRet = 0x0010,
+  kNodeFlagIsRet = 0x0040,
 
   //! Whether the instruction is special.
-  kNodeFlagIsSpecial = 0x0020,
+  kNodeFlagIsSpecial = 0x0080,
 
   //! Whether the instruction is an FPU instruction.
-  kNodeFlagIsFp = 0x0040
+  kNodeFlagIsFp = 0x0100
 };
 
 // ============================================================================
@@ -689,44 +698,125 @@ struct VarBits {
 //! Base variable data.
 struct VarData {
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Accessors - Base]
   // --------------------------------------------------------------------------
 
   //! Get variable name.
-  ASMJIT_INLINE const char* getName() const { return _name; }
-  //! Get variable id.
-  ASMJIT_INLINE uint32_t getId() const { return _id; }
+  ASMJIT_INLINE const char* getName() const {
+    return _name;
+  }
 
-  //! Get whether the variable has context id.
-  ASMJIT_INLINE bool hasContextId() const { return _contextId != kInvalidValue; }
-  //! Get context variable id (used only by `Context)`.
-  ASMJIT_INLINE uint32_t getContextId() const { return _contextId; }
-  //! Set context variable id (used only by `Context)`.
-  ASMJIT_INLINE void setContextId(uint32_t contextId) { _contextId = contextId; }
-  //! Reset context variable id (used only by `Context)`.
-  ASMJIT_INLINE void resetContextId() { _contextId = kInvalidValue; }
+  //! Get variable id.
+  ASMJIT_INLINE uint32_t getId() const {
+    return _id;
+  }
 
   //! Get variable type.
-  ASMJIT_INLINE uint32_t getType() const { return _type; }
+  ASMJIT_INLINE uint32_t getType() const {
+    return _type;
+  }
+
   //! Get variable class.
-  ASMJIT_INLINE uint32_t getClass() const { return _class; }
-  //! Get variable flags.
-  ASMJIT_INLINE uint32_t getFlags() const { return _flags; }
+  ASMJIT_INLINE uint32_t getClass() const {
+    return _class;
+  }
 
-  //! Get variable priority.
-  ASMJIT_INLINE uint32_t getPriority() const { return _priority; }
+  // --------------------------------------------------------------------------
+  // [Accessors - ContextId]
+  // --------------------------------------------------------------------------
 
-  //! Get variable state (only used by `Context)`.
-  ASMJIT_INLINE uint32_t getState() const { return _state; }
-  //! Set variable state (only used by `Context)`.
-  ASMJIT_INLINE void setState(uint32_t state) { _state = static_cast<uint8_t>(state); }
+  //! Get whether the variable has context id.
+  ASMJIT_INLINE bool hasContextId() const {
+    return _contextId != kInvalidValue;
+  }
+
+  //! Get context variable id (used only by `Context)`.
+  ASMJIT_INLINE uint32_t getContextId() const {
+    return _contextId;
+  }
+
+  //! Set context variable id (used only by `Context)`.
+  ASMJIT_INLINE void setContextId(uint32_t contextId) {
+    _contextId = contextId;
+  }
+
+  //! Reset context variable id (used only by `Context)`.
+  ASMJIT_INLINE void resetContextId() {
+    _contextId = kInvalidValue;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Priority]
+  // --------------------------------------------------------------------------
+
+  //! Get variable priority, used by compiler to decide which variable to spill.
+  ASMJIT_INLINE uint32_t getPriority() const {
+    return _priority;
+  }
+
+  //! Set variable priority.
+  ASMJIT_INLINE void setPriority(uint32_t priority) {
+    ASMJIT_ASSERT(priority <= 0xFF);
+    _priority = static_cast<uint8_t>(priority);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - State]
+  // --------------------------------------------------------------------------
+
+  //! Get variable state, only used by `Context`.
+  ASMJIT_INLINE uint32_t getState() const {
+    return _state;
+  }
+
+  //! Set variable state, only used by `Context`.
+  ASMJIT_INLINE void setState(uint32_t state) {
+    ASMJIT_ASSERT(state <= 0xFF);
+    _state = static_cast<uint8_t>(state);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - RegIndex]
+  // --------------------------------------------------------------------------
 
   //! Get register index.
-  ASMJIT_INLINE uint32_t getRegIndex() const { return _regIndex; }
+  ASMJIT_INLINE uint32_t getRegIndex() const {
+    return _regIndex;
+  }
+
   //! Set register index.
-  ASMJIT_INLINE void setRegIndex(uint32_t regIndex) { _regIndex = static_cast<uint8_t>(regIndex); }
+  ASMJIT_INLINE void setRegIndex(uint32_t regIndex) {
+    ASMJIT_ASSERT(regIndex <= 0xFF);
+    _regIndex = static_cast<uint8_t>(regIndex);
+  }
+
   //! Reset register index.
-  ASMJIT_INLINE void resetRegIndex() { _regIndex = static_cast<uint8_t>(kInvalidReg); }
+  ASMJIT_INLINE void resetRegIndex() {
+    _regIndex = static_cast<uint8_t>(kInvalidReg);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - HomeIndex/Mask]
+  // --------------------------------------------------------------------------
+
+  //! Get home registers mask.
+  ASMJIT_INLINE uint32_t getHomeMask() const {
+    return _homeMask;
+  }
+
+  //! Add a home register index to the home registers mask.
+  ASMJIT_INLINE void addHomeIndex(uint32_t regIndex) {
+    _homeMask |= IntUtil::mask(regIndex);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Flags]
+  // --------------------------------------------------------------------------
+
+  //! Get variable flags.
+  ASMJIT_INLINE uint32_t getFlags() const {
+    return _flags;
+  }
 
   //! Get whether the VarData is only memory allocated on the stack.
   ASMJIT_INLINE bool isStack() const { return static_cast<bool>(_isStack); }
@@ -817,6 +907,9 @@ struct VarData {
 
   //! Variable size.
   uint32_t _size;
+
+  //! Mask of all registers variable has been allocated to.
+  uint32_t _homeMask;
 
   //! Home memory offset.
   int32_t _memOffset;
@@ -1512,38 +1605,89 @@ struct Node {
   ASMJIT_INLINE ~Node() {}
 
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Accessors - List]
   // --------------------------------------------------------------------------
 
   //! Get previous node in the compiler stream.
-  ASMJIT_INLINE Node* getPrev() const { return _prev; }
+  ASMJIT_INLINE Node* getPrev() const {
+    return _prev;
+  }
+
   //! Get next node in the compiler stream.
-  ASMJIT_INLINE Node* getNext() const { return _next; }
+  ASMJIT_INLINE Node* getNext() const {
+    return _next;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Comment]
+  // --------------------------------------------------------------------------
 
   //! Get comment string.
-  ASMJIT_INLINE const char* getComment() const { return _comment; }
+  ASMJIT_INLINE const char* getComment() const {
+    return _comment;
+  }
+
   //! Set comment string to `str`.
-  ASMJIT_INLINE void setComment(const char* comment) { _comment = comment; }
+  ASMJIT_INLINE void setComment(const char* comment) {
+    _comment = comment;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Type and Flags]
+  // --------------------------------------------------------------------------
 
   //! Get type of node, see `kNodeType`.
-  ASMJIT_INLINE uint32_t getType() const { return _type; }
+  ASMJIT_INLINE uint32_t getType() const {
+    return _type;
+  }
 
   //! Get node flags.
-  ASMJIT_INLINE uint32_t getFlags() const { return _flags; }
+  ASMJIT_INLINE uint32_t getFlags() const {
+    return _flags;
+  }
+
   //! Set node flags to `flags`.
-  ASMJIT_INLINE void setFlags(uint32_t flags) { _flags = static_cast<uint16_t>(flags); }
+  ASMJIT_INLINE void setFlags(uint32_t flags) {
+    _flags = static_cast<uint16_t>(flags);
+  }
 
   //! Get whether the instruction has flag `flag`.
-  ASMJIT_INLINE bool hasFlag(uint32_t flag) const { return (static_cast<uint32_t>(_flags) & flag) != 0; }
+  ASMJIT_INLINE bool hasFlag(uint32_t flag) const {
+    return (static_cast<uint32_t>(_flags) & flag) != 0;
+  }
+
   //! Add instruction `flags`.
-  ASMJIT_INLINE void addFlags(uint32_t flags) { _flags |= static_cast<uint16_t>(flags); }
+  ASMJIT_INLINE void addFlags(uint32_t flags) {
+    _flags |= static_cast<uint16_t>(flags);
+  }
+
   //! Clear instruction `flags`.
-  ASMJIT_INLINE void delFlags(uint32_t flags) { _flags &= static_cast<uint16_t>(~flags); }
+  ASMJIT_INLINE void delFlags(uint32_t flags) {
+    _flags &= static_cast<uint16_t>(~flags);
+  }
 
   //! Get whether the node has beed fetched.
-  ASMJIT_INLINE bool isFetched() const { return _flowId != 0; }
+  ASMJIT_INLINE bool isFetched() const {
+    return _flowId != 0;
+  }
+
   //! Get whether the node has been translated.
-  ASMJIT_INLINE bool isTranslated() const { return hasFlag(kNodeFlagIsTranslated); }
+  ASMJIT_INLINE bool isTranslated() const {
+    return hasFlag(kNodeFlagIsTranslated);
+  }
+
+  //! Get whether the node has been translated.
+  ASMJIT_INLINE bool isScheduled() const {
+    return hasFlag(kNodeFlagIsScheduled);
+  }
+
+  //! Get whether the node is informative only and can be safely removed after
+  //! translation.
+  //!
+  //! Informative nodes are comments and hints.
+  ASMJIT_INLINE bool isInformative() const {
+    return hasFlag(kNodeFlagIsInformative);
+  }
 
   //! Whether the instruction is an unconditional jump.
   ASMJIT_INLINE bool isJmp() const { return hasFlag(kNodeFlagIsJmp); }
@@ -1559,36 +1703,78 @@ struct Node {
   //! Get whether the instruction accesses FPU.
   ASMJIT_INLINE bool isFp() const { return hasFlag(kNodeFlagIsFp); }
 
+  // --------------------------------------------------------------------------
+  // [Accessors - FlowId]
+  // --------------------------------------------------------------------------
+
   //! Get flow index.
   ASMJIT_INLINE uint32_t getFlowId() const { return _flowId; }
   //! Set flow index.
   ASMJIT_INLINE void setFlowId(uint32_t flowId) { _flowId = flowId; }
 
+  // --------------------------------------------------------------------------
+  // [Accessors - VarMap]
+  // --------------------------------------------------------------------------
+
   //! Get whether node contains variable allocation instructions.
-  ASMJIT_INLINE bool hasMap() const { return _map != NULL; }
+  ASMJIT_INLINE bool hasMap() const {
+    return _map != NULL;
+  }
 
   //! Get variable allocation instructions.
-  ASMJIT_INLINE VarMap* getMap() const { return _map; }
+  ASMJIT_INLINE VarMap* getMap() const {
+    return _map;
+  }
+
   //! Get variable allocation instructions casted to `T*`.
   template<typename T>
-  ASMJIT_INLINE T* getMap() const { return static_cast<T*>(_map); }
+  ASMJIT_INLINE T* getMap() const {
+    return static_cast<T*>(_map);
+  }
+
   //! Set variable allocation instructions.
-  ASMJIT_INLINE void setMap(VarMap* map) { _map = map; }
+  ASMJIT_INLINE void setMap(VarMap* map) {
+    _map = map;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - VarState]
+  // --------------------------------------------------------------------------
 
   //! Get node state.
-  ASMJIT_INLINE VarState* getState() const { return _state; }
+  ASMJIT_INLINE VarState* getState() const {
+    return _state;
+  }
+
   //! Get node state casted to `T*`.
   template<typename T>
-  ASMJIT_INLINE T* getState() const { return static_cast<VarState*>(_state); }
+  ASMJIT_INLINE T* getState() const {
+    return static_cast<VarState*>(_state);
+  }
+
   //! Set node state.
-  ASMJIT_INLINE void setState(VarState* state) { _state = state; }
+  ASMJIT_INLINE void setState(VarState* state) {
+    _state = state;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Liveness]
+  // --------------------------------------------------------------------------
 
   //! Get whether the node has variable liveness bits.
-  ASMJIT_INLINE bool hasLiveness() const { return _liveness != NULL; }
+  ASMJIT_INLINE bool hasLiveness() const {
+    return _liveness != NULL;
+  }
+
   //! Get variable liveness bits.
-  ASMJIT_INLINE VarBits* getLiveness() const { return _liveness; }
+  ASMJIT_INLINE VarBits* getLiveness() const {
+    return _liveness;
+  }
+
   //! Set variable liveness bits.
-  ASMJIT_INLINE void setLiveness(VarBits* liveness) { _liveness = liveness; }
+  ASMJIT_INLINE void setLiveness(VarBits* liveness) {
+    _liveness = liveness;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1761,6 +1947,7 @@ struct CommentNode : public Node {
 
   //! Create a new `CommentNode` instance.
   ASMJIT_INLINE CommentNode(Compiler* compiler, const char* comment) : Node(compiler, kNodeTypeComment) {
+    addFlags(kNodeFlagIsInformative);
     _comment = comment;
   }
 
@@ -1782,6 +1969,7 @@ struct HintNode : public Node {
 
   //! Create a new `HintNode` instance.
   ASMJIT_INLINE HintNode(Compiler* compiler, VarData* vd, uint32_t hint, uint32_t value) : Node(compiler, kNodeTypeHint) {
+    addFlags(kNodeFlagIsInformative);
     _vd = vd;
     _hint = hint;
     _value = value;

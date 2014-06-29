@@ -28,8 +28,10 @@ namespace asmjit {
 
 //! Features of \ref CodeGen.
 ASMJIT_ENUM(kCodeGen) {
-  //! Emit optimized code-alignment sequences (true by default).
+  //! Emit optimized code-alignment sequences (`Assembler` and `Compiler`).
   //!
+  //! Default `true`.
+  //! 
   //! X86/X64
   //! -------
   //!
@@ -42,7 +44,9 @@ ASMJIT_ENUM(kCodeGen) {
   //! so no alignment sequence is needed.
   kCodeGenOptimizedAlign = 0,
 
-  //! Emit jump-prediction hints (false by default).
+  //! Emit jump-prediction hints (`Assembler` and `Compiler`).
+  //!
+  //! Default `false`.
   //!
   //! X86/X64
   //! -------
@@ -55,9 +59,24 @@ ASMJIT_ENUM(kCodeGen) {
   //! If this option is enabled these hints will be emitted.
   //!
   //! This feature is disabled by default, because the only processor that
-  //! used to take into consideration prediction hints was P4 that is not used
-  //! anymore.
-  kCodeGenPredictedJumps = 1
+  //! used to take into consideration prediction hints was P4. Newer processors
+  //! implement heuristics for branch prediction that ignores any static hints.
+  kCodeGenPredictedJumps = 1,
+
+  //! Schedule instructions so they can be executed faster (`Compiler` only).
+  //!
+  //! Default `false`, has to be explicitly enabled because it scheduler needs
+  //! some time to run.
+  //!
+  //! X86/X64
+  //! -------
+  //!
+  //! If scheduling is enabled AsmJit will try to reorder instructions to
+  //! minimize dependency chain. Scheduler always runs after the registers are
+  //! allocated so it doesn't change count of register allocs/spills.
+  //!
+  //! This feature is highly experimental and untested.
+  kCodeGenEnableScheduler = 2
 };
 
 // ============================================================================
@@ -66,7 +85,9 @@ ASMJIT_ENUM(kCodeGen) {
 
 //! Code aligning mode.
 ASMJIT_ENUM(kAlignMode) {
+  //! Align by emitting a sequence that can be executed (code).
   kAlignCode = 0,
+  //! Align by emitting sequence that shouldn't be executed (data).
   kAlignData = 1
 };
 

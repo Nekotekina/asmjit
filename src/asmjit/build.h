@@ -248,7 +248,7 @@
   (sizeof(_Array_) / sizeof(*_Array_))
 
 // ============================================================================
-// [asmjit::build - ASMJIT_DEBUG]
+// [asmjit::build - ASMJIT_DEBUG / ASMJIT_TRACE]
 // ============================================================================
 
 // If ASMJIT_DEBUG and ASMJIT_RELEASE is not defined ASMJIT_DEBUG will be
@@ -259,6 +259,18 @@
 #  define ASMJIT_DEBUG
 # endif // _DEBUG
 #endif // !ASMJIT_DEBUG && !ASMJIT_RELEASE
+
+// ASMJIT_TRACE is only used by sources and private headers. It's safe to make
+// it unavailable outside of AsmJit.
+#if defined(ASMJIT_EXPORTS)
+# if defined(ASMJIT_TRACE)
+#  define ASMJIT_TSEC(_Section_) _Section_
+#  define ASMJIT_TLOG(...) ::printf(__VA_ARGS__)
+# else
+#  define ASMJIT_TSEC(_Section_) do {} while(0)
+#  define ASMJIT_TLOG(...) do {} while(0)
+# endif // ASMJIT_TRACE
+#endif // ASMJIT_EXPORTS
 
 // ============================================================================
 // [asmjit::build - ASMJIT_UNUSED]
@@ -353,9 +365,9 @@ typedef unsigned __int64 uint64_t;
 // [asmjit::build - Test]
 // ============================================================================
 
-// Include test if building for unit testing.
+// Include a unit testing package if this is a `asmjit_test` build.
 #if defined(ASMJIT_TEST)
-#include "./test/test.h"
+#include "./test/broken.h"
 #endif // ASMJIT_TEST
 
 // [Guard]
