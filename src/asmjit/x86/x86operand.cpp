@@ -78,6 +78,7 @@ X86Mem ptr_abs(Ptr pAbs, const X86Var& index, uint32_t shift, int32_t disp, uint
 } // x86 namespace
 } // asmjit namespace
 
+// [Api-End]
 #include "../apiend.h"
 
 // [Guard]

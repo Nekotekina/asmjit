@@ -187,10 +187,21 @@ struct Operand {
     //! Variable id, used by `Compiler` to identify variables.
     uint32_t id;
 
-    //! Variable type.
-    uint32_t vType;
-    //! \internal
-    uint32_t reserved_12_4;
+    union {
+      struct {
+        //! Variable type.
+        uint32_t vType;
+        //! \internal
+        uint32_t reserved_12_4;
+      };
+
+      //! \internal
+      //!
+      //! This is not needed or used, it's just to force compiler to always
+      //! align this struct to 8-bytes (so the struct is compatible to others
+      //! when it comes to alignment). It should fix VS linker warning as well.
+      uint64_t reserved8_8;
+    };
   };
 
   //! \internal

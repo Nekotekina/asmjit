@@ -38,7 +38,9 @@ namespace x86 {
 // ============================================================================
 
 #define REG(_Class_, _Name_, _Type_, _Index_, _Size_) \
-  const _Class_ _Name_ = { { kOperandTypeReg, _Size_, { ((_Type_) << 8) + _Index_ }, kInvalidValue, kInvalidVar, 0 } }
+  const _Class_ _Name_ = {{ \
+    kOperandTypeReg, _Size_, { ((_Type_) << 8) + _Index_ }, kInvalidValue, {{ kInvalidVar, 0 }} \
+  }}
 
 REG(X86GpReg, noGpReg, kInvalidReg, kInvalidReg, 0);
 
@@ -179,6 +181,7 @@ REG(X86SegReg, gs, kX86RegTypeSeg, kX86SegGs, 2);
 } // x86 namespace
 } // asmjit namespace
 
+// [Api-End]
 #include "../apiend.h"
 
 // [Guard]

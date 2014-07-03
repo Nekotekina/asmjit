@@ -15,6 +15,9 @@
 #include "../base/containers.h"
 #include "../x86/x86scheduler_p.h"
 
+// [Api-Begin]
+#include "../apibegin.h"
+
 namespace asmjit {
 
 // ============================================================================
@@ -83,6 +86,9 @@ Error X86Scheduler::run(Node* start, Node* stop) {
 }
 
 } // asmjit namespace
+
+// [Api-End]
+#include "../apiend.h"
 
 // [Guard]
 #endif // !ASMJIT_DISABLE_COMPILER && (ASMJIT_BUILD_X86 || ASMJIT_BUILD_X64)
